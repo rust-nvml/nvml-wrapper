@@ -1323,6 +1323,116 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the GPU clock frequency offset value.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `UnexpectedVariant`, for which you can read the docs for
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports all discrete products with unlocked overclocking capabilities.
+    */
+    // Checked against local
+    // Tested (no-run)
+    #[doc(alias = "nvmlDeviceGetGpcClkVfOffset")]
+    pub fn gpc_clock_vf_offset(&self) -> Result<i32, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetGpcClkVfOffset.as_ref())?;
+
+        unsafe {
+            let mut offset: c_int = mem::zeroed();
+            nvml_try(sym(self.device, &mut offset))?;
+
+            Ok(offset)
+        }
+    }
+
+    /**
+    Sets the GPU clock frequency offset value.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `UnexpectedVariant`, for which you can read the docs for
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports all discrete products with unlocked overclocking capabilities.
+    */
+    // Checked against local
+    // Tested (no-run)
+    #[doc(alias = "nvmlDeviceGetGpcClkVfOffset")]
+    pub fn set_gpc_clock_vf_offset(&self, offset: i32) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetGpcClkVfOffset.as_ref())?;
+
+        unsafe { nvml_try(sym(self.device, offset)) }
+    }
+
+    /**
+    Gets the memory clock frequency offset value.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `UnexpectedVariant`, for which you can read the docs for
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports all discrete products with unlocked overclocking capabilities.
+    */
+    // Checked against local
+    // Tested (no-run)
+    #[doc(alias = "nvmlDeviceGetGpcMemClkVfOffset")]
+    pub fn mem_clock_vf_offset(&self) -> Result<i32, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMemClkVfOffset.as_ref())?;
+
+        unsafe {
+            let mut offset: c_int = mem::zeroed();
+            nvml_try(sym(self.device, &mut offset))?;
+
+            Ok(offset)
+        }
+    }
+
+    /**
+    Sets the memory clock frequency offset value.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `UnexpectedVariant`, for which you can read the docs for
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports all discrete products with unlocked overclocking capabilities.
+    */
+    // Checked against local
+    // Tested (no-run)
+    #[doc(alias = "nvmlDeviceSetGpcMemClkVfOffset")]
+    pub fn set_mem_clock_vf_offset(&self, offset: i32) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetMemClkVfOffset.as_ref())?;
+
+        unsafe { nvml_try(sym(self.device, offset)) }
+    }
+
+    /**
     Gets the intended operating speed of the specified fan as a percentage of the
     maximum fan speed (100%).
 
