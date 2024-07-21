@@ -3453,6 +3453,34 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the status for a given p2p capability index between this [`Device`] and another given [`Device`].
+
+    # Errors
+
+    * `InvalidArg`, if device1 or device2 or p2p_index is invalid
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetP2PStatus")]
+    pub fn p2p_status(
+        &self,
+        device2: &Device,
+        p2p_index: P2pCapabilitiesIndex,
+    ) -> Result<P2pStatus, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetP2PStatus.as_ref())?;
+
+        let status_c = unsafe {
+            let mut status: nvmlGpuP2PStatus_t = mem::zeroed();
+            let device2 = device2.device;
+
+            nvml_try(sym(self.device, device2, p2p_index as u32, &mut status))?;
+
+            status
+        };
+
+        P2pStatus::try_from(status_c)
+    }
+
+    /**
     Gets the power source of this [`Device`].
 
     # Errors
