@@ -3457,6 +3457,7 @@ impl<'nvml> Device<'nvml> {
 
     # Errors
 
+    * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if device1 or device2 or p2p_index is invalid
     * `Unknown`, on any unexpected error
     */
