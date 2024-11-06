@@ -109,6 +109,7 @@ pub mod structs;
 #[cfg(test)]
 mod test_utils;
 pub mod unit;
+pub mod vgpu;
 
 // Re-exports for convenience
 pub use crate::device::Device;
