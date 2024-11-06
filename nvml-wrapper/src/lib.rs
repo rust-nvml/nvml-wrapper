@@ -298,6 +298,11 @@ impl Nvml {
         NvmlBuilder::default()
     }
 
+    /// Get the underlying `NvmlLib` instance.
+    pub fn lib(&self) -> &NvmlLib {
+        &self.lib
+    }
+
     /**
     Use this to shutdown NVML and release allocated resources if you care about handling
     potential errors (*the `Drop` implementation ignores errors!*).
