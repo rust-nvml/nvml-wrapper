@@ -225,6 +225,8 @@ pub enum DeviceArchitecture {
     Ada,
     /// <https://en.wikipedia.org/wiki/Hopper_(microarchitecture)>
     Hopper,
+    /// https://en.wikipedia.org/wiki/Blackwell_(microarchitecture)
+    Blackwell,
     /// Unknown device architecture (most likely something newer).
     Unknown,
 }
@@ -241,6 +243,7 @@ impl DeviceArchitecture {
             Self::Ampere => NVML_DEVICE_ARCH_AMPERE,
             Self::Ada => NVML_DEVICE_ARCH_ADA,
             Self::Hopper => NVML_DEVICE_ARCH_HOPPER,
+            Self::Blackwell => NVML_DEVICE_ARCH_BLACKWELL,
             Self::Unknown => NVML_DEVICE_ARCH_UNKNOWN,
         }
     }
@@ -259,6 +262,7 @@ impl TryFrom<nvmlDeviceArchitecture_t> for DeviceArchitecture {
             NVML_DEVICE_ARCH_AMPERE => Ok(Self::Ampere),
             NVML_DEVICE_ARCH_ADA => Ok(Self::Ada),
             NVML_DEVICE_ARCH_HOPPER => Ok(Self::Hopper),
+            NVML_DEVICE_ARCH_BLACKWELL => Ok(Self::Blackwell),
             NVML_DEVICE_ARCH_UNKNOWN => Ok(Self::Unknown),
             _ => Err(NvmlError::UnexpectedVariant(data)),
         }
@@ -276,6 +280,7 @@ impl Display for DeviceArchitecture {
             Self::Ampere => f.write_str("Ampere"),
             Self::Ada => f.write_str("Ada"),
             Self::Hopper => f.write_str("Hopper"),
+            Self::Blackwell => f.write_str("Blackwell"),
             Self::Unknown => f.write_str("Unknown"),
         }
     }

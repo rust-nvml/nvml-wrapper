@@ -1439,6 +1439,8 @@ typedef struct nvmlGridLicensableFeatures_st
 
 #define NVML_DEVICE_ARCH_HOPPER    9 // Devices based on the NVIDIA Hopper architecture
 
+#define NVML_DEVICE_ARCH_BLACKWELL 10 // Devices based on the NVIDIA Blackwell architecture
+
 #define NVML_DEVICE_ARCH_UNKNOWN   0xffffffff // Anything else, presumably something newer
 
 typedef unsigned int nvmlDeviceArchitecture_t;
