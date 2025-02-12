@@ -155,7 +155,7 @@ use crate::bitmasks::InitFlags;
 const LIB_PATH: &str = "nvml.dll";
 
 #[cfg(target_os = "linux")]
-const LIB_PATH: &str = "libnvidia-ml.so";
+const LIB_PATH: &str = "libnvidia-ml.so.1";
 
 /// Determines the major version of the CUDA driver given the full version.
 ///
