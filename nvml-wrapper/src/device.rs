@@ -1384,6 +1384,65 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Sets the intended operating speed of the specified fan as a percentage of the
+    maximum fan speed (100%).
+
+    You can determine valid fan indices using [`Self::num_fans()`].
+
+    WARNING: This function changes the fan control policy to manual. It means that YOU have to
+    monitor the temperature and adjust the fan speed accordingly. If you set the fan speed too
+    low you can burn your GPU! Use [`Self::set_default_fan_speed()`] to restore default control
+    policy.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid or `fan_idx` is invalid
+    * `NotSupported`, if this `Device` does not have a fan or is newer than Maxwell
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports all cuda-capable discrete products with fans that are Maxwell or Newer.
+    */
+    // Checked against local
+    // Tested (no-run)
+    #[doc(alias = "nvmlDeviceSetFanSpeed_v2")]
+    pub fn set_fan_speed(&self, fan_idx: u32, speed: u32) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetFanSpeed_v2.as_ref())?;
+
+        unsafe { nvml_try(sym(self.device, fan_idx, speed)) }
+    }
+
+    /**
+    Sets the speed of the fan control policy to default.
+    Used to restore default control policy after calling [`Self::set_fan_speed()`].
+
+    You can determine valid fan indices using [`Self::num_fans()`].
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid or `fan_idx` is invalid
+    * `NotSupported`, if this `Device` does not have a fan or is newer than Maxwell
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports cuda-capable discrete products with fans.
+     */
+    // Checked against local
+    // Tested (no-run)
+    #[doc(alias = "nvmlDeviceSetDefaultFanSpeed_v2")]
+    pub fn set_default_fan_speed(&self, fan_idx: u32) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetDefaultFanSpeed_v2.as_ref())?;
+
+        unsafe { nvml_try(sym(self.device, fan_idx)) }
+    }
+
+    /**
     Gets the current GPU operation mode and the pending one (that it will switch to
     after a reboot).
 
@@ -5886,6 +5945,28 @@ mod test {
                 other => other,
             }
         })
+    }
+
+    // This modifies device state, so we don't want to actually run the test
+    #[allow(dead_code)]
+    fn set_fan_speed() {
+        let nvml = nvml();
+        let mut device = device(&nvml);
+
+        device
+            .set_fan_speed(0, 50)
+            .expect("set fan with index 0 to speed of 50%")
+    }
+
+    // This modifies device state, so we don't want to actually run the test
+    #[allow(dead_code)]
+    fn set_default_fan_speed() {
+        let nvml = nvml();
+        let mut device = device(&nvml);
+
+        device
+            .set_default_fan_speed(0)
+            .expect("set fan with index 0 to default control policy")
     }
 
     // This modifies device state, so we don't want to actually run the test
