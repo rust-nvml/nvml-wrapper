@@ -249,7 +249,7 @@ pub trait EventLoopProvider {
     fn create_event_loop<'nvml>(
         &'nvml self,
         devices: Vec<&'nvml Device<'nvml>>,
-    ) -> Result<EventLoop, NvmlErrorWithSource>;
+    ) -> Result<EventLoop<'nvml>, NvmlErrorWithSource>;
 }
 
 impl EventLoopProvider for Nvml {
@@ -275,7 +275,7 @@ impl EventLoopProvider for Nvml {
     fn create_event_loop<'nvml>(
         &'nvml self,
         devices: Vec<&Device<'nvml>>,
-    ) -> Result<EventLoop, NvmlErrorWithSource> {
+    ) -> Result<EventLoop<'nvml>, NvmlErrorWithSource> {
         let mut set = self.create_event_set()?;
 
         for d in devices {
