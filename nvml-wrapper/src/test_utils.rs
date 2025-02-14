@@ -104,6 +104,7 @@ impl ShouldPrint for BusType {}
 impl ShouldPrint for PowerSource {}
 impl ShouldPrint for DeviceArchitecture {}
 impl ShouldPrint for PcieLinkMaxSpeed {}
+impl ShouldPrint for DeviceAttributes {}
 
 #[cfg(target_os = "windows")]
 impl ShouldPrint for DriverModelState {}
