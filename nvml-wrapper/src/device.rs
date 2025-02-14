@@ -927,6 +927,31 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets GPU device hardware attributes
+
+    DeviceAttributes represents compute capabilities, Streaming MultiProcessor
+    capacity, slices allocated to a given GPU, decoding/encoding supported,
+    available memory for these GPU operations
+
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetAttributes_v2")]
+    pub fn attributes(&self) -> Result<DeviceAttributes, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetAttributes_v2.as_ref())?;
+
+        unsafe {
+            let mut attrs: nvmlDeviceAttributes_t = mem::zeroed();
+            nvml_try(sym(self.device, &mut attrs))?;
+
+            Ok(attrs.into())
+        }
+    }
+
+    /**
     Gets the default applications clock that this `Device` boots with or defaults to after
     `reset_applications_clocks()`.
 
@@ -6074,5 +6099,12 @@ mod test {
     fn is_drain_enabled() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.is_drain_enabled(None))
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn device_attributes() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.attributes())
     }
 }
