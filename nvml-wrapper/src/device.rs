@@ -25,6 +25,8 @@ use crate::ffi::bindings::*;
 use crate::struct_wrappers::device::*;
 use crate::structs::device::*;
 
+use crate::vgpu::VgpuType;
+
 #[cfg(target_os = "linux")]
 use std::convert::TryInto;
 #[cfg(target_os = "linux")]
@@ -5057,6 +5059,48 @@ impl<'nvml> Device<'nvml> {
     */
     pub fn link_wrapper_for(&self, link: u32) -> NvLink {
         NvLink { device: self, link }
+    }
+
+    // vGPU
+
+    /// Obtain a list of vGPU type (profiles) supported by the device, if any.
+    pub fn vgpu_supported_types(&self) -> Result<Vec<VgpuType>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetSupportedVgpus.as_ref())?;
+        let mut ids = vec![];
+
+        unsafe {
+            let mut count: c_uint = mem::zeroed();
+
+            match nvml_try(sym(self.device, &mut count, ids.as_mut_ptr())) {
+                Ok(()) | Err(NvmlError::InsufficientSize(_)) => {}
+                Err(err) => return Err(err),
+            }
+
+            ids.resize(count as usize, 0);
+            nvml_try(sym(self.device, &mut count, ids.as_mut_ptr()))?;
+        }
+
+        Ok(ids.into_iter().map(|id| VgpuType::new(self, id)).collect())
+    }
+
+    /// Obtain a list of vGPU type (profiles) creatable on the device, if any.
+    pub fn vgpu_creatable_types(&self) -> Result<Vec<VgpuType>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetCreatableVgpus.as_ref())?;
+        let mut ids = vec![];
+
+        unsafe {
+            let mut count: c_uint = mem::zeroed();
+
+            match nvml_try(sym(self.device, &mut count, ids.as_mut_ptr())) {
+                Ok(()) | Err(NvmlError::InsufficientSize(_)) => {}
+                Err(err) => return Err(err),
+            }
+
+            ids.resize(count as usize, 0);
+            nvml_try(sym(self.device, &mut count, ids.as_mut_ptr()))?;
+        }
+
+        Ok(ids.into_iter().map(|id| VgpuType::new(self, id)).collect())
     }
 }
 
