@@ -764,7 +764,10 @@ impl<'nvml> Device<'nvml> {
     * `Unknown`, on any unexpected error
     */
     #[doc(alias = "nvmlDeviceGetAttestationReport")]
-    pub fn fetch_attestation_report(&self) -> Result<Vec<u8>, NvmlError> {
+    pub fn fetch_attestation_report(
+        &self,
+        nonce: [u8; NVML_CC_GPU_CEC_NONCE_SIZE as usize],
+    ) -> Result<Vec<u8>, NvmlError> {
         let sym = nvml_sym(
             self.nvml
                 .lib
@@ -773,17 +776,23 @@ impl<'nvml> Device<'nvml> {
         )?;
 
         unsafe {
-            let report: *mut nvmlConfComputeGpuAttestationReport_st = ptr::null_mut();
+            let mut report: nvmlConfComputeGpuAttestationReport_st = mem::zeroed();
+            report.nonce = nonce;
 
-            nvml_try(sym(self.device, report))?;
+            nvml_try(sym(self.device, &mut report))?;
             let mut attestation_report = Vec::new();
-            attestation_report.extend_from_slice(&(*report).nonce);
-            attestation_report.extend_from_slice(&(*report).attestationReportSize.to_be_bytes());
-            attestation_report.extend_from_slice(&(*report).attestationReport);
-            attestation_report.extend_from_slice(&(*report).isCecAttestationReportPresent.to_be_bytes());
-            attestation_report.extend_from_slice(&(*report).cecAttestationReportSize.to_be_bytes());
-            attestation_report.extend_from_slice(&(*report).cecAttestationReport);
-            
+
+            attestation_report.extend_from_slice(&report.attestationReportSize.to_be_bytes());
+            attestation_report.extend_from_slice(
+                &report.attestationReport[..report.attestationReportSize as usize],
+            );
+            attestation_report
+                .extend_from_slice(&report.isCecAttestationReportPresent.to_be_bytes());
+            attestation_report.extend_from_slice(&report.cecAttestationReportSize.to_be_bytes());
+            attestation_report.extend_from_slice(
+                &report.cecAttestationReport[..report.cecAttestationReportSize as usize],
+            );
+
             Ok(attestation_report)
         }
     }
