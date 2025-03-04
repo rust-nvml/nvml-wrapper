@@ -759,10 +759,10 @@ impl<'nvml> Device<'nvml> {
     # Errors
 
     * `Uninitialized`, if the library has not been successfully initialized
-    * `InvalidArg`, if `device` is invalid
-    * `NotSupported`, if this operation is not supported by the device
-    * `GPUIsLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `InvalidArg`, if device is invalid or memory is NULL
+    * `NotSupported`, if this query is not supported by the device
     * `Unknown`, on any unexpected error
+    
     */
     #[doc(alias = "nvmlDeviceGetAttestationReport")]
     pub fn fetch_attestation_report(&self) -> Result<Vec<u8>, NvmlError> {
