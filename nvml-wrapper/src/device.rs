@@ -783,7 +783,6 @@ impl<'nvml> Device<'nvml> {
 
             let is_cec_attestation_report_present = report.isCecAttestationReportPresent == 1;
             Ok(ConfidentialComputeGpuAttestationReport {
-                nonce: report.nonce,
                 attestation_report_size: report.attestationReportSize,
                 attestation_report: report.attestationReport,
                 is_cec_attestation_report_present,

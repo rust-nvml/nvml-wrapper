@@ -12,9 +12,6 @@ use serde_derive::{Deserialize, Serialize};
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct ConfidentialComputeGpuAttestationReport {
-    /// The nonce used to generate the attestation report. It is used to ensure the integrity of the report,
-    /// by avoiding replay attacks.
-    pub nonce: [u8; NVML_CC_GPU_CEC_NONCE_SIZE as usize],
     /// The size of the attestation report.
     pub attestation_report_size: u32,
     /// The attestation report.
