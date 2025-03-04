@@ -1,10 +1,7 @@
 #[cfg(target_os = "windows")]
 use crate::enum_wrappers::device::DriverModel;
 use crate::enum_wrappers::device::OperationMode;
-use ffi::bindings::{
-    NVML_CC_GPU_ATTESTATION_REPORT_SIZE, NVML_CC_GPU_CEC_ATTESTATION_REPORT_SIZE,
-    NVML_CC_GPU_CEC_NONCE_SIZE,
-};
+use ffi::bindings::{NVML_CC_GPU_ATTESTATION_REPORT_SIZE, NVML_CC_GPU_CEC_ATTESTATION_REPORT_SIZE};
 #[cfg(feature = "serde")]
 use serde_derive::{Deserialize, Serialize};
 
