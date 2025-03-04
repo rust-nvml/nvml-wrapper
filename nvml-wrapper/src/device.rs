@@ -744,6 +744,52 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Fetches the confidential compute attestation report for this [`Device`].
+
+    This method retrieves a comprehensive attestation report from the device, which includes:
+    - A 32-byte nonce
+    - The attestation report size (as big-endian bytes)
+    - The attestation report data (up to 8192 bytes)
+    - A flag indicating if CEC attestation is present (as big-endian bytes)
+    - The CEC attestation report size (as big-endian bytes)
+    - The CEC attestation report data (up to 4096 bytes)
+
+    The returned vector contains all these components concatenated together in the order listed above.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if `device` is invalid
+    * `NotSupported`, if this operation is not supported by the device
+    * `GPUIsLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetAttestationReport")]
+    pub fn fetch_attestation_report(&self) -> Result<Vec<u8>, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetConfComputeGpuAttestationReport
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let report: *mut nvmlConfComputeGpuAttestationReport_st = ptr::null_mut();
+
+            nvml_try(sym(self.device, report))?;
+            let mut attestation_report = Vec::new();
+            attestation_report.extend_from_slice(&(*report).nonce.to_vec());
+            attestation_report.extend_from_slice(&(*report).attestationReportSize.to_be_bytes());
+            attestation_report.extend_from_slice(&(*report).attestationReport.to_vec());
+            attestation_report.extend_from_slice(&(*report).isCecAttestationReportPresent.to_be_bytes());
+            attestation_report.extend_from_slice(&(*report).cecAttestationReportSize.to_be_bytes());
+            attestation_report.extend_from_slice(&(*report).cecAttestationReport.to_vec());
+           
+            Ok(attestation_report)
+        }
+    }
+
+    /**
     Gets the current PCIe link generation.
 
     # Errors
