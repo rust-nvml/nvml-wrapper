@@ -803,6 +803,82 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the confidential compute GPU certificate for this `Device`.
+    # Errors
+    * `Uninitialized` if the library has not been successfully initialized
+    * `InvalidArg` if device is invalid or memory is NULL
+    * `NotSupported` if this query is not supported by the device
+    * `Unknown` on any unexpected error
+    */
+    pub fn confidential_compute_gpu_certificate(
+        &self,
+    ) -> Result<ConfidentialComputeGpuCertificate, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetConfComputeGpuCertificate
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut certificate_chain: nvmlConfComputeGpuCertificate_t = mem::zeroed();
+            nvml_try(sym(self.device, &mut certificate_chain))?;
+
+            Ok(ConfidentialComputeGpuCertificate {
+                cert_chain_size: certificate_chain.certChainSize,
+                attestation_cert_chain_size: certificate_chain.attestationCertChainSize,
+                cert_chain: certificate_chain.certChain,
+                attestation_cert_chain: certificate_chain.attestationCertChain,
+            })
+        }
+    }
+
+    /**
+    Fetches the confidential compute attestation report for this [`Device`].
+    This method retrieves a comprehensive attestation report from the device, which includes:
+    - A 32-byte nonce
+    - The attestation report size (as big-endian bytes)
+    - The attestation report data (up to 8192 bytes)
+    - A flag indicating if CEC attestation is present (as big-endian bytes)
+    - The CEC attestation report size (as big-endian bytes)
+    - The CEC attestation report data (up to 4096 bytes)
+    The returned vector contains all these components concatenated together in the order listed above.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or memory is NULL
+    * `NotSupported`, if this query is not supported by the device
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetAttestationReport")]
+    pub fn confidential_compute_gpu_attestation_report(
+        &self,
+        nonce: [u8; NVML_CC_GPU_CEC_NONCE_SIZE as usize],
+    ) -> Result<ConfidentialComputeGpuAttestationReport, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetConfComputeGpuAttestationReport
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut report: nvmlConfComputeGpuAttestationReport_st = mem::zeroed();
+            report.nonce = nonce;
+
+            nvml_try(sym(self.device, &mut report))?;
+
+            let is_cec_attestation_report_present = report.isCecAttestationReportPresent == 1;
+            Ok(ConfidentialComputeGpuAttestationReport {
+                attestation_report_size: report.attestationReportSize,
+                attestation_report: report.attestationReport,
+                is_cec_attestation_report_present,
+                cec_attestation_report_size: report.cecAttestationReportSize,
+                cec_attestation_report: report.cecAttestationReport,
+            })
+        }
+    }
+
+    /**
     Gets the current utilization and sampling size (sampling size in μs) for the Decoder.
 
     # Errors

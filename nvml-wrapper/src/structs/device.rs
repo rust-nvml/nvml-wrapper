@@ -1,6 +1,10 @@
 #[cfg(target_os = "windows")]
 use crate::enum_wrappers::device::DriverModel;
 use crate::enum_wrappers::device::OperationMode;
+use ffi::bindings::{
+    NVML_CC_GPU_ATTESTATION_REPORT_SIZE, NVML_CC_GPU_CEC_ATTESTATION_REPORT_SIZE,
+    NVML_GPU_ATTESTATION_CERT_CHAIN_SIZE, NVML_GPU_CERT_CHAIN_SIZE,
+};
 #[cfg(feature = "serde")]
 use serde_derive::{Deserialize, Serialize};
 
@@ -101,3 +105,33 @@ pub struct RetiredPage {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FieldId(pub u32);
+
+/// Returned from `Device.confidential_compute_gpu_certificate()`
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ConfidentialComputeGpuCertificate {
+    /// The size of the certificate chain.
+    pub cert_chain_size: u32,
+    /// The size of the attestation certificate chain.
+    pub attestation_cert_chain_size: u32,
+    /// The certificate chain.
+    pub cert_chain: [u8; NVML_GPU_CERT_CHAIN_SIZE as usize],
+    /// The attestation certificate chain.
+    pub attestation_cert_chain: [u8; NVML_GPU_ATTESTATION_CERT_CHAIN_SIZE as usize],
+}
+
+/// Returned from `Device.confidential_compute_gpu_attestation_report_bytes()`
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ConfidentialComputeGpuAttestationReport {
+    /// The size of the attestation report.
+    pub attestation_report_size: u32,
+    /// The attestation report.
+    pub attestation_report: [u8; NVML_CC_GPU_ATTESTATION_REPORT_SIZE as usize],
+    /// Whether the CEC attestation report is present.
+    pub is_cec_attestation_report_present: bool,
+    /// The size of the CEC attestation report.
+    pub cec_attestation_report_size: u32,
+    /// The CEC attestation report.
+    pub cec_attestation_report: [u8; NVML_CC_GPU_CEC_ATTESTATION_REPORT_SIZE as usize],
+}
