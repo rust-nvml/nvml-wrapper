@@ -764,10 +764,10 @@ impl<'nvml> Device<'nvml> {
     * `Unknown`, on any unexpected error
     */
     #[doc(alias = "nvmlDeviceGetAttestationReport")]
-    pub fn fetch_attestation_report(
+    pub fn confidential_compute_gpu_attestation_report(
         &self,
         nonce: [u8; NVML_CC_GPU_CEC_NONCE_SIZE as usize],
-    ) -> Result<Vec<u8>, NvmlError> {
+    ) -> Result<ConfidentialComputeGpuAttestationReport, NvmlError> {
         let sym = nvml_sym(
             self.nvml
                 .lib
@@ -780,20 +780,16 @@ impl<'nvml> Device<'nvml> {
             report.nonce = nonce;
 
             nvml_try(sym(self.device, &mut report))?;
-            let mut attestation_report = Vec::new();
 
-            attestation_report.extend_from_slice(&report.attestationReportSize.to_be_bytes());
-            attestation_report.extend_from_slice(
-                &report.attestationReport[..report.attestationReportSize as usize],
-            );
-            attestation_report
-                .extend_from_slice(&report.isCecAttestationReportPresent.to_be_bytes());
-            attestation_report.extend_from_slice(&report.cecAttestationReportSize.to_be_bytes());
-            attestation_report.extend_from_slice(
-                &report.cecAttestationReport[..report.cecAttestationReportSize as usize],
-            );
-
-            Ok(attestation_report)
+            let is_cec_attestation_report_present = report.isCecAttestationReportPresent == 1;
+            Ok(ConfidentialComputeGpuAttestationReport {
+                nonce: report.nonce,
+                attestation_report_size: report.attestationReportSize,
+                attestation_report: report.attestationReport,
+                is_cec_attestation_report_present,
+                cec_attestation_report_size: report.cecAttestationReportSize,
+                cec_attestation_report: report.cecAttestationReport,
+            })
         }
     }
 

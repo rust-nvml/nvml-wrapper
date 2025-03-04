@@ -1,8 +1,31 @@
 #[cfg(target_os = "windows")]
 use crate::enum_wrappers::device::DriverModel;
 use crate::enum_wrappers::device::OperationMode;
+use ffi::bindings::{
+    NVML_CC_GPU_ATTESTATION_REPORT_SIZE, NVML_CC_GPU_CEC_ATTESTATION_REPORT_SIZE,
+    NVML_CC_GPU_CEC_NONCE_SIZE,
+};
 #[cfg(feature = "serde")]
 use serde_derive::{Deserialize, Serialize};
+
+/// Returned from `Device.confidential_compute_gpu_attestation_report_bytes()`
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ConfidentialComputeGpuAttestationReport {
+    /// The nonce used to generate the attestation report. It is used to ensure the integrity of the report,
+    /// by avoiding replay attacks.
+    pub nonce: [u8; NVML_CC_GPU_CEC_NONCE_SIZE as usize],
+    /// The size of the attestation report.
+    pub attestation_report_size: u32,
+    /// The attestation report.
+    pub attestation_report: [u8; NVML_CC_GPU_ATTESTATION_REPORT_SIZE as usize],
+    /// Whether the CEC attestation report is present.
+    pub is_cec_attestation_report_present: bool,
+    /// The size of the CEC attestation report.
+    pub cec_attestation_report_size: u32,
+    /// The CEC attestation report.
+    pub cec_attestation_report: [u8; NVML_CC_GPU_CEC_ATTESTATION_REPORT_SIZE as usize],
+}
 
 /// Returned from `Device.auto_boosted_clocks_enabled()`
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
