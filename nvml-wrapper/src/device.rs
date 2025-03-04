@@ -762,7 +762,6 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if device is invalid or memory is NULL
     * `NotSupported`, if this query is not supported by the device
     * `Unknown`, on any unexpected error
-    
     */
     #[doc(alias = "nvmlDeviceGetAttestationReport")]
     pub fn fetch_attestation_report(&self) -> Result<Vec<u8>, NvmlError> {
@@ -778,13 +777,13 @@ impl<'nvml> Device<'nvml> {
 
             nvml_try(sym(self.device, report))?;
             let mut attestation_report = Vec::new();
-            attestation_report.extend_from_slice(&(*report).nonce.to_vec());
+            attestation_report.extend_from_slice(&(*report).nonce);
             attestation_report.extend_from_slice(&(*report).attestationReportSize.to_be_bytes());
-            attestation_report.extend_from_slice(&(*report).attestationReport.to_vec());
+            attestation_report.extend_from_slice(&(*report).attestationReport);
             attestation_report.extend_from_slice(&(*report).isCecAttestationReportPresent.to_be_bytes());
             attestation_report.extend_from_slice(&(*report).cecAttestationReportSize.to_be_bytes());
-            attestation_report.extend_from_slice(&(*report).cecAttestationReport.to_vec());
-           
+            attestation_report.extend_from_slice(&(*report).cecAttestationReport);
+            
             Ok(attestation_report)
         }
     }
