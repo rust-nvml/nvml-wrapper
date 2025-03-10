@@ -803,6 +803,78 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Checks simultaneously if confidential compute is enabled, if the device is in a production environment,
+    and if the device is accepting client requests.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `NotSupported`, if this query is not supported by the device
+    * `InvalidArg`, if confidential compute state is invalid
+    */
+    pub fn check_confidential_compute_status(&self) -> Result<bool, NvmlError> {
+        let cc_state_sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeState.as_ref())?;
+        let cc_gpus_ready_sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlSystemGetConfComputeGpusReadyState
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut state: nvmlConfComputeSystemState_t = mem::zeroed();
+            nvml_try(cc_state_sym(&mut state))?;
+
+            let is_cc_enabled = state.ccFeature == NVML_CC_SYSTEM_FEATURE_ENABLED;
+            let is_prod_environment = state.environment == NVML_CC_SYSTEM_ENVIRONMENT_PROD;
+
+            let mut cc_gpus_ready: std::os::raw::c_uint = 0;
+            nvml_try(cc_gpus_ready_sym(&mut cc_gpus_ready))?;
+            let is_accepting_client_requests =
+                cc_gpus_ready == NVML_CC_ACCEPTING_CLIENT_REQUESTS_TRUE;
+
+            Ok(is_cc_enabled && is_prod_environment && is_accepting_client_requests)
+        }
+    }
+
+    /**
+    Gets the confidential compute capabilities for this `Device`.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or memory is NULL
+    * `NotSupported`, if this query is not supported by the device
+    * `Unknown`, on any unexpected error
+    */
+    pub fn get_confidential_compute_capabilities(
+        &self,
+    ) -> Result<ConfidentialComputeCapabilities, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeCapabilities.as_ref())?;
+
+        unsafe {
+            let mut capabilities: nvmlConfComputeSystemCaps_t = mem::zeroed();
+            nvml_try(sym(&mut capabilities))?;
+
+            let cpu_caps = match capabilities.cpuCaps {
+                NVML_CC_SYSTEM_CPU_CAPS_NONE => ConfidentialComputeCpuCapabilities::None,
+                NVML_CC_SYSTEM_CPU_CAPS_AMD_SEV => ConfidentialComputeCpuCapabilities::AmdSev,
+                NVML_CC_SYSTEM_CPU_CAPS_INTEL_TDX => ConfidentialComputeCpuCapabilities::IntelTdx,
+                _ => return Err(NvmlError::Unknown),
+            };
+
+            let gpus_caps = match capabilities.gpusCaps {
+                NVML_CC_SYSTEM_GPUS_CC_CAPABLE => ConfidentialComputeGpuCapabilities::Capable,
+                NVML_CC_SYSTEM_GPUS_CC_NOT_CAPABLE => {
+                    ConfidentialComputeGpuCapabilities::NotCapable
+                }
+                _ => return Err(NvmlError::Unknown),
+            };
+
+            Ok(ConfidentialComputeCapabilities {
+                cpu_caps,
+                gpus_caps,
+            })
+        }
+    }
+
+    /**
     Gets the confidential compute GPU certificate for this `Device`.
     # Errors
     * `Uninitialized` if the library has not been successfully initialized

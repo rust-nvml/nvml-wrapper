@@ -106,6 +106,38 @@ pub struct RetiredPage {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FieldId(pub u32);
 
+/// Returned from `Device.get_confidential_compute_capabilities()`
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ConfidentialComputeCapabilities {
+    /// The CPU capabilities.
+    pub cpu_caps: ConfidentialComputeCpuCapabilities,
+    /// The GPU capabilities.
+    pub gpus_caps: ConfidentialComputeGpuCapabilities,
+}
+
+/// The possible CPU capabilities for confidential compute (either None, AMD SEV or Intel TDX)
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum ConfidentialComputeCpuCapabilities {
+    /// No CPU capabilities.
+    None,
+    /// AMD SEV confidential compute capabilities.
+    AmdSev,
+    /// Intel TDX confidential compute capabilities.
+    IntelTdx,
+}
+
+/// The possible GPU capabilities for confidential compute (either not capable or capable)
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum ConfidentialComputeGpuCapabilities {
+    /// Capable.
+    Capable,
+    /// Not capable.
+    NotCapable,
+}
+
 /// Returned from `Device.confidential_compute_gpu_certificate()`
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
