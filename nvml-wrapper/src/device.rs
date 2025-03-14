@@ -899,8 +899,8 @@ impl<'nvml> Device<'nvml> {
             Ok(ConfidentialComputeGpuCertificate {
                 cert_chain_size: certificate_chain.certChainSize,
                 attestation_cert_chain_size: certificate_chain.attestationCertChainSize,
-                cert_chain: certificate_chain.certChain,
-                attestation_cert_chain: certificate_chain.attestationCertChain,
+                cert_chain: certificate_chain.certChain.to_vec(),
+                attestation_cert_chain: certificate_chain.attestationCertChain.to_vec(),
             })
         }
     }
@@ -942,10 +942,10 @@ impl<'nvml> Device<'nvml> {
             let is_cec_attestation_report_present = report.isCecAttestationReportPresent == 1;
             Ok(ConfidentialComputeGpuAttestationReport {
                 attestation_report_size: report.attestationReportSize,
-                attestation_report: report.attestationReport,
+                attestation_report: report.attestationReport.to_vec(),
                 is_cec_attestation_report_present,
                 cec_attestation_report_size: report.cecAttestationReportSize,
-                cec_attestation_report: report.cecAttestationReport,
+                cec_attestation_report: report.cecAttestationReport.to_vec(),
             })
         }
     }
