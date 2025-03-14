@@ -1,7 +1,6 @@
 #[cfg(target_os = "windows")]
 use crate::enum_wrappers::device::DriverModel;
 use crate::enum_wrappers::device::OperationMode;
-use ffi::bindings::{NVML_CC_GPU_ATTESTATION_REPORT_SIZE, NVML_CC_GPU_CEC_ATTESTATION_REPORT_SIZE};
 #[cfg(feature = "serde")]
 use serde_derive::{Deserialize, Serialize};
 
@@ -11,14 +10,16 @@ use serde_derive::{Deserialize, Serialize};
 pub struct ConfidentialComputeGpuAttestationReport {
     /// The size of the attestation report.
     pub attestation_report_size: u32,
-    /// The attestation report.
-    pub attestation_report: [u8; NVML_CC_GPU_ATTESTATION_REPORT_SIZE as usize],
+    /// The attestation report, of size
+    /// `ffi::bindings::NVML_CC_GPU_ATTESTATION_REPORT_SIZE` == 8192 bytes.
+    pub attestation_report: Vec<u8>,
     /// Whether the CEC attestation report is present.
     pub is_cec_attestation_report_present: bool,
     /// The size of the CEC attestation report.
     pub cec_attestation_report_size: u32,
-    /// The CEC attestation report.
-    pub cec_attestation_report: [u8; NVML_CC_GPU_CEC_ATTESTATION_REPORT_SIZE as usize],
+    /// The CEC attestation report, of size
+    /// `ffi::bindings::NVML_CC_GPU_CEC_ATTESTATION_REPORT_SIZE` == 4096 bytes.
+    pub cec_attestation_report: Vec<u8>,
 }
 
 /// Returned from `Device.auto_boosted_clocks_enabled()`

@@ -784,10 +784,10 @@ impl<'nvml> Device<'nvml> {
             let is_cec_attestation_report_present = report.isCecAttestationReportPresent == 1;
             Ok(ConfidentialComputeGpuAttestationReport {
                 attestation_report_size: report.attestationReportSize,
-                attestation_report: report.attestationReport,
+                attestation_report: report.attestationReport.to_vec(),
                 is_cec_attestation_report_present,
                 cec_attestation_report_size: report.cecAttestationReportSize,
-                cec_attestation_report: report.cecAttestationReport,
+                cec_attestation_report: report.cecAttestationReport.to_vec(),
             })
         }
     }
