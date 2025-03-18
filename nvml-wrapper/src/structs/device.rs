@@ -4,6 +4,24 @@ use crate::enum_wrappers::device::OperationMode;
 #[cfg(feature = "serde")]
 use serde_derive::{Deserialize, Serialize};
 
+/// Returned from `Device.confidential_compute_gpu_attestation_report_bytes()`
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ConfidentialComputeGpuAttestationReport {
+    /// The size of the attestation report.
+    pub attestation_report_size: u32,
+    /// The attestation report, of size
+    /// `ffi::bindings::NVML_CC_GPU_ATTESTATION_REPORT_SIZE` == 8192 bytes.
+    pub attestation_report: Vec<u8>,
+    /// Whether the CEC attestation report is present.
+    pub is_cec_attestation_report_present: bool,
+    /// The size of the CEC attestation report.
+    pub cec_attestation_report_size: u32,
+    /// The CEC attestation report, of size
+    /// `ffi::bindings::NVML_CC_GPU_CEC_ATTESTATION_REPORT_SIZE` == 4096 bytes.
+    pub cec_attestation_report: Vec<u8>,
+}
+
 /// Returned from `Device.auto_boosted_clocks_enabled()`
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
