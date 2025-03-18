@@ -73,8 +73,8 @@ pub struct Device<'nvml> {
     nvml: &'nvml Nvml,
 }
 
-unsafe impl<'nvml> Send for Device<'nvml> {}
-unsafe impl<'nvml> Sync for Device<'nvml> {}
+unsafe impl Send for Device<'_> {}
+unsafe impl Sync for Device<'_> {}
 
 assert_impl_all!(Device: Send, Sync);
 
