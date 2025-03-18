@@ -665,6 +665,46 @@ impl TryFrom<nvmlFBCSessionInfo_t> for FbcSessionInfo {
     }
 }
 
+/// Hardware level attributes from a GPU device
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct DeviceAttributes {
+    /// Streaming MultiProcessor Count
+    pub multiprocessor_count: u32,
+    /// Shared Copy Engine Count
+    pub shared_copy_engine_count: u32,
+    /// Shared Decoder Count
+    pub shared_decoder_count: u32,
+    /// Shared Encoder Count
+    pub shared_encoder_count: u32,
+    /// Shared JPEG Count
+    pub shared_jpeg_count: u32,
+    /// Shared OFA Count
+    pub shared_ofa_count: u32,
+    /// GPU instance slice Count
+    pub gpu_instance_slice_count: u32,
+    /// Compute Instance slice count
+    pub compute_instance_slice_count: u32,
+    /// Device memory size in MB
+    pub memory_size_mb: u64,
+}
+
+impl From<nvmlDeviceAttributes_t> for DeviceAttributes {
+    fn from(struct_: nvmlDeviceAttributes_t) -> Self {
+        Self {
+            multiprocessor_count: struct_.multiprocessorCount,
+            shared_copy_engine_count: struct_.sharedCopyEngineCount,
+            shared_decoder_count: struct_.sharedDecoderCount,
+            shared_encoder_count: struct_.sharedEncoderCount,
+            shared_jpeg_count: struct_.sharedJpegCount,
+            shared_ofa_count: struct_.sharedOfaCount,
+            gpu_instance_slice_count: struct_.gpuInstanceSliceCount,
+            compute_instance_slice_count: struct_.computeInstanceSliceCount,
+            memory_size_mb: struct_.memorySizeMB,
+        }
+    }
+}
+
 #[cfg(test)]
 #[allow(unused_variables, unused_imports)]
 mod tests {
