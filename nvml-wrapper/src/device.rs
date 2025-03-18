@@ -155,10 +155,10 @@ impl<'nvml> Device<'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if this `Device` is invalid or the apiType is invalid (may occur if
-    the C lib changes dramatically?)
+    * the C lib changes dramatically?)
     * `NotSupported`, if this query is not supported by this `Device` or this `Device`
-    does not support the feature that is being queried (e.g. enabling/disabling auto
-    boosted clocks is not supported by this `Device`).
+    * does not support the feature that is being queried (e.g. enabling/disabling auto
+    * boosted clocks is not supported by this `Device`).
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `UnexpectedVariant`, for which you can read the docs for
     * `Unknown`, on any unexpected error
@@ -192,7 +192,7 @@ impl<'nvml> Device<'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if this `Device` is invalid or the clockType is invalid (may occur
-    if the C lib changes dramatically?)
+    * if the C lib changes dramatically?)
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error
@@ -432,7 +432,7 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if this `Device` is invalid or `clock_type` is invalid (shouldn't occur?)
     * `NotSupported`, if this `Device` or the `clock_type` on this `Device`
-    does not support this feature
+    * does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error
 
@@ -1261,7 +1261,7 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `UnexpectedVariant`, if an enum variant not defined in this wrapper gets
-    returned in a field of an `EncoderSessionInfo` struct
+    * returned in a field of an `EncoderSessionInfo` struct
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -1924,7 +1924,7 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if `error_type`, `counter_type`, or `location` is invalid (shouldn't occur?)
     * `NotSupported`, if this `Device` does not support ECC error reporting for the specified
-    memory
+    * memory
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error
 
@@ -2846,7 +2846,7 @@ impl<'nvml> Device<'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `IncorrectBits`, if NVML returns any bits that do not correspond to flags in
-    `ThrottleReasons`
+    * `ThrottleReasons`
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error

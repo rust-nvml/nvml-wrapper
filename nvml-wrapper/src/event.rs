@@ -172,7 +172,6 @@ mod test {
         })
     }
 
-    #[cfg(feature = "test-local")]
     #[test]
     fn wait() {
         use crate::error::NvmlError;

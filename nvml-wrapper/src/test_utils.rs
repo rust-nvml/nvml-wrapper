@@ -127,9 +127,9 @@ where
     T: Fn() -> Result<R, NvmlError>,
     R: ShouldPrint,
 {
-    single(|| test());
+    single(&test);
 
-    multi(reps, || test());
+    multi(reps, test);
 }
 
 pub fn test_with_device<T, R>(reps: usize, nvml: &Nvml, test: T)
