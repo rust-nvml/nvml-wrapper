@@ -350,3 +350,34 @@ impl TryFrom<c_uint> for PcieLinkMaxSpeed {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[repr(u32)]
+pub enum FanControlPolicy {
+    TemperatureContinousSw = NVML_FAN_POLICY_TEMPERATURE_CONTINOUS_SW,
+    Manual = NVML_FAN_POLICY_MANUAL,
+}
+
+/// Returned by [`crate::Device::get_fan_control_policy()`].
+///
+/// Policy used for fan control.
+// TODO: technically this is an "enum wrapper" but the type on the C side isn't
+// an enum
+impl FanControlPolicy {
+    pub fn as_c(&self) -> nvmlFanControlPolicy_t {
+        *self as u32
+    }
+}
+
+impl TryFrom<nvmlFanControlPolicy_t> for FanControlPolicy {
+    type Error = NvmlError;
+
+    fn try_from(value: nvmlFanControlPolicy_t) -> Result<Self, Self::Error> {
+        match value {
+            NVML_FAN_POLICY_TEMPERATURE_CONTINOUS_SW => Ok(Self::TemperatureContinousSw),
+            NVML_FAN_POLICY_MANUAL => Ok(Self::TemperatureContinousSw),
+            _ => Err(NvmlError::UnexpectedVariant(value)),
+        }
+    }
+}
