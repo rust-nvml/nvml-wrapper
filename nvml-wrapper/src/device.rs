@@ -1541,6 +1541,46 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Retrieves the intended operating speed in rotations per minute (RPM) of the
+    device's specified fan.
+
+    Note: The reported speed is the intended fan speed. If the fan is physically
+    blocked and unable to spin, the output will not match the actual fan speed.
+
+    ...
+    You can determine valid fan indices using [`Self::num_fans()`].
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid or `fan_idx` is invalid
+    * `NotSupported`, if this `Device` does not have a fan or is newer than Maxwell
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    For Maxwell or newer fully supported devices.
+
+    For all discrete products with dedicated fans.
+    */
+    // Checked against local
+    // Tested
+    #[doc(alias = "nvmlDeviceGetFanSpeedRPM")]
+    pub fn fan_speed_rpm(&self, fan_idx: u32) -> Result<u32, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetFanSpeedRPM.as_ref())?;
+
+        unsafe {
+            let mut fan_speed: nvmlFanSpeedInfo_t = mem::zeroed();
+            fan_speed.version = 1;
+            fan_speed.fan = fan_idx;
+            nvml_try(sym(self.device, &mut fan_speed))?;
+
+            Ok(fan_speed.speed)
+        }
+    }
+
+    /**
     Gets current fan control policy.
 
     You can determine valid fan indices using [`Self::num_fans()`].
@@ -5617,6 +5657,12 @@ mod test {
     fn fan_speed() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.fan_speed(0))
+    }
+
+    #[test]
+    fn fan_speed_rpm() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.fan_speed_rpm(0))
     }
 
     #[test]
