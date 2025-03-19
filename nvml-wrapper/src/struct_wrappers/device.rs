@@ -705,6 +705,28 @@ impl From<nvmlDeviceAttributes_t> for DeviceAttributes {
     }
 }
 
+/// Fan speed info
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct FanSpeedInfo {
+    /// The API version number
+    pub version: u32,
+    /// The fan index
+    pub fan: u32,
+    /// OUT: the fan speed in RPM.
+    pub speed: u32,
+}
+
+impl From<nvmlFanSpeedInfo_t> for FanSpeedInfo {
+    fn from(struct_: nvmlFanSpeedInfo_t) -> Self {
+        Self {
+            version: struct_.version,
+            fan: struct_.fan,
+            speed: struct_.speed,
+        }
+    }
+}
+
 #[cfg(test)]
 #[allow(unused_variables, unused_imports)]
 mod tests {
