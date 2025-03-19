@@ -1573,7 +1573,8 @@ impl<'nvml> Device<'nvml> {
         unsafe {
             let mut fan_speed: nvmlFanSpeedInfo_t = mem::zeroed();
             // Implements NVML_STRUCT_VERSION(FanSpeedInfo, 1), as detailed in nvml.h
-            fan_speed.version = (std::mem::size_of::<nvmlFanSpeedInfo_v1_t>() | (1_usize << 24_usize)) as u32;
+            fan_speed.version =
+                (std::mem::size_of::<nvmlFanSpeedInfo_v1_t>() | (1_usize << 24_usize)) as u32;
             fan_speed.fan = fan_idx;
             nvml_try(sym(self.device, &mut fan_speed))?;
 
