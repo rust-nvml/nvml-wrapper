@@ -792,6 +792,39 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the confidential compute GPU certificate for this `Device`.
+
+    # Errors
+
+    * `Uninitialized` if the library has not been successfully initialized
+    * `InvalidArg` if device is invalid or memory is NULL
+    * `NotSupported` if this query is not supported by the device
+    * `Unknown` on any unexpected error
+    */
+    pub fn confidential_compute_gpu_certificate(
+        &self,
+    ) -> Result<ConfidentialComputeGpuCertificate, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetConfComputeGpuCertificate
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut certificate_chain: nvmlConfComputeGpuCertificate_t = mem::zeroed();
+            nvml_try(sym(self.device, &mut certificate_chain))?;
+
+            Ok(ConfidentialComputeGpuCertificate {
+                cert_chain_size: certificate_chain.certChainSize,
+                attestation_cert_chain_size: certificate_chain.attestationCertChainSize,
+                cert_chain: certificate_chain.certChain.to_vec(),
+                attestation_cert_chain: certificate_chain.attestationCertChain.to_vec(),
+            })
+        }
+    }
+
+    /**
     Gets the current PCIe link generation.
 
     # Errors
