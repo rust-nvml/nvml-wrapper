@@ -22,6 +22,22 @@ pub struct ConfidentialComputeGpuAttestationReport {
     pub cec_attestation_report: Vec<u8>,
 }
 
+/// Returned from `Device.confidential_compute_gpu_certificate()`
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ConfidentialComputeGpuCertificate {
+    /// The size of the certificate chain.
+    pub cert_chain_size: u32,
+    /// The size of the attestation certificate chain.
+    pub attestation_cert_chain_size: u32,
+    /// The certificate chain, of size
+    /// `ffi::bindings::NVML_GPU_CERT_CHAIN_SIZE` == 4096 bytes.
+    pub cert_chain: Vec<u8>,
+    /// The attestation certificate chain, of size
+    /// `ffi::bindings::NVML_GPU_ATTESTATION_CERT_CHAIN_SIZE` == 5120 bytes.
+    pub attestation_cert_chain: Vec<u8>,
+}
+
 /// Returned from `Device.auto_boosted_clocks_enabled()`
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
