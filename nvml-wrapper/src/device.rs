@@ -4091,6 +4091,58 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets a vector of bitmasks with the ideal CPU affinity for this `Device` within the specified `scope`,
+    the latter being NUMA node or processor socket (`NVML_AFFINITY_SCOPE_NODE` and `NVML_AFFINITY_SCOPE_SOCKET`).
+
+    Beyond this, the outcome and meaning are similar to `cpu_affinity`
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `InsufficientSize`, if the passed-in `size` is 0 (must be > 0)
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Kepler or newer fully supported devices.
+
+    # Platform Support
+
+    Only supports Linux.
+
+    */
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetCpuAffinityWithinScope")]
+    pub fn cpu_affinity_within_scope(
+        &self,
+        size: usize,
+        scope: nvmlAffinityScope_t,
+    ) -> Result<Vec<c_ulong>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetCpuAffinityWithinScope.as_ref())?;
+
+        unsafe {
+            if size == 0 {
+                // Return an error containing the minimum size that can be passed.
+                return Err(NvmlError::InsufficientSize(Some(1)));
+            }
+
+            let mut affinities: Vec<c_ulong> = vec![mem::zeroed(); size];
+
+            nvml_try(sym(
+                self.device,
+                size as c_uint,
+                affinities.as_mut_ptr(),
+                scope,
+            ))?;
+
+            Ok(affinities)
+        }
+    }
+
+    /**
     Try to set the default state of auto boosted clocks on this `Device`.
 
     This is the default state that auto boosted clocks will return to when no compute
@@ -5548,6 +5600,13 @@ mod test {
     fn cpu_affinity() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.cpu_affinity(64))
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn cpu_affinity_within_scope() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.cpu_affinity_within_scope(64, 0))
     }
 
     #[test]
