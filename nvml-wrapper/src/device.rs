@@ -290,6 +290,49 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the NUMA nodes physically close to the GPU.
+
+    Main goal is to facilitate memory placement optimisations for multi CPU/GPU settings.
+    Node (set) size needs to be something like `<Number of nodes> / (std::mem::size_of::<c_ulong>() / 8) + 1`
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this query
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    // Checked against local
+    // Tested
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetMemoryAffinity")]
+    pub fn memory_affinity(
+        &self,
+        size: usize,
+        scope: nvmlAffinityScope_t,
+    ) -> Result<Vec<c_ulong>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMemoryAffinity.as_ref())?;
+
+        unsafe {
+            if size == 0 {
+                return Err(NvmlError::InsufficientSize(Some(1)));
+            }
+
+            let mut affinities: Vec<c_ulong> = vec![0; size];
+
+            nvml_try(sym(
+                self.device,
+                size as c_uint,
+                affinities.as_mut_ptr(),
+                scope,
+            ))?;
+
+            Ok(affinities)
+        }
+    }
+
+    /**
     Gets the board ID for this `Device`, from 0-N.
 
     Devices with the same boardID indicate GPUs connected to the same PLX. Use in
@@ -5547,6 +5590,13 @@ mod test {
     fn bar1_memory_info() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.bar1_memory_info())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn memory_affinity() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.memory_affinity(64, 0))
     }
 
     #[test]
