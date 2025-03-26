@@ -1331,6 +1331,8 @@ impl<'nvml> Device<'nvml> {
 
     You can determine valid fan indices using [`Self::num_fans()`].
 
+    The fan speed is expressed as a percentage of the product's maximum noise tolerance fan speed. This value may exceed 100% in certain cases. 
+
     # Errors
 
     * `Uninitialized`, if the library has not been successfully initialized
@@ -1354,6 +1356,45 @@ impl<'nvml> Device<'nvml> {
             nvml_try(sym(self.device, fan_idx, &mut speed))?;
 
             Ok(speed)
+        }
+    }
+
+    /**
+    Retrieves the intended operating speed in rotations per minute (RPM) of the device's specified fan.
+
+
+    For all discrete products with dedicated fans.
+
+    Note: The reported speed is the intended fan speed. If the fan is physically blocked and unable to spin, the output will not match the actual fan speed. 
+
+    You can determine valid fan indices using [`Self::num_fans()`].
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid or `fan_idx` is invalid
+    * `NotSupported`, if this `Device` does not have a fan or is newer than Maxwell
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    For Maxwell or newer fully supported devices.
+
+    */
+    // Checked against local
+    // Tested
+    #[doc(alias = "nvmlDeviceGetFanSpeedRPM")]
+    pub fn fan_speed_rpm(&self, fan_idx: u32) -> Result<u32, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetFanSpeedRPM.as_ref())?;
+
+        unsafe {
+            let mut speed_info: nvmlFanSpeedInfo_t = mem::zeroed();
+            speed_info.version = std::mem::size_of::<nvmlFanSpeedInfo_t>() as u32 | (1 << 24u32);
+            speed_info.fan = fan_idx;
+            nvml_try(sym(self.device, &mut speed_info))?;
+
+            Ok(speed_info.speed)
         }
     }
 
