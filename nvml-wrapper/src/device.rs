@@ -2379,6 +2379,32 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Checks if the `Device`supports multi partitioned GPU feature and if enabled.
+    Not to confuse with `is_multi_gpu_board`, MIG is a single GPU
+    being able to be split into isolated instances, a sort of "NUMA" for GPU.
+    If the `Device` supports MIG, we can have its current mode (enabled/disabled)
+    and, if set, its pending mode for the next system reboot.
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetMigMode")]
+    pub fn mig_mode(&self) -> Result<MigMode, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMigMode.as_ref())?;
+
+        unsafe {
+            let mut mode: MigMode = mem::zeroed();
+            nvml_try(sym(self.device, &mut mode.current, &mut mode.pending))?;
+
+            Ok(mode)
+        }
+    }
+
+    /**
     The name of this `Device`, e.g. "Tesla C2070".
 
     The name is an alphanumeric string that denotes a particular product.
@@ -5880,6 +5906,12 @@ mod test {
     fn is_multi_gpu_board() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.is_multi_gpu_board())
+    }
+
+    #[test]
+    fn mig_mode() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.mig_mode())
     }
 
     #[test]
