@@ -1616,6 +1616,36 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Retrieves the min and max fan speed that user can set for the GPU fan.
+
+    Returns a (min, max) tuple.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not have fans
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    For all cuda-capable discrete products with fans
+    */
+    // Checked against local
+    // Tested
+    #[doc(alias = "nvmlDeviceGetFanSpeedRPM")]
+    pub fn min_max_fan_speed(&self) -> Result<(u32, u32), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMinMaxFanSpeed.as_ref())?;
+
+        unsafe {
+            let mut min = mem::zeroed();
+            let mut max = mem::zeroed();
+            nvml_try(sym(self.device, &mut min, &mut max))?;
+            Ok((min, max))
+        }
+    }
+
+    /**
     Gets current fan control policy.
 
     You can determine valid fan indices using [`Self::num_fans()`].
@@ -5085,6 +5115,7 @@ impl<'nvml> Device<'nvml> {
 
     /**
     Retrieve min and max clocks of some clock domain for a given PState.
+
     Returns a (min, max) tuple.
 
     # Errors
@@ -5917,6 +5948,12 @@ mod test {
     fn fan_speed_rpm() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.fan_speed_rpm(0))
+    }
+
+    #[test]
+    fn min_max_fan_speed() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.min_max_fan_speed())
     }
 
     #[test]
