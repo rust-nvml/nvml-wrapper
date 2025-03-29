@@ -4975,6 +4975,7 @@ impl<'nvml> Device<'nvml> {
     */
     // Checked against local
     // Tested
+    #[doc(alias = "nvmlDeviceGetClockOffsets")]
     pub fn clock_offset(
         &self,
         clock_type: Clock,
@@ -5016,6 +5017,7 @@ impl<'nvml> Device<'nvml> {
     */
     // Checked against local
     // Tested (no-run)
+    #[doc(alias = "nvmlDeviceSetClockOffsets")]
     pub fn set_clock_offset(
         &mut self,
         clock_type: Clock,
@@ -5056,6 +5058,7 @@ impl<'nvml> Device<'nvml> {
     */
     // Checked against local
     // Tested
+    #[doc(alias = "nvmlDeviceGetSupportedPerformanceStates")]
     pub fn supported_performance_states(&self) -> Result<Vec<PerformanceState>, NvmlError> {
         let sym = nvml_sym(
             self.nvml
@@ -5077,6 +5080,42 @@ impl<'nvml> Device<'nvml> {
                 .take_while(|pstate| *pstate != PerformanceState::Unknown.as_c())
                 .map(PerformanceState::try_from)
                 .collect()
+        }
+    }
+
+    /**
+    Retrieve min and max clocks of some clock domain for a given PState.
+    Returns a (min, max) tuple.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device, type or pstate are invalid or both minClockMHz and maxClockMHz are NULL
+    * `NotSupported`, if the device does not support this feature
+    */
+    // Checked against local
+    // Tested
+    #[doc(alias = "nvmlDeviceGetMinMaxClockOfPState")]
+    pub fn min_max_clock_of_pstate(
+        &self,
+        clock_type: Clock,
+        pstate: PerformanceState,
+    ) -> Result<(u32, u32), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMinMaxClockOfPState.as_ref())?;
+
+        unsafe {
+            let mut min: u32 = mem::zeroed();
+            let mut max: u32 = mem::zeroed();
+
+            nvml_try(sym(
+                self.device,
+                clock_type.as_c(),
+                pstate.as_c(),
+                &mut min,
+                &mut max,
+            ))?;
+
+            Ok((min, max))
         }
     }
 
@@ -6067,6 +6106,14 @@ mod test {
     fn supported_performance_states() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.supported_performance_states());
+    }
+
+    #[test]
+    fn min_max_clock_of_pstate() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| {
+            device.min_max_clock_of_pstate(Clock::Graphics, PerformanceState::Zero)
+        });
     }
 
     #[test]
