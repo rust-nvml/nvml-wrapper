@@ -4959,6 +4959,127 @@ impl<'nvml> Device<'nvml> {
         unsafe { nvml_try(sym(self.device, limit)) }
     }
 
+    /**
+    Retrieve min, max and current clock offset of some clock domain for a given PState
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`,  If device, type or pstate are invalid or both minClockOffsetMHz and maxClockOffsetMHz are NULL
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `NotSupported`, if this `Device` does not support this feature
+
+    # Device Support
+
+    Supports Maxwell and newer fully supported devices.
+    */
+    // Checked against local
+    // Tested
+    pub fn clock_offset(
+        &self,
+        clock_type: Clock,
+        power_state: PerformanceState,
+    ) -> Result<ClockOffset, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetClockOffsets.as_ref())?;
+
+        unsafe {
+            // Implements NVML_STRUCT_VERSION(ClockOffset, 1), as detailed in nvml.h
+            let version =
+                (std::mem::size_of::<nvmlClockOffset_v1_t>() | (1_usize << 24_usize)) as u32;
+
+            let mut clock_offset = nvmlClockOffset_v1_t {
+                version,
+                type_: clock_type.as_c(),
+                pstate: power_state.as_c(),
+                clockOffsetMHz: mem::zeroed(),
+                minClockOffsetMHz: mem::zeroed(),
+                maxClockOffsetMHz: mem::zeroed(),
+            };
+            nvml_try(sym(self.device, &mut clock_offset))?;
+            ClockOffset::try_from(clock_offset)
+        }
+    }
+
+    /**
+    Control current clock offset of some clock domain for a given PState
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `NoPermission`, if the user doesn't have permission to perform this operation
+    * `InvalidArg`,  If device, type or pstate are invalid or both clockOffsetMHz is out of allowed range
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+
+    # Device Support
+
+    Supports Maxwell and newer fully supported devices.
+    */
+    // Checked against local
+    // Tested (no-run)
+    pub fn set_clock_offset(
+        &mut self,
+        clock_type: Clock,
+        power_state: PerformanceState,
+        offset: i32,
+    ) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetClockOffsets.as_ref())?;
+
+        unsafe {
+            // Implements NVML_STRUCT_VERSION(ClockOffset, 1), as detailed in nvml.h
+            let version =
+                (std::mem::size_of::<nvmlClockOffset_v1_t>() | (1_usize << 24_usize)) as u32;
+
+            let mut clock_offset = nvmlClockOffset_t {
+                version,
+                type_: clock_type.as_c(),
+                pstate: power_state.as_c(),
+                clockOffsetMHz: offset,
+                minClockOffsetMHz: 0,
+                maxClockOffsetMHz: 0,
+            };
+            nvml_try(sym(self.device, &mut clock_offset))?;
+            Ok(())
+        }
+    }
+
+    /**
+    Get all supported Performance States (P-States) for the device.
+    The number of elements in the returned list will never exceed [`NVML_MAX_GPU_PERF_PSTATES`]`.
+
+    # Errors
+
+    * `InsufficientSize`, if the the container supplied was not large enough to hold the resulting list
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`,  if device or pstates is invalid
+    * `NotSupported`, if the device does not support performance state readings
+    * `Unknown`, on any unexpected error
+    */
+    // Checked against local
+    // Tested
+    pub fn supported_performance_states(&self) -> Result<Vec<PerformanceState>, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetSupportedPerformanceStates
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut pstates =
+                [PerformanceState::Unknown.as_c(); NVML_MAX_GPU_PERF_PSTATES as usize];
+            // The array size passed to `nvmlDeviceGetSupportedPerformanceStates` must be in bytes, not array length
+            let byte_size = mem::size_of_val(&pstates);
+
+            nvml_try(sym(self.device, pstates.as_mut_ptr(), byte_size as u32))?;
+
+            pstates
+                .into_iter()
+                .take_while(|pstate| *pstate != PerformanceState::Unknown.as_c())
+                .map(PerformanceState::try_from)
+                .collect()
+        }
+    }
+
     // Event handling methods
 
     /**
@@ -5935,6 +6056,20 @@ mod test {
     }
 
     #[test]
+    fn clock_offset() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| {
+            device.clock_offset(Clock::Graphics, PerformanceState::Zero)
+        });
+    }
+
+    #[test]
+    fn supported_performance_states() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.supported_performance_states());
+    }
+
+    #[test]
     fn power_management_limit_constraints() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| {
@@ -6470,6 +6605,17 @@ mod test {
 
         device
             .set_power_management_limit(250000)
+            .expect("set to true")
+    }
+
+    // This modifies device state, so we don't want to actually run the test
+    #[allow(dead_code)]
+    fn set_clock_offset() {
+        let nvml = nvml();
+        let mut device = device(&nvml);
+
+        device
+            .set_clock_offset(Clock::Graphics, PerformanceState::Zero, -100)
             .expect("set to true")
     }
 
