@@ -1633,7 +1633,7 @@ impl<'nvml> Device<'nvml> {
     */
     // Checked against local
     // Tested
-    #[doc(alias = "nvmlDeviceGetFanSpeedRPM")]
+    #[doc(alias = "nvmlDeviceGetMinMaxFanSpeed")]
     pub fn min_max_fan_speed(&self) -> Result<(u32, u32), NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMinMaxFanSpeed.as_ref())?;
 
@@ -5061,7 +5061,7 @@ impl<'nvml> Device<'nvml> {
             let version =
                 (std::mem::size_of::<nvmlClockOffset_v1_t>() | (1_usize << 24_usize)) as u32;
 
-            let mut clock_offset = nvmlClockOffset_t {
+            let mut clock_offset = nvmlClockOffset_v1_t {
                 version,
                 type_: clock_type.as_c(),
                 pstate: power_state.as_c(),
