@@ -64,6 +64,7 @@ impl ShouldPrint for Brand {}
 impl ShouldPrint for [i8; 16] {}
 impl ShouldPrint for Vec<ProcessInfo> {}
 impl ShouldPrint for Vec<ProcessUtilizationSample> {}
+impl ShouldPrint for Vec<PerformanceState> {}
 impl<'nvml> ShouldPrint for Vec<Device<'nvml>> {}
 impl ShouldPrint for Vec<u32> {}
 impl ShouldPrint for Vec<u64> {}
@@ -105,6 +106,7 @@ impl ShouldPrint for PowerSource {}
 impl ShouldPrint for DeviceArchitecture {}
 impl ShouldPrint for PcieLinkMaxSpeed {}
 impl ShouldPrint for DeviceAttributes {}
+impl ShouldPrint for ClockOffset {}
 
 #[cfg(target_os = "windows")]
 impl ShouldPrint for DriverModelState {}

@@ -6,7 +6,7 @@ use wrapcenum_derive::EnumWrapper;
 
 /// Unit fan state.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlFanState_enum")]
 pub enum FanState {
@@ -18,7 +18,7 @@ pub enum FanState {
 }
 
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlLedColor_enum")]
 pub enum LedColor {

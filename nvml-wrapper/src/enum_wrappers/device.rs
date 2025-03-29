@@ -6,7 +6,7 @@ use wrapcenum_derive::EnumWrapper;
 
 /// API types that allow changes to default permission restrictions.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlRestrictedAPI_enum")]
 pub enum Api {
@@ -27,7 +27,7 @@ pub enum Api {
 
 /// Clock types. All speeds are in MHz.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlClockType_enum")]
 pub enum Clock {
@@ -49,7 +49,7 @@ pub enum Clock {
 
 /// These are used in combo with `Clock` to specify a single clock value.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlClockId_enum")]
 pub enum ClockId {
@@ -69,7 +69,7 @@ pub enum ClockId {
 
 /// GPU brand.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlBrandType_enum")]
 pub enum Brand {
@@ -138,7 +138,7 @@ NVIDIA does not provide docs (in the code, that is) explaining what each chip
 type is, so you're on your own there.
 */
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlBridgeChipType_enum")]
 pub enum BridgeChip {
@@ -150,7 +150,7 @@ pub enum BridgeChip {
 
 /// Memory error types.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlMemoryErrorType_enum")]
 pub enum MemoryError {
@@ -182,7 +182,7 @@ driver client active (such as X11), then Linux also sees per-boot behavior.
 If not, volatile counts are reset each time a compute app is run.
 */
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlEccCounterType_enum")]
 pub enum EccCounter {
@@ -197,7 +197,7 @@ pub enum EccCounter {
 
 /// Memory locations. See `Device.memory_error_counter()`.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlMemoryLocation_enum")]
 pub enum MemoryLocation {
@@ -228,7 +228,7 @@ pub enum MemoryLocation {
 
 /// Driver models, Windows only.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlDriverModel_enum")]
 #[cfg(target_os = "windows")]
@@ -248,7 +248,7 @@ Allows for the reduction of power usage and optimization of GPU throughput
 by disabling GPU features. Each mode is designed to meet specific needs.
 */
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlGom_enum")]
 pub enum OperationMode {
@@ -266,7 +266,7 @@ pub enum OperationMode {
 
 /// Available infoROM objects.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlInforomObject_enum")]
 pub enum InfoRom {
@@ -284,7 +284,7 @@ pub enum InfoRom {
 /// Represents the queryable PCIe utilization counters (in bytes). 1KB
 /// granularity.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlPcieUtilCounter_enum")]
 pub enum PcieUtilCounter {
@@ -305,7 +305,7 @@ Value    Performance
 ```
 */
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlPStates_enum")]
 pub enum PerformanceState {
@@ -350,7 +350,7 @@ pub enum PerformanceState {
 
 /// Causes for page retirement.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlPageRetirementCause_enum")]
 pub enum RetirementCause {
@@ -364,7 +364,7 @@ pub enum RetirementCause {
 
 /// Possible types of sampling events.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlSamplingType_enum")]
 pub enum Sampling {
@@ -394,7 +394,7 @@ pub enum Sampling {
 }
 
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlTemperatureSensors_enum")]
 pub enum TemperatureSensor {
@@ -404,7 +404,7 @@ pub enum TemperatureSensor {
 }
 
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlTemperatureThresholds_enum")]
 pub enum TemperatureThreshold {
@@ -424,7 +424,7 @@ pub enum TemperatureThreshold {
 
 /// Level relationships within a system between two GPUs.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlGpuLevel_enum")]
 pub enum TopologyLevel {
@@ -455,7 +455,7 @@ pub enum TopologyLevel {
 
 /// Types of performance policy for which violation times can be queried.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlPerfPolicyType_enum")]
 pub enum PerformancePolicy {
@@ -485,7 +485,7 @@ pub enum PerformancePolicy {
 /// single exclusive mode, which is equivalent to `ExclusiveThread` in CUDA 4.0
 /// and beyond.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlComputeMode_enum")]
 pub enum ComputeMode {
@@ -508,7 +508,7 @@ pub enum ComputeMode {
 
 /// P2P capability index status.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlGpuP2PStatus_enum")]
 pub enum P2pStatus {
@@ -529,7 +529,7 @@ pub enum P2pStatus {
 }
 
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlGpuP2PCapsIndex_enum")]
 pub enum P2pCapabilitiesIndex {
@@ -549,7 +549,7 @@ pub enum P2pCapabilitiesIndex {
 
 /// Represents types for returned sample values.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlValueType_enum")]
 pub enum SampleValueType {
@@ -566,7 +566,7 @@ pub enum SampleValueType {
 }
 
 /// Represents encoder types that capacity can be queried for.
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlEncoderQueryType_enum")]
 pub enum EncoderType {
@@ -579,7 +579,7 @@ pub enum EncoderType {
 /// The type of a frame buffer capture session
 ///
 /// NVIDIA doesn't document the variants beyond their names.
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlFBCSessionType_enum")]
 pub enum FbcSessionType {
@@ -596,7 +596,7 @@ pub enum FbcSessionType {
 }
 
 /// Options to pass to [`crate::Device::remove()`].
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlDetachGpuState_enum")]
 pub enum DetachGpuState {
@@ -607,7 +607,7 @@ pub enum DetachGpuState {
 }
 
 /// Options to pass to [`crate::Device::remove()`].
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlPcieLinkState_enum")]
 pub enum PcieLinkState {
@@ -618,7 +618,7 @@ pub enum PcieLinkState {
 }
 
 /// Clock limit IDs for use with [`crate::Device::set_gpu_locked_clocks()`].
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlClockLimitId_enum")]
 pub enum ClockLimitId {

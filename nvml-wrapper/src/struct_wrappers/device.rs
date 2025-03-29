@@ -1,5 +1,7 @@
 use crate::bitmasks::device::FbcFlags;
-use crate::enum_wrappers::device::{BridgeChip, EncoderType, FbcSessionType, SampleValueType};
+use crate::enum_wrappers::device::{
+    BridgeChip, Clock, EncoderType, FbcSessionType, PerformanceState, SampleValueType,
+};
 use crate::enums::device::{FirmwareVersion, SampleValue, UsedGpuMemory};
 use crate::error::{nvml_try, Bits, NvmlError};
 use crate::ffi::bindings::*;
@@ -724,6 +726,34 @@ impl From<nvmlFanSpeedInfo_t> for FanSpeedInfo {
             fan: struct_.fan,
             speed: struct_.speed,
         }
+    }
+}
+
+/// Clock offset info.
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ClockOffset {
+    /// The API version number
+    pub version: u32,
+    pub clock_type: Clock,
+    pub state: PerformanceState,
+    pub clock_offset_mhz: i32,
+    pub min_clock_offset_mhz: i32,
+    pub max_clock_offset_mhz: i32,
+}
+
+impl TryFrom<nvmlClockOffset_v1_t> for ClockOffset {
+    type Error = NvmlError;
+
+    fn try_from(value: nvmlClockOffset_v1_t) -> Result<Self, Self::Error> {
+        Ok(Self {
+            version: value.version,
+            clock_type: Clock::try_from(value.type_)?,
+            state: PerformanceState::try_from(value.pstate)?,
+            clock_offset_mhz: value.clockOffsetMHz,
+            min_clock_offset_mhz: value.minClockOffsetMHz,
+            max_clock_offset_mhz: value.maxClockOffsetMHz,
+        })
     }
 }
 
