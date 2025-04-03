@@ -105,6 +105,7 @@ impl ShouldPrint for PowerSource {}
 impl ShouldPrint for DeviceArchitecture {}
 impl ShouldPrint for PcieLinkMaxSpeed {}
 impl ShouldPrint for DeviceAttributes {}
+impl ShouldPrint for GpuVirtualizationMode {}
 
 #[cfg(target_os = "windows")]
 impl ShouldPrint for DriverModelState {}

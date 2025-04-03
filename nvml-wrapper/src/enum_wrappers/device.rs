@@ -629,3 +629,24 @@ pub enum ClockLimitId {
     #[wrap(c_variant = "NVML_CLOCK_LIMIT_ID_UNLIMITED")]
     Unlimited,
 }
+
+#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[wrap(c_enum = "nvmlGpuVirtualizationMode")]
+pub enum GpuVirtualizationMode {
+    /// Bare metal mode
+    #[wrap(c_variant = "NVML_GPU_VIRTUALIZATION_MODE_NONE")]
+    Bare,
+    /// Passthrough mode
+    #[wrap(c_variant = "NVML_GPU_VIRTUALIZATION_MODE_PASSTHROUGH")]
+    PassThrough,
+    /// vGPU inside virtual machine mode
+    #[wrap(c_variant = "NVML_GPU_VIRTUALIZATION_MODE_VGPU")]
+    Vgpu,
+    /// VGX hypervisor in vGPU mode
+    #[wrap(c_variant = "NVML_GPU_VIRTUALIZATION_MODE_HOST_VGPU")]
+    HostVgpu,
+    /// VGX hypervisor in vSGA mode
+    #[wrap(c_variant = "NVML_GPU_VIRTUALIZATION_MODE_HOST_VSGA")]
+    HostVsga,
+}
