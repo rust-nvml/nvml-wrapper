@@ -973,6 +973,33 @@ impl Nvml {
             ExcludedDeviceInfo::try_from(info)
         }
     }
+
+    /**
+    Gets the loaded vGPU list of capabilities
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports all devices.
+    */
+    #[doc(alias = "nvmlGetVgpuDriverCapabilities")]
+    pub fn vgpu_driver_capabilities(
+        &self,
+        capability: nvmlVgpuDriverCapability_t,
+    ) -> Result<u32, NvmlError> {
+        let sym = nvml_sym(self.lib.nvmlGetVgpuDriverCapabilities.as_ref())?;
+
+        unsafe {
+            let mut mask: u32 = mem::zeroed();
+
+            nvml_try(sym(capability, &mut mask))?;
+            Ok(mask)
+        }
+    }
 }
 
 /// This `Drop` implementation ignores errors! Use the `.shutdown()` method on
@@ -1238,5 +1265,11 @@ mod test {
         if nvml.excluded_device_count().unwrap() > 0 {
             test(3, || nvml.excluded_device_info(0))
         }
+    }
+
+    #[test]
+    fn vgpu_driver_capabilities() {
+        let nvml = nvml();
+        test(3, || nvml.vgpu_driver_capabilities(1))
     }
 }
