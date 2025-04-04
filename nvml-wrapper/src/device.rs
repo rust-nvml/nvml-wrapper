@@ -5315,6 +5315,44 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Get the list of performance modes for `Device`
+
+    Originally, NVML returns as a list in a form of a single string separated by comma.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `NotSupported`, if the platform does not support this feature or some of the
+    requested event types.
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error. **If this error is returned, the `set` you
+
+    # Platform Support
+
+    Only supports Linux.
+    */
+    // Checked against local
+    // Tested
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetPerformanceModes")]
+    pub fn performance_modes(&self) -> Result<(Vec<String>, u32), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetPerformanceModes.as_ref())?;
+
+        unsafe {
+            let mut pmodes: nvmlDevicePerfModes_t = mem::zeroed();
+
+            nvml_try(sym(self.device, &mut pmodes))?;
+
+            let modes_str = CStr::from_ptr(pmodes.str_.as_ptr());
+            let modes = modes_str.to_str()?;
+            Ok((
+                modes.split(';').map(str::to_string).collect(),
+                pmodes.version,
+            ))
+        }
+    }
+
+    /**
     Removes this `Device` from the view of both NVML and the NVIDIA kernel driver.
 
     If you pass `None` as `pci_info`, `.pci_info()` will be called in order to obtain
@@ -6512,6 +6550,13 @@ mod test {
     fn is_drain_enabled() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.is_drain_enabled(None))
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn performance_modes() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.performance_modes())
     }
 
     #[cfg(target_os = "linux")]
