@@ -5315,6 +5315,40 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the active vGPU instances for `Device`
+
+    A list as Vec of vGPU handles is returned to be used with nvmlVgpuInstance* calls.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    * `NotSupported`, if the platform does not support this feature
+
+    # Platform Support
+
+    Only supports Linux.
+    */
+    // Checked against local
+    // Tested
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetActiveVgpus")]
+    pub fn active_vgpus(&self) -> Result<Vec<nvmlVgpuInstance_t>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetActiveVgpus.as_ref())?;
+
+        unsafe {
+            let mut count: u32 = mem::zeroed();
+
+            nvml_try(sym(self.device, std::ptr::null_mut(), &mut count))?;
+            let mut arr: Vec<nvmlVgpuInstance_t> = vec![0; count as usize];
+            nvml_try(sym(self.device, arr.as_mut_ptr(), &mut count))?;
+
+            Ok(arr)
+        }
+    }
+
+    /**
     Removes this `Device` from the view of both NVML and the NVIDIA kernel driver.
 
     If you pass `None` as `pci_info`, `.pci_info()` will be called in order to obtain
@@ -6512,6 +6546,13 @@ mod test {
     fn is_drain_enabled() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.is_drain_enabled(None))
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn active_vgpus() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.active_vgpus())
     }
 
     #[cfg(target_os = "linux")]
