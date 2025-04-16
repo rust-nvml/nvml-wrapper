@@ -846,7 +846,7 @@ impl<'nvml> Device<'nvml> {
     * `NotSupported`, if this query is not supported by the device
     */
     #[doc(alias = "nvmlSystemGetConfComputeSettings")]
-    pub fn is_ppcie_enabled(&self) -> Result<bool, NvmlError> {
+    pub fn is_multi_gpu_protected_pcie_enabled(&self) -> Result<bool, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeSettings.as_ref())?;
 
         unsafe {
