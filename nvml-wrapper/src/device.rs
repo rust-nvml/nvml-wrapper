@@ -823,9 +823,13 @@ impl<'nvml> Device<'nvml> {
     /**
     Gets the confidential compute state for this `Device`.
     # Errors
+
     * `Uninitialized`, if the library has not been successfully initialized
-    * `InvalidArg`, if device is invalid or memory is NULL
-    * `NotSupported`, if this query is not supported by the device
+    * `InvalidArg`, if device is invalid or counters is NULL
+    * `NotSupported`, if the device does not support this feature
+    * `GpuLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `Unknown`, on any unexpected error
     */
     #[doc(alias = "nvmlDeviceSetConfComputeSettings")]
     pub fn is_cc_enabled(&self) -> Result<bool, NvmlError> {
@@ -841,9 +845,13 @@ impl<'nvml> Device<'nvml> {
     /**
     Gets the confidential compute state for this `Device`.
     # Errors
+
     * `Uninitialized`, if the library has not been successfully initialized
-    * `InvalidArg`, if device is invalid or memory is NULL
-    * `NotSupported`, if this query is not supported by the device
+    * `InvalidArg`, if device is invalid or counters is NULL
+    * `NotSupported`, if the device does not support this feature
+    * `GpuLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `Unknown`, on any unexpected error
     */
     #[doc(alias = "nvmlSystemGetConfComputeSettings")]
     pub fn is_multi_gpu_protected_pcie_enabled(&self) -> Result<bool, NvmlError> {
@@ -859,8 +867,13 @@ impl<'nvml> Device<'nvml> {
     /**
     Gets the confidential compute state for this `Device`.
     # Errors
+    
     * `Uninitialized`, if the library has not been successfully initialized
-    * `InvalidArg`, if device is invalid or memory is NULL
+    * `InvalidArg`, if device is invalid or counters is NULL
+    * `NotSupported`, if the device does not support this feature
+    * `GpuLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `Unknown`, on any unexpected error
     */
     #[doc(alias = "nvmlSystemGetConfComputeSettings")]
     pub fn is_cc_dev_mode_enabled(&self) -> Result<bool, NvmlError> {
@@ -879,7 +892,6 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if device is invalid or memory is NULL
     * `NotSupported`, if this query is not supported by the device
-    * `Unknown`, on any unexpected error
     */
     pub fn get_confidential_compute_capabilities(
         &self,
