@@ -867,7 +867,7 @@ impl<'nvml> Device<'nvml> {
     /**
     Gets the confidential compute state for this `Device`.
     # Errors
-    
+
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if device is invalid or counters is NULL
     * `NotSupported`, if the device does not support this feature
