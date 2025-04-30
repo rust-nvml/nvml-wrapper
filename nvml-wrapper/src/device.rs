@@ -1646,6 +1646,35 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Sets fan control policy.
+
+    You can determine valid fan indices using [`Self::num_fans()`].
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid or `fan_idx` is invalid
+    * `NotSupported`, if this `Device` does not have a fan
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `UnexpectedVariant`, for which you can read the docs for
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Maxwell or newer fully supported discrete devices with fans.
+     */
+    #[doc(alias = "nvmlDeviceSetFanControlPolicy")]
+    pub fn set_fan_control_policy(
+        &mut self,
+        fan_idx: u32,
+        policy: FanControlPolicy,
+    ) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetFanControlPolicy.as_ref())?;
+
+        unsafe { nvml_try(sym(self.device, fan_idx, policy.as_c())) }
+    }
+
+    /**
     Sets the speed of a specified fan.
 
     WARNING: This function changes the fan control policy to manual. It means that YOU have to monitor the temperature and adjust the fan speed accordingly.
