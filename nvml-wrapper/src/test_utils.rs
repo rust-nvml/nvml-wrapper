@@ -107,6 +107,7 @@ impl ShouldPrint for DeviceArchitecture {}
 impl ShouldPrint for PcieLinkMaxSpeed {}
 impl ShouldPrint for DeviceAttributes {}
 impl ShouldPrint for ClockOffset {}
+impl ShouldPrint for MigMode {}
 
 #[cfg(target_os = "windows")]
 impl ShouldPrint for DriverModelState {}

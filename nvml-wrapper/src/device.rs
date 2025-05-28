@@ -290,6 +290,49 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the NUMA nodes physically close to the GPU.
+
+    Main goal is to facilitate memory placement optimisations for multi CPU/GPU settings.
+    Node (set) size needs to be something like `<Number of nodes> / (std::mem::size_of::<c_ulong>() / 8) + 1`
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this query
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    // Checked against local
+    // Tested
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetMemoryAffinity")]
+    pub fn memory_affinity(
+        &self,
+        size: usize,
+        scope: nvmlAffinityScope_t,
+    ) -> Result<Vec<c_ulong>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMemoryAffinity.as_ref())?;
+
+        unsafe {
+            if size == 0 {
+                return Err(NvmlError::InsufficientSize(Some(1)));
+            }
+
+            let mut affinities: Vec<c_ulong> = vec![0; size];
+
+            nvml_try(sym(
+                self.device,
+                size as c_uint,
+                affinities.as_mut_ptr(),
+                scope,
+            ))?;
+
+            Ok(affinities)
+        }
+    }
+
+    /**
     Gets the board ID for this `Device`, from 0-N.
 
     Devices with the same boardID indicate GPUs connected to the same PLX. Use in
@@ -739,6 +782,188 @@ impl<'nvml> Device<'nvml> {
             nvml_try(sym(self.device, size as c_uint, affinities.as_mut_ptr()))?;
 
             Ok(affinities)
+        }
+    }
+
+    /**
+    Checks simultaneously if confidential compute is enabled, if the device is in a production environment,
+    and if the device is accepting client requests.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `NotSupported`, if this query is not supported by the device
+    * `InvalidArg`, if confidential compute state is invalid
+    */
+    pub fn check_confidential_compute_status(&self) -> Result<bool, NvmlError> {
+        let cc_state_sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeState.as_ref())?;
+        let cc_gpus_ready_sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlSystemGetConfComputeGpusReadyState
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut state: nvmlConfComputeSystemState_t = mem::zeroed();
+            nvml_try(cc_state_sym(&mut state))?;
+
+            let is_cc_enabled = state.ccFeature == NVML_CC_SYSTEM_FEATURE_ENABLED;
+            let is_prod_environment = state.environment == NVML_CC_SYSTEM_ENVIRONMENT_PROD;
+
+            let mut cc_gpus_ready: std::os::raw::c_uint = 0;
+            nvml_try(cc_gpus_ready_sym(&mut cc_gpus_ready))?;
+            let is_accepting_client_requests =
+                cc_gpus_ready == NVML_CC_ACCEPTING_CLIENT_REQUESTS_TRUE;
+
+            Ok(is_cc_enabled && is_prod_environment && is_accepting_client_requests)
+        }
+    }
+
+    /**
+    Gets the confidential compute state for this `Device`.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or memory is NULL
+    * `NotSupported`, if this query is not supported by the device
+    */
+    #[doc(alias = "nvmlDeviceGetConfComputeGpusReadyState")]
+    pub fn get_confidential_compute_state(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlSystemGetConfComputeGpusReadyState
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut is_accepting_work: u32 = 0;
+            nvml_try(sym(&mut is_accepting_work))?;
+            Ok(is_accepting_work == NVML_CC_ACCEPTING_CLIENT_REQUESTS_TRUE)
+        }
+    }
+
+    /**
+    Sets the confidential compute state for this `Device`.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or memory is NULL
+    * `NotSupported`, if this query is not supported by the device
+    */
+    #[doc(alias = "nvmlDeviceSetConfComputeState")]
+    pub fn set_confidential_compute_state(&self, is_accepting_work: bool) -> Result<(), NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlSystemSetConfComputeGpusReadyState
+                .as_ref(),
+        )?;
+
+        unsafe {
+            nvml_try(sym(is_accepting_work as u32))?;
+            Ok(())
+        }
+    }
+
+    /**
+    Gets the confidential compute state for this `Device`.
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or counters is NULL
+    * `NotSupported`, if the device does not support this feature
+    * `GpuLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceSetConfComputeSettings")]
+    pub fn is_cc_enabled(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeSettings.as_ref())?;
+
+        unsafe {
+            let mut settings: nvmlSystemConfComputeSettings_t = mem::zeroed();
+            nvml_try(sym(&mut settings))?;
+            Ok(settings.ccFeature == NVML_CC_SYSTEM_FEATURE_ENABLED)
+        }
+    }
+
+    /**
+    Gets the confidential compute state for this `Device`.
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or counters is NULL
+    * `NotSupported`, if the device does not support this feature
+    * `GpuLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlSystemGetConfComputeSettings")]
+    pub fn is_multi_gpu_protected_pcie_enabled(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeSettings.as_ref())?;
+
+        unsafe {
+            let mut settings: nvmlSystemConfComputeSettings_t = mem::zeroed();
+            nvml_try(sym(&mut settings))?;
+            Ok(settings.multiGpuMode == NVML_CC_SYSTEM_MULTIGPU_PROTECTED_PCIE)
+        }
+    }
+
+    /**
+    Gets the confidential compute state for this `Device`.
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or counters is NULL
+    * `NotSupported`, if the device does not support this feature
+    * `GpuLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlSystemGetConfComputeSettings")]
+    pub fn is_cc_dev_mode_enabled(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeSettings.as_ref())?;
+
+        unsafe {
+            let mut settings: nvmlSystemConfComputeSettings_t = mem::zeroed();
+            nvml_try(sym(&mut settings))?;
+            Ok(settings.devToolsMode == NVML_CC_SYSTEM_DEVTOOLS_MODE_ON)
+        }
+    }
+
+    /**
+    Gets the confidential compute capabilities for this `Device`.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or memory is NULL
+    * `NotSupported`, if this query is not supported by the device
+    */
+    pub fn get_confidential_compute_capabilities(
+        &self,
+    ) -> Result<ConfidentialComputeCapabilities, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeCapabilities.as_ref())?;
+
+        unsafe {
+            let mut capabilities: nvmlConfComputeSystemCaps_t = mem::zeroed();
+            nvml_try(sym(&mut capabilities))?;
+
+            let cpu_caps = match capabilities.cpuCaps {
+                NVML_CC_SYSTEM_CPU_CAPS_NONE => ConfidentialComputeCpuCapabilities::None,
+                NVML_CC_SYSTEM_CPU_CAPS_AMD_SEV => ConfidentialComputeCpuCapabilities::AmdSev,
+                NVML_CC_SYSTEM_CPU_CAPS_INTEL_TDX => ConfidentialComputeCpuCapabilities::IntelTdx,
+                _ => return Err(NvmlError::Unknown),
+            };
+
+            let gpus_caps = match capabilities.gpusCaps {
+                NVML_CC_SYSTEM_GPUS_CC_CAPABLE => ConfidentialComputeGpuCapabilities::Capable,
+                NVML_CC_SYSTEM_GPUS_CC_NOT_CAPABLE => {
+                    ConfidentialComputeGpuCapabilities::NotCapable
+                }
+                _ => return Err(NvmlError::Unknown),
+            };
+
+            Ok(ConfidentialComputeCapabilities {
+                cpu_caps,
+                gpus_caps,
+            })
         }
     }
 
@@ -2405,6 +2630,32 @@ impl<'nvml> Device<'nvml> {
                 0 => Ok(false),
                 _ => Ok(true),
             }
+        }
+    }
+
+    /**
+    Checks if the `Device`supports multi partitioned GPU feature and if enabled.
+    Not to confuse with `is_multi_gpu_board`, MIG is a single GPU
+    being able to be split into isolated instances, a sort of "NUMA" for GPU.
+    If the `Device` supports MIG, we can have its current mode (enabled/disabled)
+    and, if set, its pending mode for the next system reboot.
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetMigMode")]
+    pub fn mig_mode(&self) -> Result<MigMode, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMigMode.as_ref())?;
+
+        unsafe {
+            let mut mode: MigMode = mem::zeroed();
+            nvml_try(sym(self.device, &mut mode.current, &mut mode.pending))?;
+
+            Ok(mode)
         }
     }
 
@@ -5740,6 +5991,13 @@ mod test {
         test_with_device(3, &nvml, |device| device.bar1_memory_info())
     }
 
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn memory_affinity() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.memory_affinity(64, 0))
+    }
+
     #[test]
     fn board_id() {
         let nvml = nvml();
@@ -6077,6 +6335,12 @@ mod test {
     fn is_multi_gpu_board() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.is_multi_gpu_board())
+    }
+
+    #[test]
+    fn mig_mode() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.mig_mode())
     }
 
     #[test]
