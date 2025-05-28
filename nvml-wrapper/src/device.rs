@@ -290,6 +290,49 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the NUMA nodes physically close to the GPU.
+
+    Main goal is to facilitate memory placement optimisations for multi CPU/GPU settings.
+    Node (set) size needs to be something like `<Number of nodes> / (std::mem::size_of::<c_ulong>() / 8) + 1`
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this query
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    // Checked against local
+    // Tested
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetMemoryAffinity")]
+    pub fn memory_affinity(
+        &self,
+        size: usize,
+        scope: nvmlAffinityScope_t,
+    ) -> Result<Vec<c_ulong>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMemoryAffinity.as_ref())?;
+
+        unsafe {
+            if size == 0 {
+                return Err(NvmlError::InsufficientSize(Some(1)));
+            }
+
+            let mut affinities: Vec<c_ulong> = vec![0; size];
+
+            nvml_try(sym(
+                self.device,
+                size as c_uint,
+                affinities.as_mut_ptr(),
+                scope,
+            ))?;
+
+            Ok(affinities)
+        }
+    }
+
+    /**
     Gets the board ID for this `Device`, from 0-N.
 
     Devices with the same boardID indicate GPUs connected to the same PLX. Use in
@@ -739,6 +782,188 @@ impl<'nvml> Device<'nvml> {
             nvml_try(sym(self.device, size as c_uint, affinities.as_mut_ptr()))?;
 
             Ok(affinities)
+        }
+    }
+
+    /**
+    Checks simultaneously if confidential compute is enabled, if the device is in a production environment,
+    and if the device is accepting client requests.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `NotSupported`, if this query is not supported by the device
+    * `InvalidArg`, if confidential compute state is invalid
+    */
+    pub fn check_confidential_compute_status(&self) -> Result<bool, NvmlError> {
+        let cc_state_sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeState.as_ref())?;
+        let cc_gpus_ready_sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlSystemGetConfComputeGpusReadyState
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut state: nvmlConfComputeSystemState_t = mem::zeroed();
+            nvml_try(cc_state_sym(&mut state))?;
+
+            let is_cc_enabled = state.ccFeature == NVML_CC_SYSTEM_FEATURE_ENABLED;
+            let is_prod_environment = state.environment == NVML_CC_SYSTEM_ENVIRONMENT_PROD;
+
+            let mut cc_gpus_ready: std::os::raw::c_uint = 0;
+            nvml_try(cc_gpus_ready_sym(&mut cc_gpus_ready))?;
+            let is_accepting_client_requests =
+                cc_gpus_ready == NVML_CC_ACCEPTING_CLIENT_REQUESTS_TRUE;
+
+            Ok(is_cc_enabled && is_prod_environment && is_accepting_client_requests)
+        }
+    }
+
+    /**
+    Gets the confidential compute state for this `Device`.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or memory is NULL
+    * `NotSupported`, if this query is not supported by the device
+    */
+    #[doc(alias = "nvmlDeviceGetConfComputeGpusReadyState")]
+    pub fn get_confidential_compute_state(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlSystemGetConfComputeGpusReadyState
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut is_accepting_work: u32 = 0;
+            nvml_try(sym(&mut is_accepting_work))?;
+            Ok(is_accepting_work == NVML_CC_ACCEPTING_CLIENT_REQUESTS_TRUE)
+        }
+    }
+
+    /**
+    Sets the confidential compute state for this `Device`.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or memory is NULL
+    * `NotSupported`, if this query is not supported by the device
+    */
+    #[doc(alias = "nvmlDeviceSetConfComputeState")]
+    pub fn set_confidential_compute_state(&self, is_accepting_work: bool) -> Result<(), NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlSystemSetConfComputeGpusReadyState
+                .as_ref(),
+        )?;
+
+        unsafe {
+            nvml_try(sym(is_accepting_work as u32))?;
+            Ok(())
+        }
+    }
+
+    /**
+    Gets the confidential compute state for this `Device`.
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or counters is NULL
+    * `NotSupported`, if the device does not support this feature
+    * `GpuLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceSetConfComputeSettings")]
+    pub fn is_cc_enabled(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeSettings.as_ref())?;
+
+        unsafe {
+            let mut settings: nvmlSystemConfComputeSettings_t = mem::zeroed();
+            nvml_try(sym(&mut settings))?;
+            Ok(settings.ccFeature == NVML_CC_SYSTEM_FEATURE_ENABLED)
+        }
+    }
+
+    /**
+    Gets the confidential compute state for this `Device`.
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or counters is NULL
+    * `NotSupported`, if the device does not support this feature
+    * `GpuLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlSystemGetConfComputeSettings")]
+    pub fn is_multi_gpu_protected_pcie_enabled(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeSettings.as_ref())?;
+
+        unsafe {
+            let mut settings: nvmlSystemConfComputeSettings_t = mem::zeroed();
+            nvml_try(sym(&mut settings))?;
+            Ok(settings.multiGpuMode == NVML_CC_SYSTEM_MULTIGPU_PROTECTED_PCIE)
+        }
+    }
+
+    /**
+    Gets the confidential compute state for this `Device`.
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or counters is NULL
+    * `NotSupported`, if the device does not support this feature
+    * `GpuLost`, if the target GPU has fallen off the bus or is otherwise inaccessible
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlSystemGetConfComputeSettings")]
+    pub fn is_cc_dev_mode_enabled(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeSettings.as_ref())?;
+
+        unsafe {
+            let mut settings: nvmlSystemConfComputeSettings_t = mem::zeroed();
+            nvml_try(sym(&mut settings))?;
+            Ok(settings.devToolsMode == NVML_CC_SYSTEM_DEVTOOLS_MODE_ON)
+        }
+    }
+
+    /**
+    Gets the confidential compute capabilities for this `Device`.
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device is invalid or memory is NULL
+    * `NotSupported`, if this query is not supported by the device
+    */
+    pub fn get_confidential_compute_capabilities(
+        &self,
+    ) -> Result<ConfidentialComputeCapabilities, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlSystemGetConfComputeCapabilities.as_ref())?;
+
+        unsafe {
+            let mut capabilities: nvmlConfComputeSystemCaps_t = mem::zeroed();
+            nvml_try(sym(&mut capabilities))?;
+
+            let cpu_caps = match capabilities.cpuCaps {
+                NVML_CC_SYSTEM_CPU_CAPS_NONE => ConfidentialComputeCpuCapabilities::None,
+                NVML_CC_SYSTEM_CPU_CAPS_AMD_SEV => ConfidentialComputeCpuCapabilities::AmdSev,
+                NVML_CC_SYSTEM_CPU_CAPS_INTEL_TDX => ConfidentialComputeCpuCapabilities::IntelTdx,
+                _ => return Err(NvmlError::Unknown),
+            };
+
+            let gpus_caps = match capabilities.gpusCaps {
+                NVML_CC_SYSTEM_GPUS_CC_CAPABLE => ConfidentialComputeGpuCapabilities::Capable,
+                NVML_CC_SYSTEM_GPUS_CC_NOT_CAPABLE => {
+                    ConfidentialComputeGpuCapabilities::NotCapable
+                }
+                _ => return Err(NvmlError::Unknown),
+            };
+
+            Ok(ConfidentialComputeCapabilities {
+                cpu_caps,
+                gpus_caps,
+            })
         }
     }
 
@@ -1616,6 +1841,36 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Retrieves the min and max fan speed that user can set for the GPU fan.
+
+    Returns a (min, max) tuple.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not have fans
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    For all cuda-capable discrete products with fans
+    */
+    // Checked against local
+    // Tested
+    #[doc(alias = "nvmlDeviceGetMinMaxFanSpeed")]
+    pub fn min_max_fan_speed(&self) -> Result<(u32, u32), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMinMaxFanSpeed.as_ref())?;
+
+        unsafe {
+            let mut min = mem::zeroed();
+            let mut max = mem::zeroed();
+            nvml_try(sym(self.device, &mut min, &mut max))?;
+            Ok((min, max))
+        }
+    }
+
+    /**
     Gets current fan control policy.
 
     You can determine valid fan indices using [`Self::num_fans()`].
@@ -1643,6 +1898,35 @@ impl<'nvml> Device<'nvml> {
 
             FanControlPolicy::try_from(policy)
         }
+    }
+
+    /**
+    Sets fan control policy.
+
+    You can determine valid fan indices using [`Self::num_fans()`].
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid or `fan_idx` is invalid
+    * `NotSupported`, if this `Device` does not have a fan
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `UnexpectedVariant`, for which you can read the docs for
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Maxwell or newer fully supported discrete devices with fans.
+     */
+    #[doc(alias = "nvmlDeviceSetFanControlPolicy")]
+    pub fn set_fan_control_policy(
+        &mut self,
+        fan_idx: u32,
+        policy: FanControlPolicy,
+    ) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetFanControlPolicy.as_ref())?;
+
+        unsafe { nvml_try(sym(self.device, fan_idx, policy.as_c())) }
     }
 
     /**
@@ -1947,7 +2231,7 @@ impl<'nvml> Device<'nvml> {
 
         unsafe {
             let last_seen_timestamp = last_seen_timestamp.into().unwrap_or(0);
-            let mut count = match self.process_utilization_stats_count()? {
+            let mut count = match self.process_utilization_stats_count(last_seen_timestamp)? {
                 0 => return Ok(vec![]),
                 v => v,
             };
@@ -1969,13 +2253,21 @@ impl<'nvml> Device<'nvml> {
         }
     }
 
-    fn process_utilization_stats_count(&self) -> Result<c_uint, NvmlError> {
+    fn process_utilization_stats_count(
+        &self,
+        last_seen_timestamp: u64,
+    ) -> Result<c_uint, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetProcessUtilization.as_ref())?;
 
         unsafe {
             let mut count: c_uint = 0;
 
-            match sym(self.device, ptr::null_mut(), &mut count, 0) {
+            match sym(
+                self.device,
+                ptr::null_mut(),
+                &mut count,
+                last_seen_timestamp,
+            ) {
                 // Despite being undocumented, this appears to be the correct behavior
                 nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => Ok(count),
                 other => nvml_try(other).map(|_| 0),
@@ -2375,6 +2667,32 @@ impl<'nvml> Device<'nvml> {
                 0 => Ok(false),
                 _ => Ok(true),
             }
+        }
+    }
+
+    /**
+    Checks if the `Device`supports multi partitioned GPU feature and if enabled.
+    Not to confuse with `is_multi_gpu_board`, MIG is a single GPU
+    being able to be split into isolated instances, a sort of "NUMA" for GPU.
+    If the `Device` supports MIG, we can have its current mode (enabled/disabled)
+    and, if set, its pending mode for the next system reboot.
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetMigMode")]
+    pub fn mig_mode(&self) -> Result<MigMode, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMigMode.as_ref())?;
+
+        unsafe {
+            let mut mode: MigMode = mem::zeroed();
+            nvml_try(sym(self.device, &mut mode.current, &mut mode.pending))?;
+
+            Ok(mode)
         }
     }
 
@@ -4959,6 +5277,167 @@ impl<'nvml> Device<'nvml> {
         unsafe { nvml_try(sym(self.device, limit)) }
     }
 
+    /**
+    Retrieve min, max and current clock offset of some clock domain for a given PState
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`,  If device, type or pstate are invalid or both minClockOffsetMHz and maxClockOffsetMHz are NULL
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+    * `NotSupported`, if this `Device` does not support this feature
+
+    # Device Support
+
+    Supports Maxwell and newer fully supported devices.
+    */
+    // Checked against local
+    // Tested
+    #[doc(alias = "nvmlDeviceGetClockOffsets")]
+    pub fn clock_offset(
+        &self,
+        clock_type: Clock,
+        power_state: PerformanceState,
+    ) -> Result<ClockOffset, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetClockOffsets.as_ref())?;
+
+        unsafe {
+            // Implements NVML_STRUCT_VERSION(ClockOffset, 1), as detailed in nvml.h
+            let version =
+                (std::mem::size_of::<nvmlClockOffset_v1_t>() | (1_usize << 24_usize)) as u32;
+
+            let mut clock_offset = nvmlClockOffset_v1_t {
+                version,
+                type_: clock_type.as_c(),
+                pstate: power_state.as_c(),
+                clockOffsetMHz: mem::zeroed(),
+                minClockOffsetMHz: mem::zeroed(),
+                maxClockOffsetMHz: mem::zeroed(),
+            };
+            nvml_try(sym(self.device, &mut clock_offset))?;
+            ClockOffset::try_from(clock_offset)
+        }
+    }
+
+    /**
+    Control current clock offset of some clock domain for a given PState
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `NoPermission`, if the user doesn't have permission to perform this operation
+    * `InvalidArg`,  If device, type or pstate are invalid or both clockOffsetMHz is out of allowed range
+    * `ArgumentVersionMismatch`, if the provided version is invalid/unsupported
+
+    # Device Support
+
+    Supports Maxwell and newer fully supported devices.
+    */
+    // Checked against local
+    // Tested (no-run)
+    #[doc(alias = "nvmlDeviceSetClockOffsets")]
+    pub fn set_clock_offset(
+        &mut self,
+        clock_type: Clock,
+        power_state: PerformanceState,
+        offset: i32,
+    ) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetClockOffsets.as_ref())?;
+
+        unsafe {
+            // Implements NVML_STRUCT_VERSION(ClockOffset, 1), as detailed in nvml.h
+            let version =
+                (std::mem::size_of::<nvmlClockOffset_v1_t>() | (1_usize << 24_usize)) as u32;
+
+            let mut clock_offset = nvmlClockOffset_v1_t {
+                version,
+                type_: clock_type.as_c(),
+                pstate: power_state.as_c(),
+                clockOffsetMHz: offset,
+                minClockOffsetMHz: 0,
+                maxClockOffsetMHz: 0,
+            };
+            nvml_try(sym(self.device, &mut clock_offset))?;
+            Ok(())
+        }
+    }
+
+    /**
+    Get all supported Performance States (P-States) for the device.
+    The number of elements in the returned list will never exceed [`NVML_MAX_GPU_PERF_PSTATES`]`.
+
+    # Errors
+
+    * `InsufficientSize`, if the the container supplied was not large enough to hold the resulting list
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`,  if device or pstates is invalid
+    * `NotSupported`, if the device does not support performance state readings
+    * `Unknown`, on any unexpected error
+    */
+    // Checked against local
+    // Tested
+    #[doc(alias = "nvmlDeviceGetSupportedPerformanceStates")]
+    pub fn supported_performance_states(&self) -> Result<Vec<PerformanceState>, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetSupportedPerformanceStates
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut pstates =
+                [PerformanceState::Unknown.as_c(); NVML_MAX_GPU_PERF_PSTATES as usize];
+            // The array size passed to `nvmlDeviceGetSupportedPerformanceStates` must be in bytes, not array length
+            let byte_size = mem::size_of_val(&pstates);
+
+            nvml_try(sym(self.device, pstates.as_mut_ptr(), byte_size as u32))?;
+
+            pstates
+                .into_iter()
+                .take_while(|pstate| *pstate != PerformanceState::Unknown.as_c())
+                .map(PerformanceState::try_from)
+                .collect()
+        }
+    }
+
+    /**
+    Retrieve min and max clocks of some clock domain for a given PState.
+
+    Returns a (min, max) tuple.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if device, type or pstate are invalid or both minClockMHz and maxClockMHz are NULL
+    * `NotSupported`, if the device does not support this feature
+    */
+    // Checked against local
+    // Tested
+    #[doc(alias = "nvmlDeviceGetMinMaxClockOfPState")]
+    pub fn min_max_clock_of_pstate(
+        &self,
+        clock_type: Clock,
+        pstate: PerformanceState,
+    ) -> Result<(u32, u32), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMinMaxClockOfPState.as_ref())?;
+
+        unsafe {
+            let mut min: u32 = mem::zeroed();
+            let mut max: u32 = mem::zeroed();
+
+            nvml_try(sym(
+                self.device,
+                clock_type.as_c(),
+                pstate.as_c(),
+                &mut min,
+                &mut max,
+            ))?;
+
+            Ok((min, max))
+        }
+    }
+
     // Event handling methods
 
     /**
@@ -5349,6 +5828,71 @@ impl<'nvml> Device<'nvml> {
                 modes.split(';').map(str::to_string).collect(),
                 pmodes.version,
             ))
+
+    /**
+    Gets the active vGPU instances for `Device`
+
+    A list as Vec of vGPU handles is returned to be used with nvmlVgpuInstance* calls.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    * `NotSupported`, if the platform does not support this feature
+
+    # Platform Support
+
+    Only supports Linux.
+    */
+    // Checked against local
+    // Tested
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetActiveVgpus")]
+    pub fn active_vgpus(&self) -> Result<Vec<nvmlVgpuInstance_t>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetActiveVgpus.as_ref())?;
+
+        unsafe {
+            let mut count: u32 = mem::zeroed();
+
+            nvml_try(sym(self.device, std::ptr::null_mut(), &mut count))?;
+            let mut arr: Vec<nvmlVgpuInstance_t> = vec![0; count as usize];
+            nvml_try(sym(self.device, arr.as_mut_ptr(), &mut count))?;
+
+            Ok(arr)
+        }
+    }
+
+    /**
+    Gets the virtualization mode of `Device`
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+
+    * `InvalidArg`, if this `Device` is invalid or `clock_type` is invalid (shouldn't occur?)
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Device support
+
+    Supports Kepler and newer fully supported devices.
+
+    */
+    // Checked against local
+    // Tested
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetVirtualizationMode")]
+    pub fn virtualization_mode(&self) -> Result<GpuVirtualizationMode, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetVirtualizationMode.as_ref())?;
+
+        unsafe {
+            let mut mode: nvmlGpuVirtualizationMode_t = mem::zeroed();
+
+            nvml_try(sym(self.device, &mut mode))?;
+
+            GpuVirtualizationMode::try_from(mode)
         }
     }
 
@@ -5587,6 +6131,13 @@ mod test {
         test_with_device(3, &nvml, |device| device.bar1_memory_info())
     }
 
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn memory_affinity() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.memory_affinity(64, 0))
+    }
+
     #[test]
     fn board_id() {
         let nvml = nvml();
@@ -5798,6 +6349,12 @@ mod test {
     }
 
     #[test]
+    fn min_max_fan_speed() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.min_max_fan_speed())
+    }
+
+    #[test]
     fn num_fans() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.num_fans())
@@ -5921,6 +6478,12 @@ mod test {
     }
 
     #[test]
+    fn mig_mode() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.mig_mode())
+    }
+
+    #[test]
     fn name() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.name())
@@ -5970,6 +6533,28 @@ mod test {
     fn power_management_limit() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.power_management_limit())
+    }
+
+    #[test]
+    fn clock_offset() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| {
+            device.clock_offset(Clock::Graphics, PerformanceState::Zero)
+        });
+    }
+
+    #[test]
+    fn supported_performance_states() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.supported_performance_states());
+    }
+
+    #[test]
+    fn min_max_clock_of_pstate() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| {
+            device.min_max_clock_of_pstate(Clock::Graphics, PerformanceState::Zero)
+        });
     }
 
     #[test]
@@ -6511,6 +7096,17 @@ mod test {
             .expect("set to true")
     }
 
+    // This modifies device state, so we don't want to actually run the test
+    #[allow(dead_code)]
+    fn set_clock_offset() {
+        let nvml = nvml();
+        let mut device = device(&nvml);
+
+        device
+            .set_clock_offset(Clock::Graphics, PerformanceState::Zero, -100)
+            .expect("set to true")
+    }
+
     #[cfg(target_os = "linux")]
     #[allow(unused_variables)]
     #[test]
@@ -6557,6 +7153,20 @@ mod test {
     fn performance_modes() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.performance_modes())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn active_vgpus() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.active_vgpus())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn virtualization_mode() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.virtualization_mode())
     }
 
     #[cfg(target_os = "linux")]

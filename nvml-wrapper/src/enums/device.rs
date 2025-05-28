@@ -376,7 +376,7 @@ impl TryFrom<nvmlFanControlPolicy_t> for FanControlPolicy {
     fn try_from(value: nvmlFanControlPolicy_t) -> Result<Self, Self::Error> {
         match value {
             NVML_FAN_POLICY_TEMPERATURE_CONTINOUS_SW => Ok(Self::TemperatureContinousSw),
-            NVML_FAN_POLICY_MANUAL => Ok(Self::TemperatureContinousSw),
+            NVML_FAN_POLICY_MANUAL => Ok(Self::Manual),
             _ => Err(NvmlError::UnexpectedVariant(value)),
         }
     }
