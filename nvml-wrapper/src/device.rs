@@ -1990,7 +1990,7 @@ impl<'nvml> Device<'nvml> {
 
         unsafe {
             let last_seen_timestamp = last_seen_timestamp.into().unwrap_or(0);
-            let mut count = match self.process_utilization_stats_count()? {
+            let mut count = match self.process_utilization_stats_count(last_seen_timestamp)? {
                 0 => return Ok(vec![]),
                 v => v,
             };
@@ -2012,13 +2012,21 @@ impl<'nvml> Device<'nvml> {
         }
     }
 
-    fn process_utilization_stats_count(&self) -> Result<c_uint, NvmlError> {
+    fn process_utilization_stats_count(
+        &self,
+        last_seen_timestamp: u64,
+    ) -> Result<c_uint, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetProcessUtilization.as_ref())?;
 
         unsafe {
             let mut count: c_uint = 0;
 
-            match sym(self.device, ptr::null_mut(), &mut count, 0) {
+            match sym(
+                self.device,
+                ptr::null_mut(),
+                &mut count,
+                last_seen_timestamp,
+            ) {
                 // Despite being undocumented, this appears to be the correct behavior
                 nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => Ok(count),
                 other => nvml_try(other).map(|_| 0),
