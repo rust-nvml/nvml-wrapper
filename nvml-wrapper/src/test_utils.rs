@@ -106,6 +106,7 @@ impl ShouldPrint for PowerSource {}
 impl ShouldPrint for DeviceArchitecture {}
 impl ShouldPrint for PcieLinkMaxSpeed {}
 impl ShouldPrint for DeviceAttributes {}
+impl ShouldPrint for GpuVirtualizationMode {}
 impl ShouldPrint for ClockOffset {}
 impl ShouldPrint for MigMode {}
 

@@ -5757,6 +5757,37 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the virtualization mode of `Device`
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid or `clock_type` is invalid (shouldn't occur?)
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Device support
+
+    Supports Kepler and newer fully supported devices.
+    */
+    // Checked against local
+    // Tested
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetVirtualizationMode")]
+    pub fn virtualization_mode(&self) -> Result<GpuVirtualizationMode, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetVirtualizationMode.as_ref())?;
+
+        unsafe {
+            let mut mode: nvmlGpuVirtualizationMode_t = mem::zeroed();
+
+            nvml_try(sym(self.device, &mut mode))?;
+
+            GpuVirtualizationMode::try_from(mode)
+        }
+    }
+
+    /**
     Removes this `Device` from the view of both NVML and the NVIDIA kernel driver.
 
     If you pass `None` as `pci_info`, `.pci_info()` will be called in order to obtain
@@ -7006,6 +7037,13 @@ mod test {
     fn is_drain_enabled() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.is_drain_enabled(None))
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn virtualization_mode() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.virtualization_mode())
     }
 
     #[cfg(target_os = "linux")]
