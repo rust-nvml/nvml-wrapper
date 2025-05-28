@@ -6,7 +6,7 @@ use wrapcenum_derive::EnumWrapper;
 
 /// Represents the NvLink utilization counter packet units.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlNvLinkUtilizationCountUnits_enum")]
 pub enum UtilizationCountUnit {
@@ -20,7 +20,7 @@ pub enum UtilizationCountUnit {
 
 /// Represents queryable NvLink capabilities.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlNvLinkCapability_enum")]
 pub enum Capability {
@@ -46,7 +46,7 @@ pub enum Capability {
 
 /// Represents queryable NvLink error counters.
 // Checked against local
-#[derive(EnumWrapper, Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlNvLinkErrorCounter_enum")]
 pub enum ErrorCounter {
