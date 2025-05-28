@@ -167,3 +167,13 @@ pub struct RetiredPage {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FieldId(pub u32);
+
+/// Returned from `Device.mig_mode()`
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct MigMode {
+    /// Whether MIG mode is enabled/disabled.
+    pub current: u32,
+    /// Mode set after reboot.
+    pub pending: u32,
+}
