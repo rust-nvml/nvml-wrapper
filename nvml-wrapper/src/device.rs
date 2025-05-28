@@ -5828,6 +5828,8 @@ impl<'nvml> Device<'nvml> {
                 modes.split(';').map(str::to_string).collect(),
                 pmodes.version,
             ))
+        }
+    }
 
     /**
     Gets the active vGPU instances for `Device`
