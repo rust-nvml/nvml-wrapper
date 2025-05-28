@@ -4,6 +4,44 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 ## [Unreleased]
 
+## [0.11.0] (released 2025-03-28)
+
+Fixes, improvements, and updates for NVML 12.8.90.
+
+### Fixed
+
+* Include license text in the packaged crates (#66)
+* Fix EventLoop elided lifetime warnings (#69)
+* Use proper api version from header. (#80)
+
+### Added
+
+* Add Gpc and Mem clock offset methods (#61)
+* Add nvmlDeviceGetP2PStatus (#62)
+* Add Blackwell to DeviceArchitecture enum (#70)
+* Add DeviceAttributes and device::attributes(). (#71)
+* Add attestation report fetch functionality to device (#73)
+* Add confidential compute gpu certificate functionality (#74)
+* Add checks for confidential compute (#76)
+* Add fan control functions (#77)
+* Add device::cpu_affinity_within_scope. (#79)
+* Add FanSpeedInfo and FanSpeedRPM wrappers. (#80)
+* Add device::memory_affinity(). (#82)
+* Add device::mig_mode(). (#83)
+* Add wrappers for clock offset and pstate functions, min_max_fan_speed (#85)
+* Add device::virtualization_mode() wrapper. (#86)
+* Add vgpu_driver_capabilities() (#87)
+* Add device::performance_modes() (#88)
+* Add device::active_vgpus() (#89)
+* Add util functions for cc and multi-gpu ppcie (#90)
+* Add set fan control policy function (#91)
+* Add last_seen_timestamp parameter to get more accurate process utilization counts. (#92)
+
+### Changed
+
+* Update nvmlDeviceGetMemoryInfo to version 2 to be consistent with nvidia-smi (#58)
+* Set LIB_PATH to libnvidia-ml.so.1 instead of libnvidia-ml.so on Linux (#63)
+
 ## [0.10.0] (released 2024-02-10)
 
 Updates for NVML 12.2.
