@@ -7117,6 +7117,7 @@ mod test {
     fn active_vgpus() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.active_vgpus())
+    }
       
     #[cfg(target_os = "linux")]
     #[test]
