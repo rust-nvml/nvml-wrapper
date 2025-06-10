@@ -2699,6 +2699,28 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+     Gets the MIG device handle from `index` on a parent physical GPU
+     # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetMigDeviceHandleByIndex")]
+    pub fn mig_device_by_index(&self, index: u32) -> Result<Device<'nvml>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMigDeviceHandleByIndex.as_ref())?;
+
+        unsafe {
+            let mut parent: nvmlDevice_t = mem::zeroed();
+            nvml_try(sym(self.device, index, &mut parent))?;
+
+            Ok(Device::new(parent, self.nvml))
+        }
+    }
+
+    /**
     The name of this `Device`, e.g. "Tesla C2070".
 
     The name is an alphanumeric string that denotes a particular product.
@@ -6527,6 +6549,13 @@ mod test {
     fn mig_mode() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.mig_mode())
+    }
+
+    #[test]
+    fn mig_device_by_index() {
+        let nvml = nvml();
+        let device = device(&nvml);
+        test(3, || device.mig_device_by_index(0))
     }
 
     #[test]
