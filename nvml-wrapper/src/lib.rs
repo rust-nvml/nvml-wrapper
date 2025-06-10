@@ -109,6 +109,7 @@ pub mod structs;
 #[cfg(test)]
 mod test_utils;
 pub mod unit;
+pub mod vgpu;
 
 // Re-exports for convenience
 pub use crate::device::Device;
@@ -295,6 +296,11 @@ impl Nvml {
     /// Create an `NvmlBuilder` for further flexibility in how NVML is initialized.
     pub fn builder<'a>() -> NvmlBuilder<'a> {
         NvmlBuilder::default()
+    }
+
+    /// Get the underlying `NvmlLib` instance.
+    pub fn lib(&self) -> &NvmlLib {
+        &self.lib
     }
 
     /**
