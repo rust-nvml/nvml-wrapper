@@ -757,6 +757,49 @@ impl TryFrom<nvmlClockOffset_v1_t> for ClockOffset {
     }
 }
 
+// Vgpu
+/// Vgpu scheduler capabilities
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VgpuSchedulerCapabilities {
+    // Adaptative Round Robin mode on/off
+    pub is_arr_mode_supported: bool,
+    // Maximum averaging factor for Adaptative Round Robin mode
+    pub max_avg_factor_for_arr: u32,
+    // Maximum frequency for Adaptative Round Robin mode
+    pub max_freq_for_arr: u32,
+    // Maximum timeslice value in ns
+    pub max_time_slice: u32,
+    // Minimum averaging factor for Adaptative Round Robin mode
+    pub min_avg_factor_for_arr: u32,
+    // Minimum frequency for Adaptative Round Robin mode
+    pub min_freq_for_arr: u32,
+    // Minimum timeslice value in ns
+    pub min_time_slice: u32,
+    // List of supported scheduler
+    pub supported_schedulers: Vec<u32>,
+}
+
+impl From<nvmlVgpuSchedulerCapabilities_t> for VgpuSchedulerCapabilities {
+    fn from(value: nvmlVgpuSchedulerCapabilities_t) -> Self {
+        let supported_schedulers = value
+            .supportedSchedulers
+            .into_iter()
+            .map(|sched| sched)
+            .collect::<Vec<_>>();
+        Self {
+            is_arr_mode_supported: value.isArrModeSupported > 0,
+            max_avg_factor_for_arr: value.maxAvgFactorForARR,
+            max_freq_for_arr: value.maxFrequencyForARR,
+            max_time_slice: value.maxTimeslice,
+            min_avg_factor_for_arr: value.minAvgFactorForARR,
+            min_freq_for_arr: value.minFrequencyForARR,
+            min_time_slice: value.minTimeslice,
+            supported_schedulers,
+        }
+    }
+}
+
 #[cfg(test)]
 #[allow(unused_variables, unused_imports)]
 mod tests {

@@ -6155,6 +6155,24 @@ impl<'nvml> Device<'nvml> {
 
         Ok(ids.into_iter().map(|id| VgpuType::new(self, id)).collect())
     }
+
+    /// Obtain a list of vGPU scheduler capabilities supported by the device, if any.
+    pub fn vgpu_scheduler_capabilities(&self) -> Result<VgpuSchedulerCapabilities, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetVgpuSchedulerCapabilities
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut capabilities: nvmlVgpuSchedulerCapabilities_t = mem::zeroed();
+
+            nvml_try(sym(self.device, &mut capabilities))?;
+
+            Ok(VgpuSchedulerCapabilities::from(capabilities))
+        }
+    }
 }
 
 #[cfg(test)]
