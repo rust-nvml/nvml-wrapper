@@ -2721,6 +2721,28 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+     Gets the maximum number of MIG devices on a physical GPU
+     # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetMaxMigDeviceCount")]
+    pub fn mig_device_count(&self) -> Result<u32, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetMaxMigDeviceCount.as_ref())?;
+
+        unsafe {
+            let mut count: c_uint = 0;
+            nvml_try(sym(self.device, &mut count))?;
+
+            Ok(count)
+        }
+    }
+
+    /**
     The name of this `Device`, e.g. "Tesla C2070".
 
     The name is an alphanumeric string that denotes a particular product.
@@ -6559,9 +6581,16 @@ mod test {
     }
 
     #[test]
+    fn mig_device_countx() {
+        let nvml = nvml();
+        let device = device(&nvml);
+        test(3, || device.mig_device_count())
+    }
+
+    #[test]
     fn name() {
         let nvml = nvml();
-        test_with_device(3, &nvml, |device| device.name())
+        test_with_device(3, &nvml, |device| device.mig_device_count())
     }
 
     #[test]
