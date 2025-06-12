@@ -2770,6 +2770,27 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+     Determines if the current device is of MIG type
+     # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    pub fn mig_is_mig_device_handle(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceIsMigDeviceHandle.as_ref())?;
+
+        unsafe {
+            let mut mig_handle: c_uint = 0;
+            nvml_try(sym(self.device, &mut mig_handle))?;
+
+            Ok(mig_handle > 0)
+        }
+    }
+
+    /**
     The name of this `Device`, e.g. "Tesla C2070".
 
     The name is an alphanumeric string that denotes a particular product.
@@ -6626,10 +6647,16 @@ mod test {
     }
 
     #[test]
-    fn mig_device_countx() {
+    fn mig_device_count() {
         let nvml = nvml();
         let device = device(&nvml);
         test(3, || device.mig_device_count())
+    }
+
+    #[test]
+    fn mig_is_mig_device_handle() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.mig_is_mig_device_handle())
     }
 
     #[test]
