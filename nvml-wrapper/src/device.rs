@@ -6221,6 +6221,19 @@ impl<'nvml> Device<'nvml> {
             Ok(VgpuSchedulerCapabilities::from(capabilities))
         }
     }
+
+    /// Check if the GPU is on vGPU host mode
+    pub fn vgpu_host_mode(&self) -> Result<HostVgpuMode, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetHostVgpuMode.as_ref())?;
+
+        unsafe {
+            let mut mode: nvmlHostVgpuMode_t = 0;
+
+            nvml_try(sym(self.device, &mut mode))?;
+
+            HostVgpuMode::try_from(mode)
+        }
+    }
 }
 
 #[cfg(test)]
