@@ -650,3 +650,17 @@ pub enum GpuVirtualizationMode {
     #[wrap(c_variant = "NVML_GPU_VIRTUALIZATION_MODE_HOST_VSGA")]
     HostVsga,
 }
+
+// vGPU
+
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[wrap(c_enum = "nvmlHostVgpuMode_enum")]
+pub enum HostVgpuMode {
+    /// Non SR-IOV mode
+    #[wrap(c_variant = "NVML_HOST_VGPU_MODE_NON_SRIOV")]
+    NonSriov,
+    /// SR-IOV mode
+    #[wrap(c_variant = "NVML_HOST_VGPU_MODE_SRIOV")]
+    Sriov,
+}
