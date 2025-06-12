@@ -2721,6 +2721,33 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+     Gets the parent device from the MiG device handle
+     # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetDeviceHandleFromMigDeviceHandle")]
+    pub fn mig_parent_device(&self) -> Result<Device<'nvml>, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetDeviceHandleFromMigDeviceHandle
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut parent: nvmlDevice_t = mem::zeroed();
+            nvml_try(sym(self.device, &mut parent))?;
+
+            Ok(Device::new(parent, self.nvml))
+        }
+    }
+
+    /**
      Gets the maximum number of MIG devices on a physical GPU
      # Errors
 
@@ -6603,6 +6630,13 @@ mod test {
         let nvml = nvml();
         let device = device(&nvml);
         test(3, || device.mig_device_count())
+    }
+
+    #[test]
+    fn mig_parent_device() {
+        let nvml = nvml();
+        let device = device(&nvml);
+        test(3, || device.mig_parent_device())
     }
 
     #[test]
