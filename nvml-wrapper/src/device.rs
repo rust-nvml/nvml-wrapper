@@ -2699,6 +2699,33 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Set the Device MIG mode ; even if the GPU supports this feature,
+    the setting can still fail (e.g. device still in use).
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceSetMigMode")]
+    pub fn set_mig_mode(&self, m: bool) -> Result<u32, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetMigMode.as_ref())?;
+
+        unsafe {
+            let mode: c_uint = match m {
+                true => NVML_DEVICE_MIG_ENABLE,
+                false => NVML_DEVICE_MIG_DISABLE,
+            };
+            let mut status: c_uint = 0;
+
+            nvml_try(sym(self.device, mode, &mut status))?;
+            Ok(status)
+        }
+    }
+
+    /**
      Gets the MIG device handle from `index` on a parent physical GPU
      # Errors
 
@@ -6679,6 +6706,12 @@ mod test {
     fn mig_mode() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.mig_mode())
+    }
+
+    #[test]
+    fn set_mig_mode() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.set_mig_mode(false))
     }
 
     #[test]
