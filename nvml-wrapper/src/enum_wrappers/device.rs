@@ -664,3 +664,24 @@ pub enum HostVgpuMode {
     #[wrap(c_variant = "NVML_HOST_VGPU_MODE_SRIOV")]
     Sriov,
 }
+
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[wrap(c_enum = "nvmlDeviceVgpuCapability_enum")]
+pub enum VgpuCapability {
+    /// Fractional vGPU profiles can be used in multi-vGPU settings
+    #[wrap(c_variant = "NVML_DEVICE_VGPU_CAP_FRACTIONAL_MULTI_VGPU")]
+    FractionalMultiVgpu,
+    /// Concurrent execution of timesliced vGPU profiles of different types
+    #[wrap(c_variant = "NVML_DEVICE_VGPU_CAP_HETEROGENEOUS_TIMESLICE_PROFILES")]
+    HeterogeneousTimesliceProfiles,
+    /// Concurrent execution of timesliced vGPU profiles of different framebuffer sizes
+    #[wrap(c_variant = "NVML_DEVICE_VGPU_CAP_HETEROGENEOUS_TIMESLICE_SIZES")]
+    HeterogeneousTimesliceSizes,
+    /// GPU read device buffer expected bandwidth (Mb/s)
+    #[wrap(c_variant = "NVML_DEVICE_VGPU_CAP_READ_DEVICE_BUFFER_BW")]
+    ReadDeviceBufferBw,
+    /// GPU write device buffer expected bandwidth (Mb/s)
+    #[wrap(c_variant = "NVML_DEVICE_VGPU_CAP_WRITE_DEVICE_BUFFER_BW")]
+    WriteDeviceBufferBw,
+}

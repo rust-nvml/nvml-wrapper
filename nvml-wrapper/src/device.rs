@@ -6234,6 +6234,35 @@ impl<'nvml> Device<'nvml> {
             HostVgpuMode::try_from(mode)
         }
     }
+
+    /// Query the given vGPU capability
+    pub fn vgpu_capabilities(&self, cap: VgpuCapability) -> Result<u32, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetVgpuCapabilities.as_ref())?;
+
+        unsafe {
+            let mut res: c_uint = 0;
+            nvml_try(sym(self.device, cap.as_c(), &mut res))?;
+
+            Ok(res)
+        }
+    }
+
+    pub fn vgpu_set_capabilities(
+        &self,
+        cap: VgpuCapability,
+        enable: bool,
+    ) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetVgpuCapabilities.as_ref())?;
+
+        unsafe {
+            let state: nvmlEnableState_t = match enable {
+                true => nvmlEnableState_enum_NVML_FEATURE_ENABLED,
+                false => nvmlEnableState_enum_NVML_FEATURE_DISABLED,
+            };
+
+            nvml_try(sym(self.device, cap.as_c(), state))
+        }
+    }
 }
 
 #[cfg(test)]
