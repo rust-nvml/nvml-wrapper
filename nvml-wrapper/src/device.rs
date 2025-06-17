@@ -2673,6 +2673,58 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+     Get GPU instance placements. A placement is a given location of a GPU in a device.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Platform Support
+
+    Only supports Linux.
+
+    # Device Support
+
+    Supports Ampere and newer fully supported devices.
+    */
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetGpuInstancePossiblePlacements_v2")]
+    pub fn possible_placements(
+        &self,
+        profile: u32,
+    ) -> Result<Vec<GpuInstancePlacement>, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetGpuInstancePossiblePlacements_v2
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut count: c_uint = 0;
+            nvml_try(sym(self.device, profile, ptr::null_mut(), &mut count))?;
+            let mut placements: Vec<nvmlGpuInstancePlacement_t> =
+                Vec::with_capacity(count as usize);
+
+            nvml_try(sym(
+                self.device,
+                profile,
+                placements.as_mut_ptr(),
+                &mut count,
+            ))?;
+
+            Ok(placements
+                .into_iter()
+                .map(GpuInstancePlacement::from)
+                .collect())
+        }
+    }
+
+    /**
     Checks if the `Device`supports multi partitioned GPU feature and if enabled.
     Not to confuse with `is_multi_gpu_board`, MIG is a single GPU
     being able to be split into isolated instances, a sort of "NUMA" for GPU.
@@ -6700,6 +6752,13 @@ mod test {
     fn is_multi_gpu_board() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.is_multi_gpu_board())
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn possible_placements() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.possible_placements(0))
     }
 
     #[test]

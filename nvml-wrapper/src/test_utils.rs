@@ -110,6 +110,7 @@ impl ShouldPrint for (Vec<String>, u32) {}
 impl ShouldPrint for GpuVirtualizationMode {}
 impl ShouldPrint for ClockOffset {}
 impl ShouldPrint for MigMode {}
+impl ShouldPrint for Vec<GpuInstancePlacement> {}
 
 #[cfg(target_os = "windows")]
 impl ShouldPrint for DriverModelState {}

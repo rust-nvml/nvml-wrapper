@@ -757,6 +757,25 @@ impl TryFrom<nvmlClockOffset_v1_t> for ClockOffset {
     }
 }
 
+/// MIG profile placements
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct GpuInstancePlacement {
+    /// Memory slices occupied
+    pub size: u32,
+    /// Index of first occupied memory slice (inclusive)
+    pub start: u32,
+}
+
+impl From<nvmlGpuInstancePlacement_t> for GpuInstancePlacement {
+    fn from(value: nvmlGpuInstancePlacement_t) -> Self {
+        Self {
+            size: value.size,
+            start: value.start,
+        }
+    }
+}
+
 // Vgpu
 /// Vgpu scheduler capabilities
 #[derive(Debug, Clone, Eq, PartialEq)]
