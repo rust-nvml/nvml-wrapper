@@ -525,6 +525,52 @@ impl<'device, 'nvml: 'device> NvLink<'device, 'nvml> {
 
         unsafe { nvml_try(sym(self.device.handle(), self.link, counter as c_uint)) }
     }
+
+    /**
+     Get the bandwidth mode of a NvLink connection
+
+     Note that, at the moment, this the global system value, the one based on a device
+     is not yet available.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if the `link` or `Device` within this `NvLink` struct instance
+    is invalid
+    * `NotSupported`, if this `Device` doesn't support this feature
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlSystemGetNvLinkBwMode")]
+    pub fn bw_mode(&self) -> Result<u32, NvmlError> {
+        let sym = nvml_sym(self.device.nvml().lib.nvmlSystemGetNvlinkBwMode.as_ref())?;
+
+        unsafe {
+            let mut mode: c_uint = 0;
+            nvml_try(sym(&mut mode))?;
+            Ok(mode)
+        }
+    }
+
+    /**
+     Set the bandwidth mode of a NvLink connection
+
+     Note that, at the moment, this the global system value, the one based on a device
+     is not yet available.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if the `link` or `Device` within this `NvLink` struct instance
+    is invalid
+    * `NotSupported`, if this `Device` doesn't support this feature
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlSystemSetNvLinkBwMode")]
+    pub fn set_bw_mode(&self, mode: u32) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.device.nvml().lib.nvmlSystemSetNvlinkBwMode.as_ref())?;
+
+        unsafe { nvml_try(sym(mode)) }
+    }
 }
 
 #[cfg(test)]
@@ -653,5 +699,16 @@ mod test {
         let mut link = device.link_wrapper_for(0);
 
         link.reset_utilization_counter(Counter::One).unwrap();
+    }
+
+    // This modifies link state, so we don't want to actually run the test
+    #[allow(dead_code)]
+    fn bw_mode() {
+        let nvml = nvml();
+        let device = device(&nvml);
+        let link = device.link_wrapper_for(0);
+
+        let mode = link.bw_mode().unwrap();
+        link.set_bw_mode(mode).unwrap();
     }
 }
