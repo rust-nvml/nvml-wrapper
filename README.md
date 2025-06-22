@@ -57,7 +57,7 @@ each time it gets called. Instead, call `Nvml::init` once and store the resultin
 ## NVML Support
 
 This wrapper is being developed against and currently supports NVML version
-11. Each new version of NVML is guaranteed to be backwards-compatible according
+12. Each new version of NVML is guaranteed to be backwards-compatible according
 to NVIDIA, so this wrapper should continue to work without issue regardless of
 NVML version bumps.
 
