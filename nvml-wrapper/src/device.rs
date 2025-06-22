@@ -882,6 +882,9 @@ impl<'nvml> Device<'nvml> {
 
         unsafe {
             let mut settings: nvmlSystemConfComputeSettings_t = mem::zeroed();
+            // Implements NVML_STRUCT_VERSION(SystemConfComputeSettings, 1), as detailed in nvml.h
+            settings.version = (std::mem::size_of::<nvmlSystemConfComputeSettings_v1_t>()
+                | (1_usize << 24_usize)) as u32;
             nvml_try(sym(&mut settings))?;
             Ok(settings.ccFeature == NVML_CC_SYSTEM_FEATURE_ENABLED)
         }
@@ -904,6 +907,9 @@ impl<'nvml> Device<'nvml> {
 
         unsafe {
             let mut settings: nvmlSystemConfComputeSettings_t = mem::zeroed();
+            // Implements NVML_STRUCT_VERSION(SystemConfComputeSettings, 1), as detailed in nvml.h
+            settings.version = (std::mem::size_of::<nvmlSystemConfComputeSettings_v1_t>()
+                | (1_usize << 24_usize)) as u32;
             nvml_try(sym(&mut settings))?;
             Ok(settings.multiGpuMode == NVML_CC_SYSTEM_MULTIGPU_PROTECTED_PCIE)
         }
@@ -926,6 +932,9 @@ impl<'nvml> Device<'nvml> {
 
         unsafe {
             let mut settings: nvmlSystemConfComputeSettings_t = mem::zeroed();
+            // Implements NVML_STRUCT_VERSION(SystemConfComputeSettings, 1), as detailed in nvml.h
+            settings.version = (std::mem::size_of::<nvmlSystemConfComputeSettings_v1_t>()
+                | (1_usize << 24_usize)) as u32;
             nvml_try(sym(&mut settings))?;
             Ok(settings.devToolsMode == NVML_CC_SYSTEM_DEVTOOLS_MODE_ON)
         }
