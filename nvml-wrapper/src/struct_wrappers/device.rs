@@ -86,9 +86,9 @@ impl TryInto<nvmlPciInfo_t> for PciInfo {
 
     * `NulError`, if a nul byte was found in the bus_id (shouldn't occur?)
     * `StringTooLong`, if `bus_id.len()` exceeded the length of
-    `NVML_DEVICE_PCI_BUS_ID_BUFFER_SIZE`. This should (?) only be able to
-    occur if the user modifies `bus_id` in some fashion. We return an error
-    rather than panicking.
+      `NVML_DEVICE_PCI_BUS_ID_BUFFER_SIZE`. This should (?) only be able to
+      occur if the user modifies `bus_id` in some fashion. We return an error
+      rather than panicking.
     */
     fn try_into(self) -> Result<nvmlPciInfo_t, Self::Error> {
         // This is more readable than spraying `buf_size as usize` everywhere
@@ -643,7 +643,7 @@ impl TryFrom<nvmlFBCSessionInfo_t> for FbcSessionInfo {
 
     * `UnexpectedVariant`, for which you can read the docs for
     * `IncorrectBits`, if the `sessionFlags` from the given struct do match the
-    wrapper definition
+      wrapper definition
     */
     fn try_from(value: nvmlFBCSessionInfo_t) -> Result<Self, Self::Error> {
         Ok(Self {
@@ -801,11 +801,7 @@ pub struct VgpuSchedulerCapabilities {
 
 impl From<nvmlVgpuSchedulerCapabilities_t> for VgpuSchedulerCapabilities {
     fn from(value: nvmlVgpuSchedulerCapabilities_t) -> Self {
-        let supported_schedulers = value
-            .supportedSchedulers
-            .into_iter()
-            .map(|sched| sched)
-            .collect::<Vec<_>>();
+        let supported_schedulers = value.supportedSchedulers.into_iter().collect::<Vec<_>>();
         Self {
             is_arr_mode_supported: value.isArrModeSupported > 0,
             max_avg_factor_for_arr: value.maxAvgFactorForARR,

@@ -446,7 +446,7 @@ impl Nvml {
     * `NotFound`, if the process does not exist
     * `NoPermission`, if the user doesn't have permission to perform the operation
     * `Utf8Error`, if the string obtained from the C function is not valid UTF-8. NVIDIA's docs say
-    that the string encoding is ANSI, so this may very well happen.
+      that the string encoding is ANSI, so this may very well happen.
     * `Unknown`, on any unexpected error
     */
     // TODO: The docs say the string is ANSI-encoded. Not sure if I should try

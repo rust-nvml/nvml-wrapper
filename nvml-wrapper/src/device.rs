@@ -1191,7 +1191,7 @@ impl<'nvml> Device<'nvml> {
 
     * `UnexpectedVariant`, for which you can read the docs for
     * `IncorrectBits`, if bits are found in a session's info flags that don't
-        match the flags in this wrapper
+      match the flags in this wrapper
     * `Uninitialized`, if the library has not been successfully initialized
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
@@ -3742,7 +3742,7 @@ impl<'nvml> Device<'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `IncorrectBits`, if NVML returns any bits that do not correspond to flags in
-    `ThrottleReasons`
+      `ThrottleReasons`
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error
 
@@ -4789,7 +4789,7 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if the `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature or accounting mode
-    is disabled
+      is disabled
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -4851,7 +4851,7 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if the `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature or accounting
-    mode is disabled
+      mode is disabled
     * `Unknown`, on any unexpected error
     */
     // Checked against local
@@ -4908,9 +4908,9 @@ impl<'nvml> Device<'nvml> {
     Note:
     * Accounting mode needs to be on. See `.is_accounting_enabled()`.
     * Only compute and graphics applications stats can be queried. Monitoring
-    applications can't be queried since they don't contribute to GPU utilization.
+      applications can't be queried since they don't contribute to GPU utilization.
     * If a PID collision occurs, the stats of the latest process (the one that
-    terminated last) will be reported.
+      terminated last) will be reported.
 
     # Errors
 
@@ -4918,7 +4918,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if the `Device` is invalid
     * `NotFound`, if the process stats were not found
     * `NotSupported`, if this `Device` does not support this feature or accounting
-    mode is disabled
+      mode is disabled
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -4952,8 +4952,8 @@ impl<'nvml> Device<'nvml> {
 
     Note:
     * This setting is not persistent and will default to disabled after the driver
-    unloads. Enable persistence mode to be sure the setting doesn't switch off
-    to disabled.
+      unloads. Enable persistence mode to be sure the setting doesn't switch off
+      to disabled.
     * Enabling accounting mode has no negative impact on GPU performance.
     * Disabling accounting clears accounting information for all PIDs
 
@@ -5026,8 +5026,8 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if the `Device` is invalid or `api_type` is invalid (shouldn't occur?)
     * `NotSupported`, if this `Device` does not support changing API restrictions or
-    this `Device` does not support the feature that API restrictions are being set for
-    (e.g. enabling/disabling auto boosted clocks is not supported by this `Device`).
+      this `Device` does not support the feature that API restrictions are being set for
+      (e.g. enabling/disabling auto boosted clocks is not supported by this `Device`).
     * `NoPermission`, if the user doesn't have permission to perform this operation
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error

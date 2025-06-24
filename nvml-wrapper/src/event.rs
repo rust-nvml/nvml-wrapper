@@ -101,7 +101,7 @@ impl<'nvml> EventSet<'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `Timeout`, if no event arrived in the specified timeout or an interrupt
-    arrived
+      arrived
     * `GpuLost`, if a GPU has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error
 
