@@ -265,7 +265,7 @@ impl EventLoopProvider for Nvml {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `GpuLost`, if any of the given `Device`s have fallen off the bus or are
-    otherwise inaccessible
+      otherwise inaccessible
     * `Unknown`, on any unexpected error
 
     # Platform Support

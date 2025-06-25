@@ -446,7 +446,7 @@ impl Nvml {
     * `NotFound`, if the process does not exist
     * `NoPermission`, if the user doesn't have permission to perform the operation
     * `Utf8Error`, if the string obtained from the C function is not valid UTF-8. NVIDIA's docs say
-    that the string encoding is ANSI, so this may very well happen.
+      that the string encoding is ANSI, so this may very well happen.
     * `Unknown`, on any unexpected error
     */
     // TODO: The docs say the string is ANSI-encoded. Not sure if I should try
@@ -911,9 +911,9 @@ impl Nvml {
     * `Uninitialized`, if the library has not been successfully initialized
     * `OperatingSystem`, if the operating system is denying this feature
     * `NoPermission`, if the calling process has insufficient permissions to
-    perform this operation
+      perform this operation
     * `NulError`, if an issue is encountered when trying to convert a Rust
-    `String` into a `CString`.
+      `String` into a `CString`.
     * `Unknown`, on any unexpected error
 
     # Device Support
