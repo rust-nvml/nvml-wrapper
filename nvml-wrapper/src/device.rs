@@ -5645,11 +5645,11 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if `events` is invalid (shouldn't occur?)
     * `NotSupported`, if the platform does not support this feature or some of the
-    requested event types.
+      requested event types.
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error. **If this error is returned, the `set` you
-    passed in has had its resources freed and will not be returned to you**. NVIDIA's
-    docs say that this error means that the set is in an invalid state.
+      passed in has had its resources freed and will not be returned to you**. NVIDIA's
+      docs say that this error means that the set is in an invalid state.
 
     # Device Support
 
@@ -5792,7 +5792,7 @@ impl<'nvml> Device<'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `IncorrectBits`, if NVML returns any bits that do not correspond to flags in
-    `EventTypes`
+      `EventTypes`
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error
 
@@ -5844,7 +5844,7 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `NotSupported`, if this `Device` doesn't support this feature
     * `NoPermission`, if the calling process has insufficient permissions to perform
-    this operation
+      this operation
     * `InUse`, if this `Device` has persistence mode turned on
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error
@@ -5984,7 +5984,7 @@ impl<'nvml> Device<'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `NotSupported`, if the platform does not support this feature or some of the
-    requested event types.
+      requested event types.
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `Unknown`, on any unexpected error. **If this error is returned, the `set` you
 

@@ -536,7 +536,7 @@ impl<'device, 'nvml: 'device> NvLink<'device, 'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if the `link` or `Device` within this `NvLink` struct instance
-    is invalid
+      is invalid
     * `NotSupported`, if this `Device` doesn't support this feature
     * `Unknown`, on any unexpected error
     */
@@ -561,7 +561,7 @@ impl<'device, 'nvml: 'device> NvLink<'device, 'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if the `link` or `Device` within this `NvLink` struct instance
-    is invalid
+      is invalid
     * `NotSupported`, if this `Device` doesn't support this feature
     * `Unknown`, on any unexpected error
     */

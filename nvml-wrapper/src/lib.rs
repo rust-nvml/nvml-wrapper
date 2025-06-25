@@ -911,9 +911,9 @@ impl Nvml {
     * `Uninitialized`, if the library has not been successfully initialized
     * `OperatingSystem`, if the operating system is denying this feature
     * `NoPermission`, if the calling process has insufficient permissions to
-    perform this operation
+      perform this operation
     * `NulError`, if an issue is encountered when trying to convert a Rust
-    `String` into a `CString`.
+      `String` into a `CString`.
     * `Unknown`, on any unexpected error
 
     # Device Support
