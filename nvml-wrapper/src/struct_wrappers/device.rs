@@ -801,7 +801,7 @@ pub struct VgpuSchedulerCapabilities {
 
 impl From<nvmlVgpuSchedulerCapabilities_t> for VgpuSchedulerCapabilities {
     fn from(value: nvmlVgpuSchedulerCapabilities_t) -> Self {
-        let supported_schedulers = value.supportedSchedulers.into_iter().collect::<Vec<_>>();
+        let supported_schedulers = value.supportedSchedulers.to_vec();
         Self {
             is_arr_mode_supported: value.isArrModeSupported > 0,
             max_avg_factor_for_arr: value.maxAvgFactorForARR,
