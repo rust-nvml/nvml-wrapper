@@ -63,3 +63,22 @@ pub enum ErrorCounter {
     #[wrap(c_variant = "NVML_NVLINK_ERROR_DL_CRC_DATA")]
     DlCrcData,
 }
+
+/// Represents NvLink remote device type
+#[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[wrap(c_enum = "nvmlIntNvLinkDeviceType_enum")]
+pub enum IntDeviceType {
+    /// GPU
+    #[wrap(c_variant = "NVML_NVLINK_DEVICE_TYPE_GPU")]
+    Gpu,
+    /// IBMNPU
+    #[wrap(c_variant = "NVML_NVLINK_DEVICE_TYPE_IBMNPU")]
+    Ibmnpu,
+    /// Switch
+    #[wrap(c_variant = "NVML_NVLINK_DEVICE_TYPE_SWITCH")]
+    Switch,
+    /// Unknown
+    #[wrap(c_variant = "NVML_NVLINK_DEVICE_TYPE_UNKNOWN")]
+    Unknown,
+}
