@@ -3945,6 +3945,38 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Set the temperature threshold for this `Device` and the specified `threshold_type` and
+    with the given temperature.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid or `threshold_type` is invalid (shouldn't occur?)
+    * `NotSupported`, if this `Device` does not have a temperature sensor or is unsupported
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Kepler and newer fully supported devices.
+    */
+    // Checked against local
+    // Tested
+    #[doc(alias = "nvmlDeviceSetTemperatureThreshold")]
+    pub fn set_temperature_threshold(
+        &self,
+        threshold_type: TemperatureThreshold,
+        temp: i32,
+    ) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetTemperatureThreshold.as_ref())?;
+
+        unsafe {
+            let mut t = temp;
+            nvml_try(sym(self.device, threshold_type.as_c(), &mut t))
+        }
+    }
+
+    /**
     Gets the common ancestor for two devices.
 
     # Errors
@@ -7074,6 +7106,15 @@ mod test {
             let shutdown = device.temperature_threshold(TemperatureThreshold::Shutdown)?;
 
             Ok((slowdown, shutdown))
+        })
+    }
+
+    #[test]
+    fn set_temperature_threshold() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| {
+            device.set_temperature_threshold(TemperatureThreshold::Slowdown, 0)?;
+            device.set_temperature_threshold(TemperatureThreshold::Shutdown, 0)
         })
     }
 
