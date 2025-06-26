@@ -2,7 +2,7 @@ use crate::Device;
 
 use crate::enum_wrappers::{
     bool_from_state,
-    nv_link::{Capability, ErrorCounter},
+    nv_link::{Capability, ErrorCounter, IntDeviceType},
     state_from_bool,
 };
 
@@ -570,6 +570,33 @@ impl<'device, 'nvml: 'device> NvLink<'device, 'nvml> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlSystemSetNvlinkBwMode.as_ref())?;
 
         unsafe { nvml_try(sym(mode)) }
+    }
+
+    /**
+     Get the NvLink device type for a given link index
+
+    # Errors
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if the `link` or `Device` within this `NvLink` struct instance
+      is invalid
+    * `NotSupported`, if this `Device` doesn't support this feature
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetNvLinkRemoteDeviceType")]
+    pub fn remote_device_type(&self, link: u32) -> Result<IntDeviceType, NvmlError> {
+        let sym = nvml_sym(
+            self.device
+                .nvml()
+                .lib
+                .nvmlDeviceGetNvLinkRemoteDeviceType
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let device_type: IntDeviceType = IntDeviceType::Unknown;
+            nvml_try(sym(self.device.handle(), link, &mut device_type.as_c()))?;
+            Ok(device_type)
+        }
     }
 }
 
