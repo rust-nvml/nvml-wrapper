@@ -815,6 +815,34 @@ impl From<nvmlVgpuSchedulerCapabilities_t> for VgpuSchedulerCapabilities {
     }
 }
 
+/// Vgpu versions range
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VgpuVersion {
+    /// Minimum vGPU version
+    pub min: u32,
+    /// Maximum vGPU version
+    pub max: u32,
+}
+
+impl From<nvmlVgpuVersion_t> for VgpuVersion {
+    fn from(value: nvmlVgpuVersion_t) -> Self {
+        Self {
+            min: value.minVersion,
+            max: value.maxVersion,
+        }
+    }
+}
+
+impl VgpuVersion {
+    pub fn as_c(&self) -> nvmlVgpuVersion_t {
+        nvmlVgpuVersion_t {
+            minVersion: self.min,
+            maxVersion: self.max,
+        }
+    }
+}
+
 #[cfg(test)]
 #[allow(unused_variables, unused_imports)]
 mod tests {

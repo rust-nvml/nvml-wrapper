@@ -148,6 +148,7 @@ use crate::struct_wrappers::ExcludedDeviceInfo;
 
 #[cfg(target_os = "linux")]
 use crate::struct_wrappers::device::PciInfo;
+use crate::struct_wrappers::device::VgpuVersion;
 use crate::struct_wrappers::unit::HwbcEntry;
 
 use crate::bitmasks::InitFlags;
@@ -1006,6 +1007,36 @@ impl Nvml {
             Ok(mask)
         }
     }
+
+    /**
+    Get the supported and actual vGPU versions range.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+    */
+    #[doc(alias = "nvmlGetVgpuVersion")]
+    pub fn vgpu_version(&self) -> Result<(VgpuVersion, VgpuVersion), NvmlError> {
+        let sym = nvml_sym(self.lib.nvmlGetVgpuVersion.as_ref())?;
+
+        unsafe {
+            let mut supported: nvmlVgpuVersion_t = mem::zeroed();
+            let mut current: nvmlVgpuVersion_t = mem::zeroed();
+
+            nvml_try(sym(&mut supported, &mut current))?;
+            Ok((VgpuVersion::from(supported), VgpuVersion::from(current)))
+        }
+    }
+
+    #[doc(alias = "nvmlSetVgpuVersion")]
+    pub fn set_vgpu_version(&self, version: VgpuVersion) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.lib.nvmlSetVgpuVersion.as_ref())?;
+
+        unsafe { nvml_try(sym(&mut version.as_c())) }
+    }
 }
 
 /// This `Drop` implementation ignores errors! Use the `.shutdown()` method on
@@ -1277,5 +1308,17 @@ mod test {
     fn vgpu_driver_capabilities() {
         let nvml = nvml();
         test(3, || nvml.vgpu_driver_capabilities(1))
+    }
+
+    #[test]
+    fn vgpu_version() {
+        let nvml = nvml();
+        test(3, || nvml.vgpu_version())
+    }
+
+    #[test]
+    fn set_vgpu_version() {
+        let nvml = nvml();
+        test(3, || nvml.set_vgpu_version(VgpuVersion { min: 0, max: 0 }))
     }
 }
