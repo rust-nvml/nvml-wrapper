@@ -6069,7 +6069,7 @@ impl<'nvml> Device<'nvml> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetActiveVgpus.as_ref())?;
 
         unsafe {
-            let mut count: u32 = mem::zeroed();
+            let mut count: u32 = 0;
 
             nvml_try(sym(self.device, std::ptr::null_mut(), &mut count))?;
             let mut arr: Vec<nvmlVgpuInstance_t> = vec![0; count as usize];
