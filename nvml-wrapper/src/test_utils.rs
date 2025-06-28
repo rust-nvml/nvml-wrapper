@@ -111,6 +111,7 @@ impl ShouldPrint for GpuVirtualizationMode {}
 impl ShouldPrint for ClockOffset {}
 impl ShouldPrint for MigMode {}
 impl ShouldPrint for Vec<GpuInstancePlacement> {}
+impl ShouldPrint for (VgpuVersion, VgpuVersion) {}
 
 #[cfg(target_os = "windows")]
 impl ShouldPrint for DriverModelState {}
