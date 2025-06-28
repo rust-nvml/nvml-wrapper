@@ -6080,6 +6080,67 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Get the list of process ids running on a given vGPU instance for stats purpose
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    * `NotSupported`, if the platform does not support this feature
+
+    # Platform Support
+
+    For Maxwell or newer fully supported devices
+    */
+    #[doc(alias = "nvmlVgpuInstanceGetAccountingPids")]
+    pub fn vgpu_accounting_pids(
+        &self,
+        instance: nvmlVgpuInstance_t,
+    ) -> Result<Vec<u32>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlVgpuInstanceGetAccountingPids.as_ref())?;
+
+        unsafe {
+            let mut count: u32 = 0;
+
+            nvml_try(sym(instance, &mut count, std::ptr::null_mut()))?;
+            let mut pids: Vec<u32> = vec![0; count as usize];
+            nvml_try(sym(instance, &mut count, pids.as_mut_ptr()))?;
+
+            Ok(pids)
+        }
+    }
+
+    /**
+     Get the stats for a given pid running in the vGPU instance
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    * `NotSupported`, if the platform does not support this feature
+
+    # Platform Support
+
+    For Maxwell or newer fully supported devices
+    */
+    #[doc(alias = "nvmlVgpuInstanceGetAccountingStats")]
+    pub fn vgpu_accounting_instance(
+        &self,
+        instance: nvmlVgpuInstance_t,
+        pid: u32,
+    ) -> Result<AccountingStats, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlVgpuInstanceGetAccountingStats.as_ref())?;
+
+        unsafe {
+            let mut stats: nvmlAccountingStats_t = mem::zeroed();
+            nvml_try(sym(instance, pid, &mut stats))?;
+
+            Ok(AccountingStats::from(stats))
+        }
+    }
+
+    /**
     Gets the virtualization mode of `Device`
 
     # Errors
@@ -7527,6 +7588,18 @@ mod test {
     fn active_vgpus() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.active_vgpus())
+    }
+
+    #[test]
+    fn vgpu_accounting_pids() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.vgpu_accounting_pids(0))
+    }
+
+    #[test]
+    fn vgpu_accounting_instance() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.vgpu_accounting_instance(0, 0))
     }
 
     #[cfg(target_os = "linux")]
