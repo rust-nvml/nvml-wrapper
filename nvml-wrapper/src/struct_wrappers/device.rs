@@ -843,6 +843,97 @@ impl VgpuVersion {
     }
 }
 
+/// Vgpu scheduler Params
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VgpuSchedulerParams {
+    pub avg_factor: Option<u32>,
+    pub timeslice: u32,
+}
+
+/// Vgpu scheduler Log entry
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VgpuSchedulerLogEntry {
+    /// Timesteamp when the software runlist was preemopted (in ns)
+    pub timestamp: u64,
+    /// Total time this runlist has run (in ns)
+    pub time_run_total: u64,
+    /// Time this runlist ran before preemption (in ns)
+    pub time_run: u64,
+    /// Runlist Id
+    pub sw_runlist_id: u32,
+    /// timeslice after deduction
+    pub target_time_slice: u64,
+    /// Preemption time for this runlist (in ns)
+    pub cumulative_preemption_time: u64,
+}
+
+impl From<nvmlVgpuSchedulerLogEntry_t> for VgpuSchedulerLogEntry {
+    fn from(value: nvmlVgpuSchedulerLogEntry_t) -> Self {
+        Self {
+            timestamp: value.timestamp,
+            time_run_total: value.timeRunTotal,
+            time_run: value.timeRun,
+            sw_runlist_id: value.swRunlistId,
+            target_time_slice: value.targetTimeSlice,
+            cumulative_preemption_time: value.cumulativePreemptionTime,
+        }
+    }
+}
+
+/// Vgpu scheduler Log
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VgpuSchedulerLog {
+    /// Engine id whose software runlist are fetched
+    pub engine_id: u32,
+    /// Scheduler policy
+    pub scheduler_policy: u32,
+    /// Scheduler Round Robin Mode
+    pub arr_mode: u32,
+    pub scheduler_params: VgpuSchedulerParams,
+    /// Number of log entries fetched during the call
+    pub entries_count: u32,
+    /// Log entries
+    pub entries: Vec<VgpuSchedulerLogEntry>,
+}
+
+impl From<nvmlVgpuSchedulerLog_t> for VgpuSchedulerLog {
+    fn from(value: nvmlVgpuSchedulerLog_t) -> Self {
+        let entries = value
+            .logEntries
+            .iter()
+            .map(|e| VgpuSchedulerLogEntry::from(*e))
+            .collect::<Vec<_>>();
+        let params = match value.arrMode {
+            2 => {
+                let data = unsafe { value.schedulerParams.vgpuSchedDataWithARR };
+                VgpuSchedulerParams {
+                    avg_factor: Some(data.avgFactor),
+                    timeslice: data.timeslice,
+                }
+            }
+            _ => {
+                let data = unsafe { value.schedulerParams.vgpuSchedData };
+                VgpuSchedulerParams {
+                    avg_factor: None,
+                    timeslice: data.timeslice,
+                }
+            }
+        };
+
+        Self {
+            engine_id: value.engineId,
+            scheduler_policy: value.schedulerPolicy,
+            arr_mode: value.arrMode,
+            scheduler_params: params,
+            entries_count: entries.len() as u32,
+            entries,
+        }
+    }
+}
+
 #[cfg(test)]
 #[allow(unused_variables, unused_imports)]
 mod tests {
