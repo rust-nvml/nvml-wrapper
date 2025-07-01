@@ -934,6 +934,70 @@ impl From<nvmlVgpuSchedulerLog_t> for VgpuSchedulerLog {
     }
 }
 
+/// Vgpu scheduler state
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VgpuSchedulerGetState {
+    /// Adaptative Round Robin scheduler mode
+    pub arr_mode: u32,
+    /// Scheduler policy
+    pub scheduler_policy: u32,
+}
+
+impl From<nvmlVgpuSchedulerGetState_t> for VgpuSchedulerGetState {
+    fn from(value: nvmlVgpuSchedulerGetState_t) -> Self {
+        Self {
+            arr_mode: value.arrMode,
+            scheduler_policy: value.schedulerPolicy,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VgpuSchedulerSetParams {
+    /// Average factor in compensating the timeslice for Adaptive Round Robin mode
+    pub avg_factor: Option<u32>,
+    /// Frequency for Adaptative Mode (when avg_factor is set)/timeslice in ns for each software run list as configured, or the default value otherwise
+    pub frequency_or_timeslice: u32,
+}
+
+impl VgpuSchedulerSetParams {
+    pub fn as_c(&self) -> nvmlVgpuSchedulerSetParams_t {
+        match self.avg_factor {
+            Some(a) => nvmlVgpuSchedulerSetParams_t {
+                vgpuSchedDataWithARR: nvmlVgpuSchedulerSetParams_t__bindgen_ty_1 {
+                    avgFactor: a,
+                    frequency: self.frequency_or_timeslice,
+                },
+            },
+            _ => nvmlVgpuSchedulerSetParams_t {
+                vgpuSchedData: nvmlVgpuSchedulerSetParams_t__bindgen_ty_2 {
+                    timeslice: self.frequency_or_timeslice,
+                },
+            },
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct VgpuSchedulerSetState {
+    pub scheduler_policy: u32,
+    pub enable_arr_mode: u32,
+    pub scheduler_params: VgpuSchedulerSetParams,
+}
+
+impl VgpuSchedulerSetState {
+    pub fn as_c(&self) -> nvmlVgpuSchedulerSetState_t {
+        nvmlVgpuSchedulerSetState_t {
+            enableARRMode: self.enable_arr_mode,
+            schedulerPolicy: self.scheduler_policy,
+            schedulerParams: self.scheduler_params.as_c(),
+        }
+    }
+}
+
 #[cfg(test)]
 #[allow(unused_variables, unused_imports)]
 mod tests {
