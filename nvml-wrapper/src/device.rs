@@ -3450,24 +3450,26 @@ impl<'nvml> Device<'nvml> {
 
         unsafe {
             let mut val_type: nvmlValueType_t = mem::zeroed();
-            let mut count = match self.samples_count(&sample_type, timestamp)? {
+            let count = match self.samples_count(&sample_type, timestamp)? {
                 0 => return Ok(vec![]),
                 value => value,
             };
             let mut samples: Vec<nvmlSample_t> = vec![mem::zeroed(); count as usize];
+            let mut new_count = count;
 
             nvml_try(sym(
                 self.device,
                 sample_type.as_c(),
                 timestamp,
                 &mut val_type,
-                &mut count,
+                &mut new_count,
                 samples.as_mut_ptr(),
             ))?;
 
             let val_type_rust = SampleValueType::try_from(val_type)?;
             Ok(samples
                 .into_iter()
+                .take(new_count as usize)
                 .map(|s| Sample::from_tag_and_struct(&val_type_rust, s))
                 .collect())
         }
