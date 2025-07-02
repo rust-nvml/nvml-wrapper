@@ -624,6 +624,63 @@ impl<'nvml> Device<'nvml> {
         }
     }
 
+    fn mps_running_compute_processes_count(&self) -> Result<c_uint, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetMPSComputeRunningProcesses_v3
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut len: c_uint = 0;
+
+            match sym(self.device, &mut len, ptr::null_mut()) {
+                nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => Ok(len),
+                another_attempt => nvml_try(another_attempt).map(|_| 0),
+            }
+        }
+    }
+
+    /**
+    Gets information about processes with a compute context running on this `Device`.
+    Note that processes list can differ between the accounting call and the list gathering
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Volta or newer fully supported devices.
+    */
+    #[doc(alias = "nvmlDeviceGetMPSComputeRunningProcesses_v3")]
+    pub fn mps_running_compute_processes(&self) -> Result<Vec<ProcessInfo>, NvmlError> {
+        let sym = nvml_sym(
+            self.nvml
+                .lib
+                .nvmlDeviceGetMPSComputeRunningProcesses_v3
+                .as_ref(),
+        )?;
+
+        unsafe {
+            let mut len: c_uint = match self.mps_running_compute_processes_count()? {
+                0 => return Ok(vec![]),
+                value => value,
+            };
+
+            let mut processes: Vec<nvmlProcessInfo_t> = Vec::with_capacity(len as usize);
+
+            nvml_try(sym(self.device, &mut len, processes.as_mut_ptr()))?;
+
+            processes.set_len(len as usize);
+            Ok(processes.into_iter().map(ProcessInfo::from).collect())
+        }
+    }
+
     /**
     Gets the number of processes with a compute context running on this `Device`.
 
@@ -6631,6 +6688,12 @@ mod test {
     fn running_compute_processes_v2() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.running_compute_processes_v2())
+    }
+
+    #[test]
+    fn mps_running_compute_processes() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.mps_running_compute_processes())
     }
 
     #[cfg(target_os = "linux")]
