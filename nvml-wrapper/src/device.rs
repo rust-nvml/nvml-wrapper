@@ -6403,7 +6403,7 @@ impl<'nvml> Device<'nvml> {
         }
     }
 
-    /// Obtain the n log entries (max 200) of the vGPU scheduler, to be called several time if need
+    /// Obtain the n log entries (max 200) of the vGPU scheduler, to be called several times if need
     /// be.
     pub fn vgpu_scheduler_log(&self) -> Result<VgpuSchedulerLog, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetVgpuSchedulerLog.as_ref())?;
@@ -6415,6 +6415,29 @@ impl<'nvml> Device<'nvml> {
 
             Ok(VgpuSchedulerLog::from(schedulerlog))
         }
+    }
+
+    /// Obtain the vGPU scheduler state of the device
+    pub fn vgpu_scheduler_state(&self) -> Result<VgpuSchedulerGetState, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetVgpuSchedulerState.as_ref())?;
+
+        unsafe {
+            let mut scheduler_state: nvmlVgpuSchedulerGetState_t = mem::zeroed();
+
+            nvml_try(sym(self.device, &mut scheduler_state))?;
+
+            Ok(VgpuSchedulerGetState::from(scheduler_state))
+        }
+    }
+
+    /// Set the vGPU scheduler state of the device
+    pub fn set_vgpu_scheduler_state(
+        &self,
+        scheduler_state: VgpuSchedulerSetState,
+    ) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetVgpuSchedulerState.as_ref())?;
+
+        unsafe { nvml_try(sym(self.device, &mut scheduler_state.as_c())) }
     }
 
     /// Check if the GPU is on vGPU host mode
