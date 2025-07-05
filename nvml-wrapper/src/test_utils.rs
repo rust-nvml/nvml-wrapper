@@ -113,6 +113,7 @@ impl ShouldPrint for MigMode {}
 impl ShouldPrint for Vec<GpuInstancePlacement> {}
 impl ShouldPrint for (VgpuVersion, VgpuVersion) {}
 impl ShouldPrint for ProfileInfo {}
+impl ShouldPrint for GspFirmwareMode {}
 
 #[cfg(target_os = "windows")]
 impl ShouldPrint for DriverModelState {}
