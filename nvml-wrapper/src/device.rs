@@ -6331,6 +6331,54 @@ impl<'nvml> Device<'nvml> {
         }
     }
 
+    /**
+     Get GSP firmware mode. Whether it is enabled and if it is in default mode.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    * `NotSupported`, if the platform does not support this feature
+    */
+    #[doc(alias = "nvmlDeviceGetGspFirmwareMode")]
+    pub fn gsp_firmware_mode(&self) -> Result<(bool, bool), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetGspFirmwareMode.as_ref())?;
+
+        unsafe {
+            let mut enabled: c_uint = 0;
+            let mut default: c_uint = 0;
+
+            nvml_try(sym(self.device, &mut enabled, &mut default))?;
+
+            Ok((enabled != 0, default != 0))
+        }
+    }
+
+    /**
+     Get GSP firmware version.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    * `NotSupported`, if the platform does not support this feature
+    */
+    #[doc(alias = "nvmlDeviceGetGspFirmwareVersion")]
+    pub fn gsp_firmware_version(&self) -> Result<String, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetGspFirmwareVersion.as_ref())?;
+
+        unsafe {
+            let mut version = vec![0; 80];
+
+            nvml_try(sym(self.device, version.as_mut_ptr()))?;
+            let raw = CStr::from_ptr(version.as_ptr());
+
+            Ok(raw.to_str()?.into())
+        }
+    }
+
     // NvLink
 
     /**
@@ -7068,6 +7116,18 @@ mod test {
             device.samples(Sampling::ProcessorClock, None)?;
             Ok(())
         })
+    }
+
+    #[test]
+    fn gsp_firmware_mode() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.gsp_firmware_mode())
+    }
+
+    #[test]
+    fn gsp_firmware_version() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.gsp_firmware_version())
     }
 
     #[test]
