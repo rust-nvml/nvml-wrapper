@@ -757,6 +757,41 @@ impl TryFrom<nvmlClockOffset_v1_t> for ClockOffset {
     }
 }
 
+/// Profile info.
+#[derive(Debug, Clone, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ProfileInfo {
+    pub copy_engine_count: u32,
+    pub decoder_count: u32,
+    pub encoder_count: u32,
+    pub id: u32,
+    pub instance_count: u32,
+    pub is_p2p_supported: bool,
+    pub jpeg_count: u32,
+    pub memory_size_mb: u64,
+    pub multiprocessor_count: u32,
+    pub ofa_count: u32,
+    pub slice_count: u32,
+}
+
+impl From<nvmlGpuInstanceProfileInfo_t> for ProfileInfo {
+    fn from(struct_: nvmlGpuInstanceProfileInfo_t) -> Self {
+        Self {
+            copy_engine_count: struct_.copyEngineCount,
+            decoder_count: struct_.decoderCount,
+            encoder_count: struct_.encoderCount,
+            id: struct_.id,
+            instance_count: struct_.instanceCount,
+            is_p2p_supported: struct_.isP2pSupported > 0,
+            jpeg_count: struct_.jpegCount,
+            memory_size_mb: struct_.memorySizeMB,
+            multiprocessor_count: struct_.multiprocessorCount,
+            ofa_count: struct_.ofaCount,
+            slice_count: struct_.sliceCount,
+        }
+    }
+}
+
 /// MIG profile placements
 #[derive(Debug, Clone, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
