@@ -1058,8 +1058,11 @@ impl<'nvml> Device<'nvml> {
             Ok(ConfidentialComputeGpuCertificate {
                 cert_chain_size: certificate_chain.certChainSize,
                 attestation_cert_chain_size: certificate_chain.attestationCertChainSize,
-                cert_chain: certificate_chain.certChain.to_vec(),
-                attestation_cert_chain: certificate_chain.attestationCertChain.to_vec(),
+                cert_chain: certificate_chain.certChain[..certificate_chain.certChainSize as usize]
+                    .to_vec(),
+                attestation_cert_chain: certificate_chain.attestationCertChain
+                    [..certificate_chain.attestationCertChainSize as usize]
+                    .to_vec(),
             })
         }
     }
