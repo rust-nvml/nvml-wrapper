@@ -1019,10 +1019,14 @@ impl<'nvml> Device<'nvml> {
             let is_cec_attestation_report_present = report.isCecAttestationReportPresent == 1;
             Ok(ConfidentialComputeGpuAttestationReport {
                 attestation_report_size: report.attestationReportSize,
-                attestation_report: report.attestationReport.to_vec(),
+                attestation_report: report.attestationReport
+                    [..report.attestationReportSize as usize]
+                    .to_vec(),
                 is_cec_attestation_report_present,
                 cec_attestation_report_size: report.cecAttestationReportSize,
-                cec_attestation_report: report.cecAttestationReport.to_vec(),
+                cec_attestation_report: report.cecAttestationReport
+                    [..report.cecAttestationReportSize as usize]
+                    .to_vec(),
             })
         }
     }
