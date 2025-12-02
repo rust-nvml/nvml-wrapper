@@ -374,6 +374,33 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the NUMA node ID for this `Device` (if within a NUMA node).
+
+    It is possible to identify the NUMA node id for a given Device
+    so ww can optimise a CPU thread to be pinned within the same node
+    for example
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetNumaNodeId")]
+    pub fn numa_node_id(&self) -> Result<u32, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetNumaNodeId.as_ref())?;
+
+        unsafe {
+            let mut id: c_uint = mem::zeroed();
+            nvml_try(sym(self.device, &mut id))?;
+
+            Ok(id)
+        }
+    }
+
+    /**
     Gets the brand of this `Device`.
 
     See the `Brand` enum for documentation of possible values.
@@ -6558,6 +6585,12 @@ mod test {
     fn board_id() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.board_id())
+    }
+
+    #[test]
+    fn numa_node_id() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.numa_node_id())
     }
 
     #[test]
