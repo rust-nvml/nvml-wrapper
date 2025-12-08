@@ -177,3 +177,11 @@ pub struct MigMode {
     /// Mode set after reboot.
     pub pending: u32,
 }
+
+/// Returned from `Device.gsp_firmware_mode()`
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct GspFirmwareMode {
+    pub enabled: bool,
+    pub default: bool,
+}
