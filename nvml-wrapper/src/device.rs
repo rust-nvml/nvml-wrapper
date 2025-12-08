@@ -6466,7 +6466,7 @@ impl<'nvml> Device<'nvml> {
     * `NotSupported`, if the platform does not support this feature
     */
     #[doc(alias = "nvmlDeviceGetGspFirmwareMode")]
-    pub fn gsp_firmware_mode(&self) -> Result<(bool, bool), NvmlError> {
+    pub fn gsp_firmware_mode(&self) -> Result<GspFirmwareMode, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetGspFirmwareMode.as_ref())?;
 
         unsafe {
@@ -6475,7 +6475,10 @@ impl<'nvml> Device<'nvml> {
 
             nvml_try(sym(self.device, &mut enabled, &mut default))?;
 
-            Ok((enabled != 0, default != 0))
+            Ok(GspFirmwareMode {
+                enabled: enabled != 0,
+                default: default != 0,
+            })
         }
     }
 
