@@ -103,7 +103,7 @@ impl<'nvml> Unit<'nvml> {
     // Checked against local
     // Tested
     #[doc(alias = "nvmlUnitGetDevices")]
-    pub fn devices(&self) -> Result<Vec<Device>, NvmlError> {
+    pub fn devices(&self) -> Result<Vec<Device<'_>>, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlUnitGetDevices.as_ref())?;
 
         unsafe {

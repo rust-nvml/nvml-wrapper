@@ -29,7 +29,7 @@ impl<'dev> VgpuType<'dev> {
 
     /// Access the `Device` this struct belongs to.
     ///
-    pub fn device(&self) -> &'dev Device {
+    pub fn device(&self) -> &'dev Device<'_> {
         self.device
     }
 

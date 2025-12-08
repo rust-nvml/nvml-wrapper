@@ -58,7 +58,7 @@ assert_impl_all!(NvLink: Send, Sync);
 
 impl<'device, 'nvml: 'device> NvLink<'device, 'nvml> {
     /// Obtain the `Device` reference stored within this struct.
-    pub fn device(&self) -> &Device {
+    pub fn device(&self) -> &Device<'_> {
         self.device
     }
 

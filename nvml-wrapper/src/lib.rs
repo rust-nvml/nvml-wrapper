@@ -500,7 +500,7 @@ impl Nvml {
     // Checked against local
     // Tested
     #[doc(alias = "nvmlDeviceGetHandleByIndex_v2")]
-    pub fn device_by_index(&self, index: u32) -> Result<Device, NvmlError> {
+    pub fn device_by_index(&self, index: u32) -> Result<Device<'_>, NvmlError> {
         let sym = nvml_sym(self.lib.nvmlDeviceGetHandleByIndex_v2.as_ref())?;
 
         unsafe {
@@ -534,7 +534,10 @@ impl Nvml {
     // Checked against local
     // Tested
     #[doc(alias = "nvmlDeviceGetHandleByPciBusId_v2")]
-    pub fn device_by_pci_bus_id<S: AsRef<str>>(&self, pci_bus_id: S) -> Result<Device, NvmlError>
+    pub fn device_by_pci_bus_id<S: AsRef<str>>(
+        &self,
+        pci_bus_id: S,
+    ) -> Result<Device<'_>, NvmlError>
     where
         Vec<u8>: From<S>,
     {
@@ -555,7 +558,7 @@ impl Nvml {
     // Tested (for an error)
     #[deprecated(note = "use `.device_by_uuid()`, this errors on dual GPU boards")]
     #[doc(alias = "nvmlDeviceGetHandleBySerial")]
-    pub fn device_by_serial<S: AsRef<str>>(&self, board_serial: S) -> Result<Device, NvmlError>
+    pub fn device_by_serial<S: AsRef<str>>(&self, board_serial: S) -> Result<Device<'_>, NvmlError>
     where
         Vec<u8>: From<S>,
     {
@@ -594,7 +597,7 @@ impl Nvml {
     // Checked against local
     // Tested
     #[doc(alias = "nvmlDeviceGetHandleByUUID")]
-    pub fn device_by_uuid<S: AsRef<str>>(&self, uuid: S) -> Result<Device, NvmlError>
+    pub fn device_by_uuid<S: AsRef<str>>(&self, uuid: S) -> Result<Device<'_>, NvmlError>
     where
         Vec<u8>: From<S>,
     {
@@ -669,7 +672,7 @@ impl Nvml {
     // Checked against local
     // Tested (for an error)
     #[doc(alias = "nvmlUnitGetHandleByIndex")]
-    pub fn unit_by_index(&self, index: u32) -> Result<Unit, NvmlError> {
+    pub fn unit_by_index(&self, index: u32) -> Result<Unit<'_>, NvmlError> {
         let sym = nvml_sym(self.lib.nvmlUnitGetHandleByIndex.as_ref())?;
 
         unsafe {
@@ -731,7 +734,7 @@ impl Nvml {
     // Tested
     #[cfg(target_os = "linux")]
     #[doc(alias = "nvmlSystemGetTopologyGpuSet")]
-    pub fn topology_gpu_set(&self, cpu_number: u32) -> Result<Vec<Device>, NvmlError> {
+    pub fn topology_gpu_set(&self, cpu_number: u32) -> Result<Vec<Device<'_>>, NvmlError> {
         let sym = nvml_sym(self.lib.nvmlSystemGetTopologyGpuSet.as_ref())?;
 
         unsafe {
@@ -877,7 +880,7 @@ impl Nvml {
     // Checked against local
     // Tested
     #[doc(alias = "nvmlEventSetCreate")]
-    pub fn create_event_set(&self) -> Result<EventSet, NvmlError> {
+    pub fn create_event_set(&self) -> Result<EventSet<'_>, NvmlError> {
         let sym = nvml_sym(self.lib.nvmlEventSetCreate.as_ref())?;
 
         unsafe {
