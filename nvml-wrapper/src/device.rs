@@ -6514,14 +6514,14 @@ impl<'nvml> Device<'nvml> {
     NVIDIA does not provide any information as to how to obtain a valid NvLink
     value, so you're on your own there.
     */
-    pub fn link_wrapper_for(&self, link: u32) -> NvLink {
+    pub fn link_wrapper_for(&self, link: u32) -> NvLink<'_, 'nvml> {
         NvLink { device: self, link }
     }
 
     // vGPU
 
     /// Obtain a list of vGPU type (profiles) supported by the device, if any.
-    pub fn vgpu_supported_types(&self) -> Result<Vec<VgpuType>, NvmlError> {
+    pub fn vgpu_supported_types(&self) -> Result<Vec<VgpuType<'_>>, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetSupportedVgpus.as_ref())?;
         let mut ids = vec![];
 
@@ -6541,7 +6541,7 @@ impl<'nvml> Device<'nvml> {
     }
 
     /// Obtain a list of vGPU type (profiles) creatable on the device, if any.
-    pub fn vgpu_creatable_types(&self) -> Result<Vec<VgpuType>, NvmlError> {
+    pub fn vgpu_creatable_types(&self) -> Result<Vec<VgpuType<'_>>, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetCreatableVgpus.as_ref())?;
         let mut ids = vec![];
 
