@@ -2709,6 +2709,37 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+     Get Gpu instance profile info for a give profile.
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this feature
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Platform Support
+
+    Only supports Linux.
+
+    # Device Support
+
+    Supports Ampere and newer fully supported devices.
+    */
+    #[cfg(target_os = "linux")]
+    #[doc(alias = "nvmlDeviceGetGpuInstanceProfileInfo")]
+    pub fn profile_info(&self, profile: u32) -> Result<ProfileInfo, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetGpuInstanceProfileInfo.as_ref())?;
+
+        unsafe {
+            let mut info: nvmlGpuInstanceProfileInfo_t = mem::zeroed();
+            nvml_try(sym(self.device, profile, &mut info))?;
+
+            Ok(info.into())
+        }
+    }
+
+    /**
      Get GPU instance placements. A placement is a given location of a GPU in a device.
 
     # Errors
@@ -6931,6 +6962,13 @@ mod test {
     fn possible_placements() {
         let nvml = nvml();
         test_with_device(3, &nvml, |device| device.possible_placements(0))
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn profile_info() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.profile_info(0))
     }
 
     #[test]
