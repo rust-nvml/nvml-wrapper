@@ -534,7 +534,10 @@ impl Nvml {
     // Checked against local
     // Tested
     #[doc(alias = "nvmlDeviceGetHandleByPciBusId_v2")]
-    pub fn device_by_pci_bus_id<S: AsRef<str>>(&self, pci_bus_id: S) -> Result<Device<'_>, NvmlError>
+    pub fn device_by_pci_bus_id<S: AsRef<str>>(
+        &self,
+        pci_bus_id: S,
+    ) -> Result<Device<'_>, NvmlError>
     where
         Vec<u8>: From<S>,
     {
