@@ -199,6 +199,50 @@ pub fn nvml_try(code: nvmlReturn_t) -> Result<(), NvmlError> {
     }
 }
 
+#[allow(deprecated)]
+impl From<NvmlError> for nvmlReturn_t {
+    fn from(error: NvmlError) -> Self {
+        use NvmlError::*;
+
+        match error {
+            Uninitialized => nvmlReturn_enum_NVML_ERROR_UNINITIALIZED,
+            InvalidArg => nvmlReturn_enum_NVML_ERROR_INVALID_ARGUMENT,
+            NotSupported => nvmlReturn_enum_NVML_ERROR_NOT_SUPPORTED,
+            NoPermission => nvmlReturn_enum_NVML_ERROR_NO_PERMISSION,
+            AlreadyInitialized => nvmlReturn_enum_NVML_ERROR_ALREADY_INITIALIZED,
+            NotFound => nvmlReturn_enum_NVML_ERROR_NOT_FOUND,
+            InsufficientSize(_) => nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE,
+            InsufficientPower => nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_POWER,
+            DriverNotLoaded => nvmlReturn_enum_NVML_ERROR_DRIVER_NOT_LOADED,
+            Timeout => nvmlReturn_enum_NVML_ERROR_TIMEOUT,
+            IrqIssue => nvmlReturn_enum_NVML_ERROR_IRQ_ISSUE,
+            LibraryNotFound => nvmlReturn_enum_NVML_ERROR_LIBRARY_NOT_FOUND,
+            FunctionNotFound => nvmlReturn_enum_NVML_ERROR_FUNCTION_NOT_FOUND,
+            CorruptedInfoROM => nvmlReturn_enum_NVML_ERROR_CORRUPTED_INFOROM,
+            GpuLost => nvmlReturn_enum_NVML_ERROR_GPU_IS_LOST,
+            ResetRequired => nvmlReturn_enum_NVML_ERROR_RESET_REQUIRED,
+            OperatingSystem => nvmlReturn_enum_NVML_ERROR_OPERATING_SYSTEM,
+            LibRmVersionMismatch => nvmlReturn_enum_NVML_ERROR_LIB_RM_VERSION_MISMATCH,
+            InUse => nvmlReturn_enum_NVML_ERROR_IN_USE,
+            InsufficientMemory => nvmlReturn_enum_NVML_ERROR_MEMORY,
+            NoData => nvmlReturn_enum_NVML_ERROR_NO_DATA,
+            VgpuEccNotSupported => nvmlReturn_enum_NVML_ERROR_VGPU_ECC_NOT_SUPPORTED,
+            Unknown => nvmlReturn_enum_NVML_ERROR_UNKNOWN,
+            UnexpectedVariant(code) => code,
+            // For non-NVML errors, return UNKNOWN
+            Utf8Error(_)
+            | NulError(_)
+            | LibloadingError(_)
+            | FailedToLoadSymbol(_)
+            | StringTooLong { .. }
+            | IncorrectBits(_)
+            | SetReleaseFailed
+            | GetPciInfoFailed
+            | PciInfoToCFailed => nvmlReturn_enum_NVML_ERROR_UNKNOWN,
+        }
+    }
+}
+
 /// Helper to map a `&libloading::Error` into an `NvmlError`
 pub fn nvml_sym<'a, T>(sym: Result<&'a T, &libloading::Error>) -> Result<&'a T, NvmlError> {
     sym.map_err(|e| NvmlError::FailedToLoadSymbol(e.to_string()))
