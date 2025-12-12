@@ -161,7 +161,7 @@ pub enum NvmlError {
     )]
     VgpuEccNotSupported,
 
-    #[error("an internal driver error occured")]
+    #[error("an internal driver error occurred")]
     Unknown,
 }
 

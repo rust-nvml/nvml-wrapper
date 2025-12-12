@@ -5786,7 +5786,7 @@ impl<'nvml> Device<'nvml> {
     this `Device`.
 
     **Unfortunately, due to the way `error-chain` works, there is no way to
-    return the set if it is still valid after an error has occured with the
+    return the set if it is still valid after an error has occurred with the
     register call.** The set that you passed in will be freed if any error
     occurs and will not be returned to you. This is not desired behavior
     and I will fix it as soon as it is possible to do so.
