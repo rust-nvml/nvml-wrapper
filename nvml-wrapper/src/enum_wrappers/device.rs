@@ -420,6 +420,18 @@ pub enum TemperatureThreshold {
     /// GPU temperature at which the GPU can be throttled below the base clock.
     #[wrap(c_variant = "NVML_TEMPERATURE_THRESHOLD_GPU_MAX")]
     GpuMax,
+    /// Minimum GPU Temperature that can be set as acoustic threshold.
+    #[wrap(c_variant = "NVML_TEMPERATURE_THRESHOLD_ACOUSTIC_MIN")]
+    AcousticMin,
+    /// Current temperature that is set as acoustic threshold.
+    #[wrap(c_variant = "NVML_TEMPERATURE_THRESHOLD_ACOUSTIC_CURR")]
+    AcousticCurr,
+    /// Maximum GPU Temperature that can be set as acoustic threshold.
+    #[wrap(c_variant = "NVML_TEMPERATURE_THRESHOLD_ACOUSTIC_MAX")]
+    AcousticMax,
+    /// Current temperature that is set as gps threshold.
+    #[wrap(c_variant = "NVML_TEMPERATURE_THRESHOLD_GPS_CURR")]
+    GpsCurr,
 }
 
 /// Level relationships within a system between two GPUs.
