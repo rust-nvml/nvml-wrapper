@@ -1,5 +1,6 @@
 #[cfg(target_os = "linux")]
 use crate::EventSet;
+use crate::GpmSample;
 use crate::NvLink;
 use crate::Nvml;
 
@@ -6655,6 +6656,147 @@ impl<'nvml> Device<'nvml> {
 
             nvml_try(sym(self.device, cap.as_c(), state))
         }
+    }
+
+    // GPM (GPU Performance Monitoring) methods
+
+    /**
+    Queries whether GPM (GPU Performance Monitoring) is supported on this device.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if the device is invalid
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Hopper and newer architectures.
+    */
+    #[doc(alias = "nvmlGpmQueryDeviceSupport")]
+    pub fn gpm_support(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlGpmQueryDeviceSupport.as_ref())?;
+
+        unsafe {
+            let mut support: nvmlGpmSupport_t = mem::zeroed();
+            support.version = NVML_GPM_SUPPORT_VERSION;
+
+            nvml_try(sym(self.device, &mut support))?;
+
+            Ok(support.isSupportedDevice != 0)
+        }
+    }
+
+    /**
+    Queries whether GPM streaming is currently enabled on this device.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if the device is invalid
+    * `NotSupported`, if GPM is not supported on this device
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Hopper and newer architectures.
+    */
+    #[doc(alias = "nvmlGpmQueryIfStreamingEnabled")]
+    pub fn gpm_streaming_enabled(&self) -> Result<bool, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlGpmQueryIfStreamingEnabled.as_ref())?;
+
+        unsafe {
+            let mut state: c_uint = 0;
+            nvml_try(sym(self.device, &mut state))?;
+
+            Ok(state != 0)
+        }
+    }
+
+    /**
+    Enables or disables GPM streaming on this device.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if the device is invalid
+    * `NotSupported`, if GPM is not supported on this device
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Hopper and newer architectures.
+    */
+    #[doc(alias = "nvmlGpmSetStreamingEnabled")]
+    pub fn set_gpm_streaming_enabled(&self, enabled: bool) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlGpmSetStreamingEnabled.as_ref())?;
+
+        let state: c_uint = if enabled { 1 } else { 0 };
+
+        unsafe { nvml_try(sym(self.device, state)) }
+    }
+
+    /**
+    Allocates a GPM sample and populates it with current GPU performance data.
+
+    Take two samples separated by a time interval and pass them to
+    [`crate::gpm::gpm_metrics_get`] to compute performance metrics for that
+    interval.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if the device is invalid
+    * `NotSupported`, if GPM is not supported on this device
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Hopper and newer architectures.
+    */
+    #[doc(alias = "nvmlGpmSampleGet")]
+    pub fn gpm_sample(&self) -> Result<GpmSample<'nvml>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlGpmSampleGet.as_ref())?;
+
+        let sample = GpmSample::alloc(self.nvml)?;
+
+        unsafe {
+            nvml_try(sym(self.device, sample.handle()))?;
+        }
+
+        Ok(sample)
+    }
+
+    /**
+    Allocates a GPM sample and populates it with current performance data
+    for a specific MIG (Multi-Instance GPU) GPU instance.
+
+    Take two samples separated by a time interval and pass them to
+    [`crate::gpm::gpm_metrics_get`] to compute performance metrics for that
+    interval.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if the device or GPU instance ID is invalid
+    * `NotSupported`, if GPM is not supported on this device
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Hopper and newer architectures with MIG enabled.
+    */
+    #[doc(alias = "nvmlGpmMigSampleGet")]
+    pub fn gpm_mig_sample(&self, gpu_instance_id: u32) -> Result<GpmSample<'nvml>, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlGpmMigSampleGet.as_ref())?;
+
+        let sample = GpmSample::alloc(self.nvml)?;
+
+        unsafe {
+            nvml_try(sym(self.device, gpu_instance_id, sample.handle()))?;
+        }
+
+        Ok(sample)
     }
 }
 

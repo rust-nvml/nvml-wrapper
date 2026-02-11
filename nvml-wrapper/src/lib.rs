@@ -102,6 +102,7 @@ pub mod enum_wrappers;
 pub mod enums;
 pub mod error;
 pub mod event;
+pub mod gpm;
 pub mod high_level;
 pub mod nv_link;
 pub mod struct_wrappers;
@@ -114,6 +115,7 @@ pub mod vgpu;
 // Re-exports for convenience
 pub use crate::device::Device;
 pub use crate::event::EventSet;
+pub use crate::gpm::GpmSample;
 pub use crate::nv_link::NvLink;
 pub use crate::unit::Unit;
 
