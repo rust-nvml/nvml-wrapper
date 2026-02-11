@@ -1,4 +1,5 @@
 use crate::Device;
+use crate::GpmSample;
 use crate::NvLink;
 use crate::Nvml;
 use crate::Unit;
@@ -13,6 +14,7 @@ use crate::enums::device::PowerSource;
 use crate::enums::unit::*;
 use crate::error::NvmlError;
 use crate::event::EventSet;
+use crate::struct_wrappers::gpm::GpmMetricResult;
 use std::fmt::Debug;
 
 use crate::struct_wrappers::nv_link::*;
@@ -53,6 +55,14 @@ impl<'nvml> ShouldPrint for EventSet<'nvml> {
         false
     }
 }
+
+impl<'nvml> ShouldPrint for GpmSample<'nvml> {
+    fn should_print(&self) -> bool {
+        false
+    }
+}
+
+impl ShouldPrint for Vec<Result<GpmMetricResult, NvmlError>> {}
 
 impl ShouldPrint for bool {}
 impl ShouldPrint for u32 {}
