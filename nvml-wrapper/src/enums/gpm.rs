@@ -270,8 +270,12 @@ impl TryFrom<c_uint> for GpmMetricId {
             nvmlGpmMetricId_t_NVML_GPM_METRIC_NVJPG_7_UTIL => Ok(Self::Nvjpg7Util),
             nvmlGpmMetricId_t_NVML_GPM_METRIC_NVOFA_0_UTIL => Ok(Self::Nvofa0Util),
             nvmlGpmMetricId_t_NVML_GPM_METRIC_NVOFA_1_UTIL => Ok(Self::Nvofa1Util),
-            nvmlGpmMetricId_t_NVML_GPM_METRIC_NVLINK_TOTAL_RX_PER_SEC => Ok(Self::NvlinkTotalRxPerSec),
-            nvmlGpmMetricId_t_NVML_GPM_METRIC_NVLINK_TOTAL_TX_PER_SEC => Ok(Self::NvlinkTotalTxPerSec),
+            nvmlGpmMetricId_t_NVML_GPM_METRIC_NVLINK_TOTAL_RX_PER_SEC => {
+                Ok(Self::NvlinkTotalRxPerSec)
+            }
+            nvmlGpmMetricId_t_NVML_GPM_METRIC_NVLINK_TOTAL_TX_PER_SEC => {
+                Ok(Self::NvlinkTotalTxPerSec)
+            }
             nvmlGpmMetricId_t_NVML_GPM_METRIC_NVLINK_L0_RX_PER_SEC => Ok(Self::NvlinkL0RxPerSec),
             nvmlGpmMetricId_t_NVML_GPM_METRIC_NVLINK_L0_TX_PER_SEC => Ok(Self::NvlinkL0TxPerSec),
             nvmlGpmMetricId_t_NVML_GPM_METRIC_NVLINK_L1_RX_PER_SEC => Ok(Self::NvlinkL1RxPerSec),
