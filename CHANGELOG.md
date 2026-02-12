@@ -4,6 +4,45 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 ## [Unreleased]
 
+### Added
+
+* Add idiomatic abstraction for vGPU type information (#68)
+* Add device::mig_device_by_index() (#93)
+* Add device::mig_device_count() (#94)
+* Add device::vgpu_scheduler_capabilities() (#95)
+* Add device::mig_parent_device() (#96)
+* Add device::vgpu_host_mode() (#98)
+* Add device::mig_is_mig_device_handle() (#99)
+* Add device::set_mig_mode() (#100)
+* Add vGPU capabilities support (#101)
+* Add device::possible_placements() (#102)
+* Add NvLink bandwidth mode API (#103)
+* Add NvLink::remote_device_type() (#106)
+* Add device::set_temperature_threshold() (#107)
+* Add Nvml::vgpu_version() and Nvml::set_vgpu_version() (#108)
+* Add device::vgpu_accounting_pids() and device::vgpu_accounting_stats() (#109)
+* Add device::vgpu_scheduler_log() (#110)
+* Add device::vgpu_scheduler_state() and device::set_vgpu_scheduler_state() (#111)
+* Add MPS version of running_compute_processes for >= Volta (#112)
+* Add device::gsp_firmware_mode() and device::gsp_firmware_version() (#113)
+* Add device::profile_info() (#115)
+* Implement `From<NvmlError>` for `nvmlReturn_t` conversion (#117)
+* Add device::numa_node_id() for NUMA-node-friendly GPUs (#118)
+* Add missing AcousticThreshold enum variants (#121)
+* Add GPU Performance Monitoring (GPM) support (#122)
+
+### Fixed
+
+* Only return samples that are actually valid (#67)
+* Fix get cc macros (#104)
+* Fix attestation report size (#116)
+* Fix spelling mistake of "occurred" (#120)
+
+### Internal
+
+* Address cargo clippy warnings (#105)
+* Fix lifetime warnings (#119)
+
 ## [0.11.0] (released 2025-03-28)
 
 Fixes, improvements, and updates for NVML 12.8.90.
@@ -546,7 +585,8 @@ Initial release wrapping the majority of the NVML API surface.
 
 This release **requires** and supports **Rust 1.17.0** or higher.
 
-[Unreleased]: https://github.com/Cldfire/nvml-wrapper/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/Cldfire/nvml-wrapper/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/Cldfire/nvml-wrapper/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/Cldfire/nvml-wrapper/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/Cldfire/nvml-wrapper/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/Cldfire/nvml-wrapper/compare/v0.7.0...v0.8.0
