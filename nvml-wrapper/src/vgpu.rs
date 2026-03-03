@@ -33,6 +33,11 @@ impl<'dev> VgpuType<'dev> {
         self.device
     }
 
+    /// Get the underlying vGPU type id.
+    pub fn id(&self) -> nvmlVgpuTypeId_t {
+        self.id
+    }
+
     /// Retrieve the class of the vGPU type.
     ///
     /// # Errors
