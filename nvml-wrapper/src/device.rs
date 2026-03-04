@@ -6196,9 +6196,9 @@ impl<'nvml> Device<'nvml> {
         unsafe {
             let mut count: u32 = 0;
 
-            nvml_try(sym(self.device, std::ptr::null_mut(), &mut count))?;
+            nvml_try(sym(self.device, &mut count, std::ptr::null_mut()))?;
             let mut arr: Vec<nvmlVgpuInstance_t> = vec![0; count as usize];
-            nvml_try(sym(self.device, arr.as_mut_ptr(), &mut count))?;
+            nvml_try(sym(self.device, &mut count, arr.as_mut_ptr()))?;
 
             Ok(arr)
         }
