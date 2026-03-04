@@ -4,6 +4,7 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 ## [Unreleased]
 
+## [0.12.0] (released 2026-02-11)
 ### Added
 
 * Add idiomatic abstraction for vGPU type information (#68)
