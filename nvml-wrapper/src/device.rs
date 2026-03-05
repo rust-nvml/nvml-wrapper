@@ -9,6 +9,8 @@ use crate::bitmasks::device::ThrottleReasons;
 use crate::bitmasks::event::EventTypes;
 #[cfg(target_os = "windows")]
 use crate::bitmasks::Behavior;
+#[cfg(target_os = "linux")]
+use crate::vgpu::VgpuInstance;
 
 use crate::enum_wrappers::{bool_from_state, device::*, state_from_bool};
 
@@ -6174,18 +6176,25 @@ impl<'nvml> Device<'nvml> {
     // Tested
     #[cfg(target_os = "linux")]
     #[doc(alias = "nvmlDeviceGetActiveVgpus")]
-    pub fn active_vgpus(&self) -> Result<Vec<nvmlVgpuInstance_t>, NvmlError> {
+    pub fn active_vgpus<'a>(&'a self) -> Result<Vec<VgpuInstance<'nvml>>, NvmlError>
+    where
+        'a: 'nvml,
+    {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetActiveVgpus.as_ref())?;
 
-        unsafe {
+        let raw_vgpus = unsafe {
             let mut count: u32 = 0;
 
             nvml_try_count(sym(self.device, &mut count, std::ptr::null_mut()))?;
             let mut arr: Vec<nvmlVgpuInstance_t> = vec![0; count as usize];
             nvml_try(sym(self.device, &mut count, arr.as_mut_ptr()))?;
 
-            Ok(arr)
-        }
+            arr
+        };
+        Ok(raw_vgpus
+            .into_iter()
+            .map(|raw| VgpuInstance::new(raw, self))
+            .collect())
     }
 
     /**
@@ -7950,7 +7959,13 @@ mod test {
     #[test]
     fn active_vgpus() {
         let nvml = nvml();
-        test_with_device(3, &nvml, |device| device.active_vgpus())
+        test_with_device(3, &nvml, |device| {
+            Ok(device
+                .active_vgpus()?
+                .into_iter()
+                .map(|v| v.instance)
+                .collect::<Vec<_>>())
+        })
     }
 
     #[test]

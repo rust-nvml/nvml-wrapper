@@ -15,6 +15,7 @@ use crate::enums::unit::*;
 use crate::error::NvmlError;
 use crate::event::EventSet;
 use crate::struct_wrappers::gpm::GpmMetricResult;
+use crate::vgpu::VgpuInstance;
 use std::fmt::Debug;
 
 use crate::struct_wrappers::nv_link::*;
@@ -124,6 +125,8 @@ impl ShouldPrint for Vec<GpuInstancePlacement> {}
 impl ShouldPrint for (VgpuVersion, VgpuVersion) {}
 impl ShouldPrint for ProfileInfo {}
 impl ShouldPrint for GspFirmwareMode {}
+impl<'dev> ShouldPrint for VgpuInstance<'dev> {}
+impl<'dev> ShouldPrint for Vec<VgpuInstance<'dev>> {}
 
 #[cfg(target_os = "windows")]
 impl ShouldPrint for DriverModelState {}
@@ -151,9 +154,9 @@ where
     multi(reps, test);
 }
 
-pub fn test_with_device<T, R>(reps: usize, nvml: &Nvml, test: T)
+pub fn test_with_device<'a, T, R>(reps: usize, nvml: &'a Nvml, test: T)
 where
-    T: Fn(&Device) -> Result<R, NvmlError>,
+    T: Fn(&Device<'a>) -> Result<R, NvmlError>,
     R: ShouldPrint,
 {
     let device = device(nvml);
