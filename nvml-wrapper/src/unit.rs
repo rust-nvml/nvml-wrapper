@@ -1,7 +1,7 @@
 use crate::device::Device;
 use crate::enum_wrappers::unit::LedColor;
 use crate::enums::unit::{LedState, TemperatureReading};
-use crate::error::{nvml_sym, nvml_try, NvmlError};
+use crate::error::{nvml_sym, nvml_try, nvml_try_count, NvmlError};
 use crate::ffi::bindings::*;
 use crate::struct_wrappers::unit::{FansInfo, PsuInfo, UnitInfo};
 use crate::Nvml;
@@ -145,31 +145,17 @@ impl<'nvml> Unit<'nvml> {
     pub fn device_count(&self) -> Result<u32, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlUnitGetDevices.as_ref())?;
 
+        /*
+        From the docs:
+        deviceCount
+          Reference in which to provide the devices array size,
+          and to return the number of attached GPU devices
+        */
+        let mut count: c_uint = 0;
         unsafe {
-            /*
-            NVIDIA doesn't even say that `count` will be set to the count if
-            `InsufficientSize` is returned. But we can assume sanity, right?
-
-            The idea here is:
-            If there are 0 devices, NVML_SUCCESS is returned, `count` is set
-              to 0. We return count, all good.
-            If there is 1 device, NVML_SUCCESS is returned, `count` is set to
-              1. We return count, all good.
-            If there are >= 2 devices, NVML_INSUFFICIENT_SIZE is returned.
-             `count` is theoretically set to the actual count, and we
-              return it.
-            */
-            let mut count: c_uint = 1;
-            let mut devices: [nvmlDevice_t; 1] = [mem::zeroed()];
-
-            match sym(self.unit, &mut count, devices.as_mut_ptr()) {
-                nvmlReturn_enum_NVML_SUCCESS | nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => {
-                    Ok(count)
-                }
-                // We know that this will be an error
-                other => nvml_try(other).map(|_| 0),
-            }
+            nvml_try_count(sym(self.unit, &mut count, std::ptr::null_mut()))?;
         }
+        Ok(count)
     }
 
     /**

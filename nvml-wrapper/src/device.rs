@@ -16,6 +16,7 @@ use crate::enums::device::{
     BusType, DeviceArchitecture, FanControlPolicy, GpuLockedClocksSetting, PcieLinkMaxSpeed,
     PowerSource,
 };
+use crate::error::nvml_try_count;
 #[cfg(target_os = "linux")]
 use crate::error::NvmlErrorWithSource;
 use crate::error::{nvml_sym, nvml_try, Bits, NvmlError};
@@ -2217,11 +2218,8 @@ impl<'nvml> Device<'nvml> {
             let mut count: c_uint = 0;
 
             // Passing null doesn't indicate that we want the count. It's just allowed.
-            match sym(self.device, &mut count, ptr::null_mut()) {
-                nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => Ok(count),
-                // If success, return 0; otherwise, return error
-                other => nvml_try(other).map(|_| 0),
-            }
+            nvml_try_count(sym(self.device, &mut count, ptr::null_mut()))?;
+            Ok(count)
         }
     }
 
@@ -2293,11 +2291,8 @@ impl<'nvml> Device<'nvml> {
             let mut count: c_uint = 0;
 
             // Passing null doesn't indicate that we want the count. It's just allowed.
-            match sym(self.device, &mut count, ptr::null_mut()) {
-                nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => Ok(count),
-                // If success, return 0; otherwise, return error
-                other => nvml_try(other).map(|_| 0),
-            }
+            nvml_try_count(sym(self.device, &mut count, ptr::null_mut()))?;
+            Ok(count)
         }
     }
 
@@ -2365,16 +2360,13 @@ impl<'nvml> Device<'nvml> {
         unsafe {
             let mut count: c_uint = 0;
 
-            match sym(
+            nvml_try_count(sym(
                 self.device,
                 ptr::null_mut(),
                 &mut count,
                 last_seen_timestamp,
-            ) {
-                // Despite being undocumented, this appears to be the correct behavior
-                nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => Ok(count),
-                other => nvml_try(other).map(|_| 0),
-            }
+            ))?;
+            Ok(count)
         }
     }
 
@@ -3454,7 +3446,7 @@ impl<'nvml> Device<'nvml> {
         unsafe {
             let mut count: c_uint = 0;
 
-            nvml_try(sym(
+            nvml_try_count(sym(
                 self.device,
                 cause.as_c(),
                 &mut count,
@@ -3606,7 +3598,7 @@ impl<'nvml> Device<'nvml> {
             let mut val_type: nvmlValueType_t = mem::zeroed();
             let mut count: c_uint = mem::zeroed();
 
-            nvml_try(sym(
+            nvml_try_count(sym(
                 self.device,
                 sample_type.as_c(),
                 timestamp,
@@ -3947,13 +3939,12 @@ impl<'nvml> Device<'nvml> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetSupportedGraphicsClocks.as_ref())?;
 
         unsafe {
-            match sym(self.device, for_mem_clock, &mut count, items.as_mut_ptr()) {
-                // `count` is now the size that is required. Return it in the error.
-                nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => {
-                    return Err(NvmlError::InsufficientSize(Some(count as usize)))
-                }
-                value => nvml_try(value)?,
-            }
+            nvml_try_count(sym(
+                self.device,
+                for_mem_clock,
+                &mut count,
+                items.as_mut_ptr(),
+            ))?;
         }
 
         items.truncate(count as usize);
@@ -3995,7 +3986,7 @@ impl<'nvml> Device<'nvml> {
         let mut count = size as c_uint;
 
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetSupportedMemoryClocks.as_ref())?;
-
+        // TODO: should this fn call `sym` twice, first to populate `count` and second to fill the vec?
         unsafe {
             match sym(self.device, &mut count, items.as_mut_ptr()) {
                 // `count` is now the size that is required. Return it in the error.
@@ -4186,7 +4177,7 @@ impl<'nvml> Device<'nvml> {
         unsafe {
             let mut count: c_uint = 0;
 
-            nvml_try(sym(
+            nvml_try_count(sym(
                 self.device,
                 level.as_c(),
                 &mut count,
@@ -5034,20 +5025,13 @@ impl<'nvml> Device<'nvml> {
     fn accounting_pids_count(&self) -> Result<c_uint, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetAccountingPids.as_ref())?;
 
+        // Indicates that we want the count
+        let mut count: c_uint = 0;
         unsafe {
-            // Indicates that we want the count
-            let mut count: c_uint = 0;
-
             // Null also indicates that we want the count
-            match sym(self.device, &mut count, ptr::null_mut()) {
-                // List is empty
-                nvmlReturn_enum_NVML_SUCCESS => Ok(0),
-                // Count is set to pids count
-                nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => Ok(count),
-                // We know this is an error
-                other => nvml_try(other).map(|_| 0),
-            }
+            nvml_try_count(sym(self.device, &mut count, ptr::null_mut()))?;
         }
+        Ok(count)
     }
 
     /**
@@ -6196,7 +6180,7 @@ impl<'nvml> Device<'nvml> {
         unsafe {
             let mut count: u32 = 0;
 
-            nvml_try(sym(self.device, &mut count, std::ptr::null_mut()))?;
+            nvml_try_count(sym(self.device, &mut count, std::ptr::null_mut()))?;
             let mut arr: Vec<nvmlVgpuInstance_t> = vec![0; count as usize];
             nvml_try(sym(self.device, &mut count, arr.as_mut_ptr()))?;
 
@@ -6228,7 +6212,7 @@ impl<'nvml> Device<'nvml> {
         unsafe {
             let mut count: u32 = 0;
 
-            nvml_try(sym(instance, &mut count, std::ptr::null_mut()))?;
+            nvml_try_count(sym(instance, &mut count, std::ptr::null_mut()))?;
             let mut pids: Vec<u32> = vec![0; count as usize];
             nvml_try(sym(instance, &mut count, pids.as_mut_ptr()))?;
 
@@ -6529,10 +6513,7 @@ impl<'nvml> Device<'nvml> {
         unsafe {
             let mut count: c_uint = 0;
 
-            match nvml_try(sym(self.device, &mut count, ids.as_mut_ptr())) {
-                Ok(()) | Err(NvmlError::InsufficientSize(_)) => {}
-                Err(err) => return Err(err),
-            }
+            nvml_try_count(sym(self.device, &mut count, ids.as_mut_ptr()))?;
 
             ids.resize(count as usize, 0);
             nvml_try(sym(self.device, &mut count, ids.as_mut_ptr()))?;
@@ -6549,10 +6530,7 @@ impl<'nvml> Device<'nvml> {
         unsafe {
             let mut count: c_uint = 0;
 
-            match nvml_try(sym(self.device, &mut count, ids.as_mut_ptr())) {
-                Ok(()) | Err(NvmlError::InsufficientSize(_)) => {}
-                Err(err) => return Err(err),
-            }
+            nvml_try_count(sym(self.device, &mut count, ids.as_mut_ptr()))?;
 
             ids.resize(count as usize, 0);
             nvml_try(sym(self.device, &mut count, ids.as_mut_ptr()))?;
