@@ -166,36 +166,54 @@ pub enum NvmlError {
 }
 
 /// Converts an `nvmlReturn_t` type into a `Result<(), NvmlError>`.
-#[allow(deprecated)]
 pub fn nvml_try(code: nvmlReturn_t) -> Result<(), NvmlError> {
-    use NvmlError::*;
+    if code == nvmlReturn_enum_NVML_SUCCESS {
+        return Ok(());
+    }
+    Err(code.into())
+}
 
-    match code {
-        nvmlReturn_enum_NVML_SUCCESS => Ok(()),
-        nvmlReturn_enum_NVML_ERROR_UNINITIALIZED => Err(Uninitialized),
-        nvmlReturn_enum_NVML_ERROR_INVALID_ARGUMENT => Err(InvalidArg),
-        nvmlReturn_enum_NVML_ERROR_NOT_SUPPORTED => Err(NotSupported),
-        nvmlReturn_enum_NVML_ERROR_NO_PERMISSION => Err(NoPermission),
-        nvmlReturn_enum_NVML_ERROR_ALREADY_INITIALIZED => Err(AlreadyInitialized),
-        nvmlReturn_enum_NVML_ERROR_NOT_FOUND => Err(NotFound),
-        nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => Err(InsufficientSize(None)),
-        nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_POWER => Err(InsufficientPower),
-        nvmlReturn_enum_NVML_ERROR_DRIVER_NOT_LOADED => Err(DriverNotLoaded),
-        nvmlReturn_enum_NVML_ERROR_TIMEOUT => Err(Timeout),
-        nvmlReturn_enum_NVML_ERROR_IRQ_ISSUE => Err(IrqIssue),
-        nvmlReturn_enum_NVML_ERROR_LIBRARY_NOT_FOUND => Err(LibraryNotFound),
-        nvmlReturn_enum_NVML_ERROR_FUNCTION_NOT_FOUND => Err(FunctionNotFound),
-        nvmlReturn_enum_NVML_ERROR_CORRUPTED_INFOROM => Err(CorruptedInfoROM),
-        nvmlReturn_enum_NVML_ERROR_GPU_IS_LOST => Err(GpuLost),
-        nvmlReturn_enum_NVML_ERROR_RESET_REQUIRED => Err(ResetRequired),
-        nvmlReturn_enum_NVML_ERROR_OPERATING_SYSTEM => Err(OperatingSystem),
-        nvmlReturn_enum_NVML_ERROR_LIB_RM_VERSION_MISMATCH => Err(LibRmVersionMismatch),
-        nvmlReturn_enum_NVML_ERROR_IN_USE => Err(InUse),
-        nvmlReturn_enum_NVML_ERROR_MEMORY => Err(InsufficientMemory),
-        nvmlReturn_enum_NVML_ERROR_NO_DATA => Err(NoData),
-        nvmlReturn_enum_NVML_ERROR_VGPU_ECC_NOT_SUPPORTED => Err(VgpuEccNotSupported),
-        nvmlReturn_enum_NVML_ERROR_UNKNOWN => Err(Unknown),
-        _ => Err(UnexpectedVariant(code)),
+/// Converts an `nvmlReturn_t` type into a `Result<(), NvmlError>`, allowing for the call to return the
+/// value `nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE` which is a common return value when using an
+/// in/out parameter that provides the size of a buffer needed to complete that call
+pub fn nvml_try_count(code: nvmlReturn_t) -> Result<(), NvmlError> {
+    if code == nvmlReturn_enum_NVML_SUCCESS || code == nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE
+    {
+        return Ok(());
+    }
+    Err(code.into())
+}
+
+#[allow(deprecated)]
+impl From<nvmlReturn_t> for NvmlError {
+    fn from(value: nvmlReturn_t) -> Self {
+        use NvmlError::*;
+        match value {
+            nvmlReturn_enum_NVML_ERROR_UNINITIALIZED => Uninitialized,
+            nvmlReturn_enum_NVML_ERROR_INVALID_ARGUMENT => InvalidArg,
+            nvmlReturn_enum_NVML_ERROR_NOT_SUPPORTED => NotSupported,
+            nvmlReturn_enum_NVML_ERROR_NO_PERMISSION => NoPermission,
+            nvmlReturn_enum_NVML_ERROR_ALREADY_INITIALIZED => AlreadyInitialized,
+            nvmlReturn_enum_NVML_ERROR_NOT_FOUND => NotFound,
+            nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_SIZE => InsufficientSize(None),
+            nvmlReturn_enum_NVML_ERROR_INSUFFICIENT_POWER => InsufficientPower,
+            nvmlReturn_enum_NVML_ERROR_DRIVER_NOT_LOADED => DriverNotLoaded,
+            nvmlReturn_enum_NVML_ERROR_TIMEOUT => Timeout,
+            nvmlReturn_enum_NVML_ERROR_IRQ_ISSUE => IrqIssue,
+            nvmlReturn_enum_NVML_ERROR_LIBRARY_NOT_FOUND => LibraryNotFound,
+            nvmlReturn_enum_NVML_ERROR_FUNCTION_NOT_FOUND => FunctionNotFound,
+            nvmlReturn_enum_NVML_ERROR_CORRUPTED_INFOROM => CorruptedInfoROM,
+            nvmlReturn_enum_NVML_ERROR_GPU_IS_LOST => GpuLost,
+            nvmlReturn_enum_NVML_ERROR_RESET_REQUIRED => ResetRequired,
+            nvmlReturn_enum_NVML_ERROR_OPERATING_SYSTEM => OperatingSystem,
+            nvmlReturn_enum_NVML_ERROR_LIB_RM_VERSION_MISMATCH => LibRmVersionMismatch,
+            nvmlReturn_enum_NVML_ERROR_IN_USE => InUse,
+            nvmlReturn_enum_NVML_ERROR_MEMORY => InsufficientMemory,
+            nvmlReturn_enum_NVML_ERROR_NO_DATA => NoData,
+            nvmlReturn_enum_NVML_ERROR_VGPU_ECC_NOT_SUPPORTED => VgpuEccNotSupported,
+            nvmlReturn_enum_NVML_ERROR_UNKNOWN => Unknown,
+            _ => UnexpectedVariant(value),
+        }
     }
 }
 
