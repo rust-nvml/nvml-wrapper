@@ -25,6 +25,7 @@ use crate::{
     Device,
 };
 
+#[derive(Debug)]
 pub struct VgpuType<'dev> {
     id: nvmlVgpuTypeId_t,
     device: &'dev Device<'dev>,
@@ -1126,5 +1127,267 @@ impl<'dev> std::fmt::Debug for VgpuInstance<'dev> {
         f.debug_struct("VgpuInstance")
             .field("instance", &self.instance)
             .finish_non_exhaustive()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    use crate::test_utils::*;
+
+    #[test]
+    fn vgpu_type_class_name() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).class_name());
+    }
+
+    #[test]
+    fn vgpu_type_license() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).license());
+    }
+
+    #[test]
+    fn vgpu_type_name() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).name());
+    }
+
+    #[test]
+    fn vgpu_type_device_id() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).device_id());
+    }
+
+    #[test]
+    fn vgpu_type_frame_rate_limit() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).frame_rate_limit());
+    }
+
+    #[test]
+    fn vgpu_type_framebuffer_size() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).framebuffer_size());
+    }
+
+    #[test]
+    fn vgpu_type_instance_profile_id() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).instance_profile_id());
+    }
+
+    #[test]
+    fn vgpu_type_max_instances() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).max_instances());
+    }
+
+    #[test]
+    fn vgpu_type_max_instances_per_vm() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).max_instances_per_vm());
+    }
+
+    #[test]
+    fn vgpu_type_num_display_heads() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).num_display_heads());
+    }
+
+    #[test]
+    fn vgpu_type_resolution() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).resolution(1));
+    }
+
+    #[test]
+    fn vgpu_type_get_bar1_info() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).get_bar1_info());
+    }
+
+    #[test]
+    fn vgpu_type_get_fb_reservation() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).get_fb_reservation());
+    }
+
+    #[test]
+    fn vgpu_type_get_gsp_heap_size() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuType::new(dev, 1).get_gsp_heap_size());
+    }
+
+    #[test]
+    fn vgpu_instance_get_vm_id() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).get_vm_id());
+    }
+
+    #[test]
+    fn vgpu_instance_get_fb_usage() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).get_fb_usage());
+    }
+
+    #[test]
+    fn vgpu_instance_get_instance_type() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            Ok(VgpuInstance::new(1, dev).get_instance_type()?.id)
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_accounting_pids() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).accounting_pids());
+    }
+
+    #[test]
+    fn vgpu_instance_clear_accounting_pids() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).clear_accounting_pids()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_get_accounting_mode() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).get_accounting_mode()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_get_ecc_mode() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).get_ecc_mode());
+    }
+
+    #[test]
+    fn vgpu_instance_get_encoder_capacity() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).get_encoder_capacity()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_get_encoder_sessions() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).get_encoder_sessions()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_get_encoder_stats() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).get_encoder_stats()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_get_fbc_sessions() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).get_fbc_sessions());
+    }
+
+    #[test]
+    fn vgpu_instance_get_fbc_stats() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).get_fbc_stats());
+    }
+
+    #[test]
+    fn vgpu_instance_get_frame_rate_limit() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).get_frame_rate_limit()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_get_gpu_instance_id() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).get_gpu_instance_id()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_get_gpu_pci_id() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).get_gpu_pci_id());
+    }
+
+    #[test]
+    #[cfg(feature = "legacy-functions")]
+    fn vgpu_instance_get_license_info() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).get_license_info());
+    }
+
+    #[test]
+    fn vgpu_instance_get_license_info_v2() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).get_license_info_v2()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_get_mdev_uuid() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).get_mdev_uuid());
+    }
+
+    #[test]
+    fn vgpu_instance_get_metadata() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).get_metadata());
+    }
+
+    #[test]
+    fn vgpu_instance_get_get_placement_id() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).get_get_placement_id()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_get_get_runtime_state_size() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).get_get_runtime_state_size()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_get_uuid() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| VgpuInstance::new(1, dev).get_uuid());
+    }
+
+    #[test]
+    fn vgpu_instance_get_driver_version() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).get_driver_version()
+        });
+    }
+
+    #[test]
+    fn vgpu_instance_set_encoder_capacity() {
+        let nvml = nvml();
+        test_with_device(1, &nvml, |dev| {
+            VgpuInstance::new(1, dev).set_encoder_capacity(50)
+        });
     }
 }
