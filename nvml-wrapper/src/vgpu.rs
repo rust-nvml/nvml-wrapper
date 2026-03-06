@@ -25,6 +25,7 @@ use crate::{
     Device,
 };
 
+#[derive(Debug)]
 pub struct VgpuType<'dev> {
     id: nvmlVgpuTypeId_t,
     device: &'dev Device<'dev>,

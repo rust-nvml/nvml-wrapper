@@ -7,6 +7,7 @@ use crate::{
     error::NvmlError,
 };
 
+#[derive(Debug, Copy, Clone)]
 pub struct VgpuLicenseInfo {
     pub is_licensed: bool,
     pub expiry: VgpuLicenseExpiry,
@@ -23,6 +24,7 @@ impl From<nvmlVgpuLicenseInfo_t> for VgpuLicenseInfo {
     }
 }
 
+#[derive(Debug, Copy, Clone)]
 pub struct VgpuLicenseExpiry {
     pub year: u16,
     pub month: u8,
@@ -47,6 +49,7 @@ impl From<nvmlVgpuLicenseExpiry_t> for VgpuLicenseExpiry {
     }
 }
 
+#[derive(Debug)]
 pub struct VgpuMetadata {
     pub version: u32,
     pub revision: u32,
@@ -108,6 +111,7 @@ impl From<nvmlVgpuRuntimeState_t> for VgpuRuntimeState {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct Bar1Info {
     pub version: u32,
     pub size: u64,
