@@ -374,6 +374,15 @@ impl<'dev> VgpuType<'dev> {
         Ok((x, y))
     }
 
+    /// Retrieve the BAR1 info for given vGPU type.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuTypeGetBAR1Info")]
     pub fn get_bar1_info(&self) -> Result<Bar1Info, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuTypeGetBAR1Info.as_ref())?;
@@ -385,6 +394,12 @@ impl<'dev> VgpuType<'dev> {
         Ok(info.into())
     }
 
+    /// Retrieve the static framebuffer reservation of the vGPU type in bytes
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    ///
     #[doc(alias = "nvmlVgpuTypeGetFbReservation")]
     pub fn get_fb_reservation(&self) -> Result<u64, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuTypeGetFbReservation.as_ref())?;
@@ -395,6 +410,11 @@ impl<'dev> VgpuType<'dev> {
         Ok(res)
     }
 
+    /// Retrieve the static GSP heap size of the vGPU type in bytes
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
     #[doc(alias = "nvmlVgpuTypeGetGspHeapSize")]
     pub fn get_gsp_heap_size(&self) -> Result<u64, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuTypeGetGspHeapSize.as_ref())?;
@@ -418,25 +438,23 @@ impl<'dev> VgpuInstance<'dev> {
         Self { instance, device }
     }
 
-    /**
-    Retrieve the VM ID associated with a vGPU instance.
-
-    The VM ID is returned as a string, not exceeding 80 characters in length (including the NUL
-    terminator). See nvmlConstants::NVML_DEVICE_UUID_BUFFER_SIZE.
-
-    The format of the VM ID varies by platform, and is indicated by the type identifier returned
-    in vmIdType.
-
-    # Errors
-
-    * `Uninitialized` if the library has not been successfully initialized
-    * `NotFound` if self does not match a valid active vGPU instance on the system
-    * `Unknown` on any unexpected error
-
-    # Platform Support
-
-    For Kepler or newer fully supported devices.
-    */
+    /// Retrieve the VM ID associated with a vGPU instance.
+    ///
+    /// The VM ID is returned as a string, not exceeding 80 characters in length (including the NUL
+    /// terminator). See nvmlConstants::NVML_DEVICE_UUID_BUFFER_SIZE.
+    ///
+    /// The format of the VM ID varies by platform, and is indicated by the type identifier returned
+    /// in vmIdType.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized` if the library has not been successfully initialized
+    /// * `NotFound` if self does not match a valid active vGPU instance on the system
+    /// * `Unknown` on any unexpected error
+    ///
+    /// # Platform Support
+    ///
+    /// For Kepler or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetVmID")]
     pub fn get_vm_id(&self) -> Result<VmId, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuInstanceGetVmID.as_ref())?;
@@ -460,22 +478,20 @@ impl<'dev> VgpuInstance<'dev> {
         })
     }
 
-    /**
-    Retrieve the framebuffer usage in bytes.
-
-    Framebuffer usage is the amont of vGPU framebuffer memory that is currently in use by the VM
-
-    # Errors
-
-    * `Uninitialized`, if the library has not been successfully initialized
-    * `InvalidArg` if self is invalid
-    * `NotFound` if self does not match a valid active vGPU instance on the system
-    * `Unknown`, on any unexpected error
-
-    # Platform Support
-
-    For Kepler or newer fully supported devices.
-    */
+    /// Retrieve the framebuffer usage in bytes.
+    ///
+    /// Framebuffer usage is the amount of vGPU framebuffer memory that is currently in use by the VM
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `InvalidArg` if self is invalid
+    /// * `NotFound` if self does not match a valid active vGPU instance on the system
+    /// * `Unknown`, on any unexpected error
+    ///
+    /// # Platform Support
+    ///
+    /// For Kepler or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetFbUsage")]
     pub fn get_fb_usage(&self) -> Result<u64, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuInstanceGetFbUsage.as_ref())?;
@@ -486,22 +502,20 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(usage)
     }
 
-    /**
-    Retrieve the vGPU type of a vGPU instance
-
-    Returns the vGPU type ID of vgpu assigned to the vGPU instance.
-
-    # Errors
-
-    * `Uninitialized`, if the library has not been successfully initialized
-    * `InvalidArg` if self is invalid
-    * `NotFound` if self does not match a valid active vGPU instance on the system
-    * `Unknown`, on any unexpected error
-
-    # Platform Support
-
-    For Maxwell or newer fully supported devices
-    */
+    /// Retrieve the vGPU type of a vGPU instance
+    ///
+    /// Returns the vGPU type ID of vgpu assigned to the vGPU instance.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `InvalidArg` if self is invalid
+    /// * `NotFound` if self does not match a valid active vGPU instance on the system
+    /// * `Unknown`, on any unexpected error
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices
     #[doc(alias = "nvmlVgpuInstanceGetType")]
     pub fn get_instance_type(&'dev self) -> Result<VgpuType<'dev>, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuInstanceGetType.as_ref())?;
@@ -512,16 +526,25 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(VgpuType::new(self.device, raw_type))
     }
 
-    /**
-    Get the list of process ids running on this vGPU instance for stats purpose
-
-    see [`crate::device::Device::vgpu_accounting_pids`] for details
-    */
+    /// Get the list of process ids running on this vGPU instance for stats purpose
+    ///
+    /// see [`crate::device::Device::vgpu_accounting_pids`] for details
     #[doc(alias = "nvmlVgpuInstanceGetAccountingPids")]
     pub fn accounting_pids(&self) -> Result<Vec<u32>, NvmlError> {
         self.device.vgpu_accounting_pids(self.instance)
     }
 
+    /// Clears accounting information of the vGPU instance that have already terminated.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NoPermission`, if the user doesn't have permission to perform this operation
+    /// * `NotSupported`, if the vGPU doesn't support this feature or accounting mode is disabled
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices. Requires root/admin permissions.
     #[doc(alias = "nvmlVgpuInstanceClearAccountingPids")]
     pub fn clear_accounting_pids(&self) -> Result<(), NvmlError> {
         let sym = nvml_sym(
@@ -534,6 +557,18 @@ impl<'dev> VgpuInstance<'dev> {
         unsafe { nvml_try(sym(self.instance)) }
     }
 
+    /// Queries the state of per process accounting mode on vGPU.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    /// * `NotSupported`, if the vGPU doesn't support this feature or accounting mode is disabled
+    /// * `DriverNotLoaded`, driver is not running on the vGPU instance
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetAccountingMode")]
     pub fn get_accounting_mode(&self) -> Result<bool, NvmlError> {
         let sym = nvml_sym(
@@ -550,6 +585,13 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(mode == nvmlEnableState_enum_NVML_FEATURE_ENABLED)
     }
 
+    /// Retrieve the current ECC mode of vGPU instance.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    /// * `NotSupported`, if the vGPU doesn't support this feature or accounting mode is disabled
     #[doc(alias = "nvmlVgpuInstanceGetEccMode")]
     pub fn get_ecc_mode(&self) -> Result<bool, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuInstanceGetEccMode.as_ref())?;
@@ -560,6 +602,17 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(mode == nvmlEnableState_enum_NVML_FEATURE_ENABLED)
     }
 
+    /// Retrieve the encoder capacity of a vGPU instance, as a percentage of maximum encoder
+    /// capacity with valid values in the range 0-100.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetEncoderCapacity")]
     pub fn get_encoder_capacity(&self) -> Result<u32, NvmlError> {
         let sym = nvml_sym(
@@ -576,6 +629,16 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(cap)
     }
 
+    /// Retrieves information about all active encoder sessions on a vGPU Instance.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetEncoderSessions")]
     pub fn get_encoder_sessions(&self) -> Result<Vec<EncoderSessionInfo>, NvmlError> {
         let sym = nvml_sym(
@@ -597,6 +660,16 @@ impl<'dev> VgpuInstance<'dev> {
             .collect()
     }
 
+    /// Retrieves the current encoder statistics of a vGPU Instance
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetEncoderStats")]
     pub fn get_encoder_stats(&self) -> Result<EncoderStats, NvmlError> {
         let sym = nvml_sym(
@@ -624,6 +697,20 @@ impl<'dev> VgpuInstance<'dev> {
         })
     }
 
+    /// Retrieves information about active frame buffer capture sessions on a vGPU Instance.
+    ///
+    /// > hResolution, vResolution, averageFPS and averageLatency data for a FBC session
+    /// > returned in sessionInfo may be zero if there are no new frames captured since the
+    /// > session started.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetFBCSessions")]
     pub fn get_fbc_sessions(&self) -> Result<Vec<FbcSessionInfo>, NvmlError> {
         let sym = nvml_sym(
@@ -646,6 +733,16 @@ impl<'dev> VgpuInstance<'dev> {
         info.into_iter().map(FbcSessionInfo::try_from).collect()
     }
 
+    /// Retrieves the active frame buffer capture sessions statistics of a vGPU Instance
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetFBCStats")]
     pub fn get_fbc_stats(&self) -> Result<FbcStats, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuInstanceGetFBCStats.as_ref())?;
@@ -656,6 +753,19 @@ impl<'dev> VgpuInstance<'dev> {
         }
     }
 
+    /// Retrieve the frame rate limit set for the vGPU instance.
+    ///
+    /// Returns the value of the frame rate limit set for the vGPU instance
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotSupported`, if frame rate limiter is turned off for the vGPU type
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Kepler or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetFrameRateLimit")]
     pub fn get_frame_rate_limit(&self) -> Result<u32, NvmlError> {
         let sym = nvml_sym(
@@ -672,6 +782,17 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(limit)
     }
 
+    /// Retrieve the GPU Instance ID for the given vGPU Instance. The API will return a valid GPU
+    /// Instance ID for MIG backed vGPU Instance, else INVALID_GPU_INSTANCE_ID is returned.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Kepler or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetGpuInstanceId")]
     pub fn get_gpu_instance_id(&self) -> Result<u32, NvmlError> {
         let sym = nvml_sym(
@@ -688,6 +809,17 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(id)
     }
 
+    /// Retrieves the PCI Id of the given vGPU Instance i.e. the PCI Id of the GPU as seen inside
+    /// the VM.
+    ///
+    /// The vGPU PCI id is returned as "00000000:00:00.0" if NVIDIA driver is not installed on the
+    /// vGPU instance.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    /// * `DriverNotLoaded`, driver is not running on the vGPU instance
     #[doc(alias = "nvmlVgpuInstanceGetGpuPciId")]
     pub fn get_gpu_pci_id(&self) -> Result<String, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuInstanceGetGpuPciId.as_ref())?;
@@ -705,6 +837,13 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(raw_id.to_str()?.to_string())
     }
 
+    /// Query the license information of the vGPU instance.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    /// * `DriverNotLoaded`, driver is not running on the vGPU instance
     #[cfg(feature = "legacy-functions")]
     #[doc(alias = "nvmlVgpuInstanceGetLicenseInfo")]
     pub fn get_license_info(&self) -> Result<VgpuLicenseInfo, NvmlError> {
@@ -724,6 +863,17 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(VgpuLicenseInfo::from(info))
     }
 
+    /// Query the license information of the vGPU instance.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    /// * `DriverNotLoaded`, driver is not running on the vGPU instance
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetLicenseInfo_v2")]
     pub fn get_license_info_v2(&self) -> Result<VgpuLicenseInfo, NvmlError> {
         let sym = nvml_sym(
@@ -742,6 +892,22 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(VgpuLicenseInfo::from(info))
     }
 
+    /// Retrieve the MDEV UUID of a vGPU instance.
+    ///
+    /// The MDEV UUID is a globally unique identifier of the mdev device assigned to the VM, and is
+    /// returned as a 5-part hexadecimal string, not exceeding 80 characters in length (including
+    /// the NULL terminator). MDEV UUID is displayed only on KVM platform.
+    /// See nvmlConstants::NVML_DEVICE_UUID_BUFFER_SIZE.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    /// * `NotSupported`, on any hypervisor other than KVM
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetMdevUUID")]
     pub fn get_mdev_uuid(&self) -> Result<String, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuInstanceGetMdevUUID.as_ref())?;
@@ -759,6 +925,23 @@ impl<'dev> VgpuInstance<'dev> {
         }
     }
 
+    /// Returns vGPU metadata structure for a running vGPU. The structure contains information
+    /// about the vGPU and its associated VM such as the currently installed NVIDIA guest driver
+    /// version, together with host driver version and an opaque data section containing internal
+    /// state.
+    ///
+    /// May be called at any time for a vGPU instance. Some fields in the returned structure are
+    /// dependent on information obtained from the guest VM, which may not yet have reached a state
+    /// where that information is available.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    ///
     #[doc(alias = "nvmlVgpuInstanceGetMetadata")]
     pub fn get_metadata(&self) -> Result<Vec<VgpuMetadata>, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuInstanceGetMetadata.as_ref())?;
@@ -772,6 +955,14 @@ impl<'dev> VgpuInstance<'dev> {
         metadata.into_iter().map(VgpuMetadata::try_from).collect()
     }
 
+    /// Query the placement ID of active vGPU instance.
+    ///
+    /// When in vGPU heterogeneous mode, this function returns a valid placement ID as
+    /// [`VgpuPlacementId::id`], [`VgpuPlacementId::version`] is the version number
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
     #[doc(alias = "nvmlVgpuInstanceGetPlacementId")]
     pub fn get_get_placement_id(&self) -> Result<VgpuPlacementId, NvmlError> {
         let sym = nvml_sym(
@@ -789,6 +980,20 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(raw_placement_id.into())
     }
 
+    /// Retrieve the currently used runtime state size of the vGPU instance
+    ///
+    /// This size represents the maximum in-memory data size utilized by a vGPU instance during
+    /// standard operation. This measurement is exclusive of frame buffer (FB) data size assigned
+    /// to the vGPU instance.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetRuntimeStateSize")]
     pub fn get_get_runtime_state_size(&self) -> Result<VgpuRuntimeState, NvmlError> {
         let sym = nvml_sym(
@@ -806,6 +1011,18 @@ impl<'dev> VgpuInstance<'dev> {
         Ok(raw_state.into())
     }
 
+    /// Retrieve the UUID of a vGPU instance.
+    ///
+    /// The UUID is a globally unique identifier associated with the vGPU, and is returned as a 5-part hexadecimal string
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Kepler or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetUUID")]
     pub fn get_uuid(&self) -> Result<String, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuInstanceGetUUID.as_ref())?;
@@ -823,6 +1040,23 @@ impl<'dev> VgpuInstance<'dev> {
         }
     }
 
+    /// Retrieve the NVIDIA driver version installed in the VM associated with a vGPU.
+    ///
+    /// The version is returned as an alphanumeric string in the caller-supplied buffer version.
+    /// This may be called at any time for a vGPU instance.
+    ///
+    /// The guest VM driver version is returned as "Not Available" if no NVIDIA driver is installed
+    /// in the VM, or the VM has not yet booted to the point where the NVIDIA driver is loaded and
+    /// initialized.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Kepler or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceGetVmDriverVersion")]
     pub fn get_driver_version(&self) -> Result<String, NvmlError> {
         let sym = nvml_sym(
@@ -845,7 +1079,16 @@ impl<'dev> VgpuInstance<'dev> {
             Ok(raw_id.to_str()?.to_string())
         }
     }
-
+    /// Set the encoder capacity of a vGPU instance, as a percentage of maximum encoder capacity with valid values in the range 0-100.
+    ///
+    /// # Errors
+    ///
+    /// * `Uninitialized`, if the library has not been successfully initialized
+    /// * `NotFound`, if the vGPU does not match a valid active vGPU instance on the system
+    ///
+    /// # Platform Support
+    ///
+    /// For Maxwell or newer fully supported devices.
     #[doc(alias = "nvmlVgpuInstanceSetEncoderCapacity")]
     pub fn set_encoder_capacity(&self, capacity: u32) -> Result<(), NvmlError> {
         let sym = nvml_sym(
