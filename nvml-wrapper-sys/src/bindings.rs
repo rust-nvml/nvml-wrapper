@@ -6,8 +6,8 @@
 #![allow(dead_code)]
 use std::os::raw;
 
-pub const NVML_API_VERSION: u32 = 12;
-pub const NVML_API_VERSION_STR: &[u8; 3] = b"12\0";
+pub const NVML_API_VERSION: u32 = 13;
+pub const NVML_API_VERSION_STR: &[u8; 3] = b"13\0";
 pub const NVML_VALUE_NOT_AVAILABLE: i32 = -1;
 pub const NVML_DEVICE_PCI_BUS_ID_BUFFER_SIZE: u32 = 32;
 pub const NVML_DEVICE_PCI_BUS_ID_BUFFER_V2_SIZE: u32 = 16;
