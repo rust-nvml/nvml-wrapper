@@ -7439,6 +7439,19 @@ mod test {
                 FieldId(NVML_FI_DEV_PERF_POLICY_TOTAL_BASE_CLOCKS),
                 FieldId(NVML_FI_DEV_MEMORY_TEMP),
                 FieldId(NVML_FI_DEV_TOTAL_ENERGY_CONSUMPTION),
+                FieldId(NVML_FI_DEV_CLOCKS_EVENT_REASON_SW_THERM_SLOWDOWN),
+                FieldId(NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_THERM_SLOWDOWN),
+                FieldId(NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_POWER_BRAKE_SLOWDOWN),
+                FieldId(NVML_FI_DEV_POWER_SYNC_BALANCING_FREQ),
+                FieldId(NVML_FI_DEV_POWER_SYNC_BALANCING_AF),
+                FieldId(NVML_FI_DEV_EDPP_MULTIPLIER),
+                FieldId(NVML_FI_DEV_NVLINK_COUNT_RAW_ERRORS_LANE0),
+                FieldId(NVML_FI_DEV_NVLINK_COUNT_RAW_ERRORS_LANE1),
+                FieldId(NVML_FI_DEV_NVLINK_COUNT_RAW_BER_LANE0_V2),
+                FieldId(NVML_FI_DEV_NVLINK_COUNT_RAW_BER_LANE1_V2),
+                FieldId(NVML_FI_DEV_NVLINK_COUNT_RAW_BER_V2),
+                FieldId(NVML_FI_DEV_NVLINK_PLR_XMIT_BLOCKS),
+                FieldId(NVML_FI_DEV_NVLINK_PLR_XMIT_RETRY_BLOCKS),
             ])
         })
     }
