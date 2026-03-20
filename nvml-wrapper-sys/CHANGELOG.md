@@ -4,6 +4,22 @@ This file describes the changes / additions / fixes between bindings releases.
 
 ## Unreleased
 
+Bindings have been regenerated using the NVML 12.9.79 header and bindgen 0.72.1.
+
+### Added
+
+* `NVML_FI_DEV_CLOCKS_EVENT_REASON_SW_THERM_SLOWDOWN` (251)
+* `NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_THERM_SLOWDOWN` (252)
+* `NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_POWER_BRAKE_SLOWDOWN` (253)
+* `NVML_FI_DEV_POWER_SYNC_BALANCING_FREQ` (254)
+* `NVML_FI_DEV_POWER_SYNC_BALANCING_AF` (255)
+* `NVML_FI_PWR_SMOOTHING_*` fields (256–273, shifted from prior incorrect values)
+* `NVML_FI_MAX` updated from 269 to 274
+
+### Changed
+
+* **Breaking:** `NVML_FI_PWR_SMOOTHING_*` field IDs have shifted by +5 (e.g. `NVML_FI_PWR_SMOOTHING_ENABLED` was 251, now 256). Code using these constants must be recompiled.
+
 ## 0.9.0 (released 2025-03-28)
 
 Bindings have been regenerated using the NVML 12.8.90 header and bindgen 0.68.1.
