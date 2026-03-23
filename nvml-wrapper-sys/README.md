@@ -35,9 +35,14 @@ there's a convincing reason to do so; please file an issue.
 
 ## NVML Support
 
-These bindings were generated for NVML version 11. Each new version of NVML is
+These bindings were generated for NVML version 12. Each new version of NVML is
 guaranteed to be backwards-compatible according to NVIDIA, so these bindings
 should be useful regardless of NVML version bumps.
+
+Note that NVML version 13.0 update 1 (and/or driver 580TRD2) [breaks backwards compatibility](https://docs.nvidia.com/deploy/nvml-api/known-issues.html#known-issues):
+
+> NVML Field Values from #251 - #273 (Power Smoothing, Clock Event Reason, and Sync Power Balancing related field values) have changed between 13.0 and 13.0U1/v580TRD2.
+> Any application that is using these field IDs must be recompiled using the NVML header file from CUDA 13.0 Update 1 in order to continue working correctly with NVIDIA drivers v580 TRD2 and beyond.
 
 ### Legacy Functions
 
