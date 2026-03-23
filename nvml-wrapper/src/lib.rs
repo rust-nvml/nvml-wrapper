@@ -237,7 +237,7 @@ impl Nvml {
         Self::init_internal(LIB_PATH)
     }
 
-    fn init_internal(path: impl AsRef<std::ffi::OsStr>) -> Result<Self, NvmlError> {
+    fn init_internal(path: impl libloading::AsFilename) -> Result<Self, NvmlError> {
         let lib = unsafe {
             let lib = NvmlLib::new(path)?;
             let sym = nvml_sym(lib.nvmlInit_v2.as_ref())?;
@@ -282,7 +282,7 @@ impl Nvml {
     }
 
     fn init_with_flags_internal(
-        path: impl AsRef<std::ffi::OsStr>,
+        path: impl libloading::AsFilename,
         flags: InitFlags,
     ) -> Result<Self, NvmlError> {
         let lib = unsafe {
