@@ -111,7 +111,7 @@ dependencies = [
 
 [[package]]
 name = "nvml-wrapper"
-version = "0.13.0"
+version = "0.13.0-utilidata.0"
 dependencies = [
  "bitflags",
  "libloading",
@@ -126,7 +126,7 @@ dependencies = [
 
 [[package]]
 name = "nvml-wrapper-sys"
-version = "0.10.0"
+version = "0.10.0-utilidata.0"
 dependencies = [
  "libloading",
 ]
