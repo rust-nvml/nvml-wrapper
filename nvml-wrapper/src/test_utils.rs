@@ -205,8 +205,9 @@ where
             NvmlError::NotSupported
             | NvmlError::NoPermission
             | NvmlError::NotFound
-            | NvmlError::UnexpectedVariant(_) => {
-                // Acceptable for features not present – treat as success
+            | NvmlError::UnexpectedVariant(_)
+            | NvmlError::IncorrectBits(_) => {
+                // Acceptable for features not present or unknown bits – treat as success
             }
             NvmlError::InvalidArg => panic!("unexpected InvalidArg error"),
             other => panic!("unexpected NVML error: {:?}", other),
