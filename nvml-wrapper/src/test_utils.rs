@@ -203,13 +203,12 @@ where
         }
         Err(e) => match e {
             NvmlError::NotSupported
-            | NvmlError::InvalidArg
             | NvmlError::NoPermission
             | NvmlError::NotFound
             | NvmlError::UnexpectedVariant(_) => {
-                // Treat these as acceptable "feature not present" cases
-                // No panic – test considered passed
+                // Acceptable for features not present – treat as success
             }
+            NvmlError::InvalidArg => panic!("unexpected InvalidArg error"),
             other => panic!("unexpected NVML error: {:?}", other),
         },
     }
