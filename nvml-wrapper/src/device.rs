@@ -7444,11 +7444,15 @@ mod test {
     }
 
     // Passing an empty slice should return an `InvalidArg` error
-    #[should_panic(expected = "InvalidArg")]
     #[test]
     fn field_values_for_empty() {
         let nvml = nvml();
-        test_with_device(3, &nvml, |device| device.field_values_for(&[]))
+        let device = device(&nvml);
+        let result = device.field_values_for(&[]);
+        match result {
+            Err(NvmlError::InvalidArg) => (), // expected
+            _ => panic!("field_values_for_empty did not return InvalidArg"),
+        }
     }
 
     #[test]

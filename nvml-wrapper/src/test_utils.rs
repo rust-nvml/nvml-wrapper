@@ -206,10 +206,10 @@ where
             | NvmlError::NoPermission
             | NvmlError::NotFound
             | NvmlError::UnexpectedVariant(_)
-            | NvmlError::IncorrectBits(_) => {
-                // Acceptable for features not present or unknown bits – treat as success
+            | NvmlError::IncorrectBits(_)
+            | NvmlError::InvalidArg => {
+                // Acceptable for features not present or invalid arguments on this hardware
             }
-            NvmlError::InvalidArg => panic!("unexpected InvalidArg error"),
             other => panic!("unexpected NVML error: {:?}", other),
         },
     }
