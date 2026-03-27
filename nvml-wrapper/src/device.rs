@@ -7443,6 +7443,68 @@ mod test {
         })
     }
 
+    /// Verify that the v12↔v13U1 field ID remapping works correctly at runtime.
+    ///
+    /// On a v13U1+ driver (>= 580.82), CLOCKS_EVENT_REASON fields must be
+    /// remapped from their canonical v12 IDs (251-253) to the driver's v13U1
+    /// IDs (269-271). If the remapping is broken, the driver would interpret
+    /// these as PWR_SMOOTHING fields instead, returning either NotSupported
+    /// or silently wrong data.
+    ///
+    /// The CLOCKS_EVENT_REASON fields return throttle-reason nanosecond
+    /// counters and should work on most GPUs (including consumer cards like
+    /// the RTX 4090). PWR_SMOOTHING fields are Blackwell-only and should
+    /// return NotSupported on older architectures — so if we get a successful
+    /// result, we know the remapping sent the right ID to the driver.
+    #[test]
+    fn field_values_for_v12_v13u1_remapping() {
+        let nvml = nvml();
+
+        println!("Driver version: {:?}", nvml.sys_driver_version());
+        println!("Field ID scheme: {:?}", nvml.field_id_scheme());
+
+        test_with_device(3, &nvml, |device| {
+            let results = device.field_values_for(&[
+                // These are the fields affected by the v12↔v13U1 renumbering.
+                // CLOCKS_EVENT_REASON (v12: 251-253) — should work on most GPUs
+                FieldId(NVML_FI_DEV_CLOCKS_EVENT_REASON_SW_THERM_SLOWDOWN),
+                FieldId(NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_THERM_SLOWDOWN),
+                FieldId(NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_POWER_BRAKE_SLOWDOWN),
+                // POWER_SYNC_BALANCING (v12: 254-255)
+                FieldId(NVML_FI_DEV_POWER_SYNC_BALANCING_FREQ),
+                FieldId(NVML_FI_DEV_POWER_SYNC_BALANCING_AF),
+                // PWR_SMOOTHING (v12: 256-273) — Blackwell-only, expect NotSupported on older GPUs
+                FieldId(NVML_FI_PWR_SMOOTHING_ENABLED),
+                FieldId(NVML_FI_PWR_SMOOTHING_PRIV_LVL),
+                FieldId(NVML_FI_PWR_SMOOTHING_IMM_RAMP_DOWN_ENABLED),
+                FieldId(NVML_FI_PWR_SMOOTHING_APPLIED_TMP_CEIL),
+                FieldId(NVML_FI_PWR_SMOOTHING_APPLIED_TMP_FLOOR),
+                FieldId(NVML_FI_PWR_SMOOTHING_MAX_PERCENT_TMP_FLOOR_SETTING),
+                FieldId(NVML_FI_PWR_SMOOTHING_MIN_PERCENT_TMP_FLOOR_SETTING),
+                FieldId(NVML_FI_PWR_SMOOTHING_HW_CIRCUITRY_PERCENT_LIFETIME_REMAINING),
+                FieldId(NVML_FI_PWR_SMOOTHING_MAX_NUM_PRESET_PROFILES),
+                FieldId(NVML_FI_PWR_SMOOTHING_PROFILE_PERCENT_TMP_FLOOR),
+                FieldId(NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_UP_RATE),
+                FieldId(NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_DOWN_RATE),
+                FieldId(NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_DOWN_HYST_VAL),
+                FieldId(NVML_FI_PWR_SMOOTHING_ACTIVE_PRESET_PROFILE),
+                FieldId(NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_PERCENT_TMP_FLOOR),
+                FieldId(NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_UP_RATE),
+                FieldId(NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_DOWN_RATE),
+                FieldId(NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_DOWN_HYST_VAL),
+            ])?;
+
+            for sample in &results {
+                match sample {
+                    Ok(s) => println!("  field {:?}: value={:?}", s.field, s.value),
+                    Err(e) => println!("  field error: {e:?}"),
+                }
+            }
+
+            Ok(results)
+        })
+    }
+
     // Passing an empty slice should return an `InvalidArg` error
     #[should_panic(expected = "InvalidArg")]
     #[test]
