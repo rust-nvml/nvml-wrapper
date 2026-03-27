@@ -1437,13 +1437,66 @@ mod test {
 
     #[test]
     fn translate_field_id_v13u1_remaps_affected_range() {
-        // CLOCKS_EVENT_REASON/POWER_SYNC (v12: 251-255) → v13U1: 269-273
-        assert_eq!(translate_field_id(FieldIdScheme::V13Update1, 251), 269);
-        assert_eq!(translate_field_id(FieldIdScheme::V13Update1, 255), 273);
+        use crate::ffi::bindings::field_id::*;
 
-        // PWR_SMOOTHING (v12: 256-273) → v13U1: 251-268
-        assert_eq!(translate_field_id(FieldIdScheme::V13Update1, 256), 251);
-        assert_eq!(translate_field_id(FieldIdScheme::V13Update1, 273), 268);
+        // Exhaustive check: CLOCKS_EVENT_REASON/POWER_SYNC (v12: 251-255) → v13U1: 269-273
+        let v12_clocks_event = [
+            (NVML_FI_DEV_CLOCKS_EVENT_REASON_SW_THERM_SLOWDOWN, 269),
+            (NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_THERM_SLOWDOWN, 270),
+            (NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_POWER_BRAKE_SLOWDOWN, 271),
+            (NVML_FI_DEV_POWER_SYNC_BALANCING_FREQ, 272),
+            (NVML_FI_DEV_POWER_SYNC_BALANCING_AF, 273),
+        ];
+        for (v12_id, expected_v13u1) in v12_clocks_event {
+            assert_eq!(
+                translate_field_id(FieldIdScheme::V13Update1, v12_id),
+                expected_v13u1,
+                "v12 ID {v12_id} should map to v13U1 ID {expected_v13u1}"
+            );
+        }
+
+        // Exhaustive check: PWR_SMOOTHING (v12: 256-273) → v13U1: 251-268
+        let v12_pwr_smoothing = [
+            (NVML_FI_PWR_SMOOTHING_ENABLED, 251),
+            (NVML_FI_PWR_SMOOTHING_PRIV_LVL, 252),
+            (NVML_FI_PWR_SMOOTHING_IMM_RAMP_DOWN_ENABLED, 253),
+            (NVML_FI_PWR_SMOOTHING_APPLIED_TMP_CEIL, 254),
+            (NVML_FI_PWR_SMOOTHING_APPLIED_TMP_FLOOR, 255),
+            (NVML_FI_PWR_SMOOTHING_MAX_PERCENT_TMP_FLOOR_SETTING, 256),
+            (NVML_FI_PWR_SMOOTHING_MIN_PERCENT_TMP_FLOOR_SETTING, 257),
+            (
+                NVML_FI_PWR_SMOOTHING_HW_CIRCUITRY_PERCENT_LIFETIME_REMAINING,
+                258,
+            ),
+            (NVML_FI_PWR_SMOOTHING_MAX_NUM_PRESET_PROFILES, 259),
+            (NVML_FI_PWR_SMOOTHING_PROFILE_PERCENT_TMP_FLOOR, 260),
+            (NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_UP_RATE, 261),
+            (NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_DOWN_RATE, 262),
+            (NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_DOWN_HYST_VAL, 263),
+            (NVML_FI_PWR_SMOOTHING_ACTIVE_PRESET_PROFILE, 264),
+            (NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_PERCENT_TMP_FLOOR, 265),
+            (NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_UP_RATE, 266),
+            (NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_DOWN_RATE, 267),
+            (NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_DOWN_HYST_VAL, 268),
+        ];
+        for (v12_id, expected_v13u1) in v12_pwr_smoothing {
+            assert_eq!(
+                translate_field_id(FieldIdScheme::V13Update1, v12_id),
+                expected_v13u1,
+                "v12 ID {v12_id} should map to v13U1 ID {expected_v13u1}"
+            );
+        }
+
+        // Verify the mapping is bijective (no collisions) over the full 251-273 range
+        let mut mapped: Vec<u32> = (251..=273)
+            .map(|id| translate_field_id(FieldIdScheme::V13Update1, id))
+            .collect();
+        mapped.sort();
+        let expected: Vec<u32> = (251..=273).collect();
+        assert_eq!(
+            mapped, expected,
+            "remapping must be a bijection over 251-273"
+        );
     }
 
     #[test]
