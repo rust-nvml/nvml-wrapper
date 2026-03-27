@@ -3653,7 +3653,7 @@ impl<'nvml> Device<'nvml> {
 
             for id in id_slice.iter() {
                 let mut raw: nvmlFieldValue_t = mem::zeroed();
-                raw.fieldId = id.0;
+                raw.fieldId = crate::translate_field_id(self.nvml.field_id_scheme, id.0);
 
                 field_values.push(raw);
             }
@@ -7441,6 +7441,145 @@ mod test {
                 FieldId(NVML_FI_DEV_TOTAL_ENERGY_CONSUMPTION),
             ])
         })
+    }
+
+    /// Verify that the v12↔v13U1 field ID remapping works correctly at runtime.
+    ///
+    /// On a v13U1+ driver (>= 580.82), CLOCKS_EVENT_REASON fields must be
+    /// remapped from their canonical v12 IDs (251-253) to the driver's v13U1
+    /// IDs (269-271). If the remapping is broken, the driver would interpret
+    /// these as PWR_SMOOTHING fields instead, returning either NotSupported
+    /// or silently wrong data.
+    ///
+    /// The CLOCKS_EVENT_REASON fields return throttle-reason nanosecond
+    /// counters and should work on most GPUs (including consumer cards like
+    /// the RTX 4090). PWR_SMOOTHING fields are Blackwell-only and should
+    /// return NotSupported on older architectures — so if we get a successful
+    /// result, we know the remapping sent the right ID to the driver.
+    #[test]
+    fn field_values_for_v12_v13u1_remapping() {
+        let nvml = nvml();
+
+        let driver = nvml
+            .sys_driver_version()
+            .unwrap_or_else(|_| "unknown".into());
+        let scheme = nvml.field_id_scheme();
+        println!("Driver: {driver}, scheme: {scheme:?}");
+
+        // (canonical v12 name, v12 ID, expected to work on most GPUs?)
+        let fields: &[(&str, u32)] = &[
+            (
+                "CLOCKS_EVENT_REASON_SW_THERM_SLOWDOWN",
+                NVML_FI_DEV_CLOCKS_EVENT_REASON_SW_THERM_SLOWDOWN,
+            ),
+            (
+                "CLOCKS_EVENT_REASON_HW_THERM_SLOWDOWN",
+                NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_THERM_SLOWDOWN,
+            ),
+            (
+                "CLOCKS_EVENT_REASON_HW_POWER_BRAKE_SLOWDOWN",
+                NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_POWER_BRAKE_SLOWDOWN,
+            ),
+            (
+                "POWER_SYNC_BALANCING_FREQ",
+                NVML_FI_DEV_POWER_SYNC_BALANCING_FREQ,
+            ),
+            (
+                "POWER_SYNC_BALANCING_AF",
+                NVML_FI_DEV_POWER_SYNC_BALANCING_AF,
+            ),
+            ("PWR_SMOOTHING_ENABLED", NVML_FI_PWR_SMOOTHING_ENABLED),
+            ("PWR_SMOOTHING_PRIV_LVL", NVML_FI_PWR_SMOOTHING_PRIV_LVL),
+            (
+                "PWR_SMOOTHING_IMM_RAMP_DOWN_ENABLED",
+                NVML_FI_PWR_SMOOTHING_IMM_RAMP_DOWN_ENABLED,
+            ),
+            (
+                "PWR_SMOOTHING_APPLIED_TMP_CEIL",
+                NVML_FI_PWR_SMOOTHING_APPLIED_TMP_CEIL,
+            ),
+            (
+                "PWR_SMOOTHING_APPLIED_TMP_FLOOR",
+                NVML_FI_PWR_SMOOTHING_APPLIED_TMP_FLOOR,
+            ),
+            (
+                "PWR_SMOOTHING_MAX_PERCENT_TMP_FLOOR_SETTING",
+                NVML_FI_PWR_SMOOTHING_MAX_PERCENT_TMP_FLOOR_SETTING,
+            ),
+            (
+                "PWR_SMOOTHING_MIN_PERCENT_TMP_FLOOR_SETTING",
+                NVML_FI_PWR_SMOOTHING_MIN_PERCENT_TMP_FLOOR_SETTING,
+            ),
+            (
+                "PWR_SMOOTHING_HW_CIRCUITRY_PERCENT_LIFETIME_REMAINING",
+                NVML_FI_PWR_SMOOTHING_HW_CIRCUITRY_PERCENT_LIFETIME_REMAINING,
+            ),
+            (
+                "PWR_SMOOTHING_MAX_NUM_PRESET_PROFILES",
+                NVML_FI_PWR_SMOOTHING_MAX_NUM_PRESET_PROFILES,
+            ),
+            (
+                "PWR_SMOOTHING_PROFILE_PERCENT_TMP_FLOOR",
+                NVML_FI_PWR_SMOOTHING_PROFILE_PERCENT_TMP_FLOOR,
+            ),
+            (
+                "PWR_SMOOTHING_PROFILE_RAMP_UP_RATE",
+                NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_UP_RATE,
+            ),
+            (
+                "PWR_SMOOTHING_PROFILE_RAMP_DOWN_RATE",
+                NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_DOWN_RATE,
+            ),
+            (
+                "PWR_SMOOTHING_PROFILE_RAMP_DOWN_HYST_VAL",
+                NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_DOWN_HYST_VAL,
+            ),
+            (
+                "PWR_SMOOTHING_ACTIVE_PRESET_PROFILE",
+                NVML_FI_PWR_SMOOTHING_ACTIVE_PRESET_PROFILE,
+            ),
+            (
+                "PWR_SMOOTHING_ADMIN_OVERRIDE_PERCENT_TMP_FLOOR",
+                NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_PERCENT_TMP_FLOOR,
+            ),
+            (
+                "PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_UP_RATE",
+                NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_UP_RATE,
+            ),
+            (
+                "PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_DOWN_RATE",
+                NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_DOWN_RATE,
+            ),
+            (
+                "PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_DOWN_HYST_VAL",
+                NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_DOWN_HYST_VAL,
+            ),
+        ];
+
+        let field_ids: Vec<FieldId> = fields.iter().map(|(_, id)| FieldId(*id)).collect();
+
+        let device = device(&nvml);
+        let results = device
+            .field_values_for(&field_ids)
+            .expect("field_values_for call succeeded");
+
+        println!(
+            "{:<52} {:>6} {:>10}  {}",
+            "NAME", "V12_ID", "DRIVER_ID", "RESULT"
+        );
+        println!("{}", "-".repeat(90));
+
+        for ((name, v12_id), sample) in fields.iter().zip(results.iter()) {
+            let driver_id = crate::translate_field_id(scheme, *v12_id);
+            let result_str = match sample {
+                Ok(s) => match &s.value {
+                    Ok(v) => format!("Ok({v:?})"),
+                    Err(e) => format!("{e:?}"),
+                },
+                Err(e) => format!("ERR: {e:?}"),
+            };
+            println!("{name:<52} {v12_id:>6} {driver_id:>10}  {result_str}");
+        }
     }
 
     // Passing an empty slice should return an `InvalidArg` error

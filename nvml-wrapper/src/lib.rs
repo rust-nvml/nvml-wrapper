@@ -196,8 +196,24 @@ and may not accurately reflect the version of NVML that this library is written 
 should ideally read the doc comments on an up-to-date NVML API header. Such a header can be
 downloaded as part of the [CUDA toolkit](https://developer.nvidia.com/cuda-downloads).
 */
+/// Describes which field ID numbering scheme the loaded NVML driver uses for
+/// IDs 251-273. NVIDIA broke ABI compatibility for these IDs between the
+/// original CUDA 13.0 release and CUDA 13.0 Update 1 (driver >= 580.82).
+///
+/// See <https://docs.nvidia.com/deploy/nvml-api/known-issues.html>
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum FieldIdScheme {
+    /// Used by drivers before 580.82 (CUDA 12.x and original CUDA 13.0).
+    /// IDs 251-255 are CLOCKS_EVENT_REASON/POWER_SYNC, 256-273 are PWR_SMOOTHING.
+    V12,
+    /// Used by drivers >= 580.82 (CUDA 13.0 Update 1+).
+    /// IDs 251-268 are PWR_SMOOTHING, 269-273 are CLOCKS_EVENT_REASON/POWER_SYNC.
+    V13Update1,
+}
+
 pub struct Nvml {
     lib: ManuallyDrop<NvmlLib>,
+    field_id_scheme: FieldIdScheme,
 }
 
 assert_impl_all!(Nvml: Send, Sync);
@@ -205,6 +221,36 @@ assert_impl_all!(Nvml: Send, Sync);
 impl std::fmt::Debug for Nvml {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.write_str("NVML")
+    }
+}
+
+/// Parse a driver version string (e.g. "580.82.07") and determine the field ID scheme.
+/// Returns `V13Update1` for driver >= 580.82, `V12` otherwise.
+fn detect_field_id_scheme(driver_version: &str) -> FieldIdScheme {
+    let mut parts = driver_version.split('.');
+    let major: u32 = parts.next().and_then(|s| s.parse().ok()).unwrap_or(0);
+    let minor: u32 = parts.next().and_then(|s| s.parse().ok()).unwrap_or(0);
+
+    if major > 580 || (major == 580 && minor >= 82) {
+        FieldIdScheme::V13Update1
+    } else {
+        FieldIdScheme::V12
+    }
+}
+
+/// Translate a field ID from the canonical v12 numbering to the v13U1 numbering.
+/// Only affects IDs in the 251-273 range. IDs outside this range pass through unchanged.
+pub(crate) fn translate_field_id(scheme: FieldIdScheme, id: u32) -> u32 {
+    if scheme == FieldIdScheme::V12 {
+        return id;
+    }
+    // V13Update1 remapping:
+    //   v12 251-255 (CLOCKS_EVENT_REASON/POWER_SYNC) → v13U1 269-273
+    //   v12 256-273 (PWR_SMOOTHING) → v13U1 251-268
+    match id {
+        251..=255 => id + 18,
+        256..=273 => id - 5,
+        other => other,
     }
 }
 
@@ -246,7 +292,16 @@ impl Nvml {
             ManuallyDrop::new(lib)
         };
 
-        Ok(Self { lib })
+        let mut nvml = Self {
+            lib,
+            field_id_scheme: FieldIdScheme::V12,
+        };
+        nvml.field_id_scheme = nvml
+            .sys_driver_version()
+            .map(|v| detect_field_id_scheme(&v))
+            .unwrap_or(FieldIdScheme::V12);
+
+        Ok(nvml)
     }
 
     /**
@@ -293,7 +348,16 @@ impl Nvml {
             ManuallyDrop::new(lib)
         };
 
-        Ok(Self { lib })
+        let mut nvml = Self {
+            lib,
+            field_id_scheme: FieldIdScheme::V12,
+        };
+        nvml.field_id_scheme = nvml
+            .sys_driver_version()
+            .map(|v| detect_field_id_scheme(&v))
+            .unwrap_or(FieldIdScheme::V12);
+
+        Ok(nvml)
     }
 
     /// Create an `NvmlBuilder` for further flexibility in how NVML is initialized.
@@ -304,6 +368,11 @@ impl Nvml {
     /// Get the underlying `NvmlLib` instance.
     pub fn lib(&self) -> &NvmlLib {
         &self.lib
+    }
+
+    /// Returns the detected field ID numbering scheme for the loaded driver.
+    pub fn field_id_scheme(&self) -> FieldIdScheme {
+        self.field_id_scheme
     }
 
     /**
@@ -1325,5 +1394,115 @@ mod test {
     fn set_vgpu_version() {
         let nvml = nvml();
         test(3, || nvml.set_vgpu_version(VgpuVersion { min: 0, max: 0 }))
+    }
+
+    #[test]
+    fn detect_field_id_scheme_v12_drivers() {
+        assert_eq!(detect_field_id_scheme("575.51.03"), FieldIdScheme::V12);
+        assert_eq!(detect_field_id_scheme("570.86.16"), FieldIdScheme::V12);
+        assert_eq!(detect_field_id_scheme("580.65.06"), FieldIdScheme::V12);
+        assert_eq!(detect_field_id_scheme("580.0.0"), FieldIdScheme::V12);
+    }
+
+    #[test]
+    fn detect_field_id_scheme_v13u1_drivers() {
+        assert_eq!(
+            detect_field_id_scheme("580.82.07"),
+            FieldIdScheme::V13Update1
+        );
+        assert_eq!(
+            detect_field_id_scheme("580.95.05"),
+            FieldIdScheme::V13Update1
+        );
+        assert_eq!(
+            detect_field_id_scheme("580.126.09"),
+            FieldIdScheme::V13Update1
+        );
+        assert_eq!(detect_field_id_scheme("581.0.0"), FieldIdScheme::V13Update1);
+        assert_eq!(detect_field_id_scheme("600.0.0"), FieldIdScheme::V13Update1);
+    }
+
+    #[test]
+    fn detect_field_id_scheme_malformed() {
+        assert_eq!(detect_field_id_scheme(""), FieldIdScheme::V12);
+        assert_eq!(detect_field_id_scheme("garbage"), FieldIdScheme::V12);
+    }
+
+    #[test]
+    fn translate_field_id_v12_is_noop() {
+        for id in 0..300 {
+            assert_eq!(translate_field_id(FieldIdScheme::V12, id), id);
+        }
+    }
+
+    #[test]
+    fn translate_field_id_v13u1_remaps_affected_range() {
+        use crate::ffi::bindings::field_id::*;
+
+        // Exhaustive check: CLOCKS_EVENT_REASON/POWER_SYNC (v12: 251-255) → v13U1: 269-273
+        let v12_clocks_event = [
+            (NVML_FI_DEV_CLOCKS_EVENT_REASON_SW_THERM_SLOWDOWN, 269),
+            (NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_THERM_SLOWDOWN, 270),
+            (NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_POWER_BRAKE_SLOWDOWN, 271),
+            (NVML_FI_DEV_POWER_SYNC_BALANCING_FREQ, 272),
+            (NVML_FI_DEV_POWER_SYNC_BALANCING_AF, 273),
+        ];
+        for (v12_id, expected_v13u1) in v12_clocks_event {
+            assert_eq!(
+                translate_field_id(FieldIdScheme::V13Update1, v12_id),
+                expected_v13u1,
+                "v12 ID {v12_id} should map to v13U1 ID {expected_v13u1}"
+            );
+        }
+
+        // Exhaustive check: PWR_SMOOTHING (v12: 256-273) → v13U1: 251-268
+        let v12_pwr_smoothing = [
+            (NVML_FI_PWR_SMOOTHING_ENABLED, 251),
+            (NVML_FI_PWR_SMOOTHING_PRIV_LVL, 252),
+            (NVML_FI_PWR_SMOOTHING_IMM_RAMP_DOWN_ENABLED, 253),
+            (NVML_FI_PWR_SMOOTHING_APPLIED_TMP_CEIL, 254),
+            (NVML_FI_PWR_SMOOTHING_APPLIED_TMP_FLOOR, 255),
+            (NVML_FI_PWR_SMOOTHING_MAX_PERCENT_TMP_FLOOR_SETTING, 256),
+            (NVML_FI_PWR_SMOOTHING_MIN_PERCENT_TMP_FLOOR_SETTING, 257),
+            (
+                NVML_FI_PWR_SMOOTHING_HW_CIRCUITRY_PERCENT_LIFETIME_REMAINING,
+                258,
+            ),
+            (NVML_FI_PWR_SMOOTHING_MAX_NUM_PRESET_PROFILES, 259),
+            (NVML_FI_PWR_SMOOTHING_PROFILE_PERCENT_TMP_FLOOR, 260),
+            (NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_UP_RATE, 261),
+            (NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_DOWN_RATE, 262),
+            (NVML_FI_PWR_SMOOTHING_PROFILE_RAMP_DOWN_HYST_VAL, 263),
+            (NVML_FI_PWR_SMOOTHING_ACTIVE_PRESET_PROFILE, 264),
+            (NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_PERCENT_TMP_FLOOR, 265),
+            (NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_UP_RATE, 266),
+            (NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_DOWN_RATE, 267),
+            (NVML_FI_PWR_SMOOTHING_ADMIN_OVERRIDE_RAMP_DOWN_HYST_VAL, 268),
+        ];
+        for (v12_id, expected_v13u1) in v12_pwr_smoothing {
+            assert_eq!(
+                translate_field_id(FieldIdScheme::V13Update1, v12_id),
+                expected_v13u1,
+                "v12 ID {v12_id} should map to v13U1 ID {expected_v13u1}"
+            );
+        }
+
+        // Verify the mapping is bijective (no collisions) over the full 251-273 range
+        let mut mapped: Vec<u32> = (251..=273)
+            .map(|id| translate_field_id(FieldIdScheme::V13Update1, id))
+            .collect();
+        mapped.sort();
+        let expected: Vec<u32> = (251..=273).collect();
+        assert_eq!(
+            mapped, expected,
+            "remapping must be a bijection over 251-273"
+        );
+    }
+
+    #[test]
+    fn translate_field_id_v13u1_passthrough_outside_range() {
+        assert_eq!(translate_field_id(FieldIdScheme::V13Update1, 0), 0);
+        assert_eq!(translate_field_id(FieldIdScheme::V13Update1, 250), 250);
+        assert_eq!(translate_field_id(FieldIdScheme::V13Update1, 274), 274);
     }
 }
