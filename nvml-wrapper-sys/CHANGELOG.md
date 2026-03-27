@@ -8,9 +8,7 @@ This file describes the changes / additions / fixes between bindings releases.
 
 ### Fixed
 
-* Corrected `NVML_FI_PWR_SMOOTHING_*` field IDs to match v12 numbering (shifted from 251-268 to 256-273) (#137)
-* Added missing field ID constants: `NVML_FI_DEV_CLOCKS_EVENT_REASON_SW_THERM_SLOWDOWN` (251), `NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_THERM_SLOWDOWN` (252), `NVML_FI_DEV_CLOCKS_EVENT_REASON_HW_POWER_BRAKE_SLOWDOWN` (253), `NVML_FI_DEV_POWER_SYNC_BALANCING_FREQ` (254), `NVML_FI_DEV_POWER_SYNC_BALANCING_AF` (255)
-* Updated `NVML_FI_MAX` from 269 to 274
+* Corrected `NVML_FI_*` field IDs 251-273 to match v12 numbering (#137)
 
 ## 0.9.0 (released 2025-03-28)
 
