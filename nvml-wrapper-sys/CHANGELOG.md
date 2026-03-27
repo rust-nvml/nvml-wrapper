@@ -4,6 +4,12 @@ This file describes the changes / additions / fixes between bindings releases.
 
 ## Unreleased
 
+## 0.9.1 (released 2026-03-27)
+
+### Fixed
+
+* Corrected `NVML_FI_*` field IDs 251-273 to match v12 numbering (#137)
+
 ## 0.9.0 (released 2025-03-28)
 
 Bindings have been regenerated using the NVML 12.8.90 header and bindgen 0.68.1.

@@ -4,6 +4,20 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 ## [Unreleased]
 
+## [0.12.1] (released 2026-03-27)
+
+### Fixed
+
+* Corrected `NVML_FI_PWR_SMOOTHING_*` field IDs which used CUDA 13.0U1 numbering instead of v12, causing silent data corruption on CUDA 12 hosts (#134, #137)
+* Added runtime driver version detection and transparent field ID remapping for drivers >= 580.82 (CUDA 13.0 Update 1+) so callers don't need to handle the v12/v13U1 numbering difference (#137)
+* Fixed APIs that need double-calls for buffer size calculation (#129)
+* Fixed `nvmlDeviceGetActiveVgpus` argument ordering (#128)
+
+### Added
+
+* `FieldIdScheme` enum and `Nvml::field_id_scheme()` to inspect the detected driver's field ID numbering
+* Method for getting vGPU type ID (#124)
+
 ## [0.12.0] (released 2026-02-11)
 ### Added
 
