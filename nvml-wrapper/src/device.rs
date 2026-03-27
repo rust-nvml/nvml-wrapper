@@ -3653,7 +3653,8 @@ impl<'nvml> Device<'nvml> {
 
             for id in id_slice.iter() {
                 let mut raw: nvmlFieldValue_t = mem::zeroed();
-                raw.fieldId = id.0;
+                raw.fieldId =
+                    crate::translate_field_id(self.nvml.field_id_scheme, id.0);
 
                 field_values.push(raw);
             }
