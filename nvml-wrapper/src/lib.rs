@@ -228,14 +228,8 @@ impl std::fmt::Debug for Nvml {
 /// Returns `V13Update1` for driver >= 580.82, `V12` otherwise.
 fn detect_field_id_scheme(driver_version: &str) -> FieldIdScheme {
     let mut parts = driver_version.split('.');
-    let major: u32 = parts
-        .next()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(0);
-    let minor: u32 = parts
-        .next()
-        .and_then(|s| s.parse().ok())
-        .unwrap_or(0);
+    let major: u32 = parts.next().and_then(|s| s.parse().ok()).unwrap_or(0);
+    let minor: u32 = parts.next().and_then(|s| s.parse().ok()).unwrap_or(0);
 
     if major > 580 || (major == 580 && minor >= 82) {
         FieldIdScheme::V13Update1
@@ -1412,9 +1406,18 @@ mod test {
 
     #[test]
     fn detect_field_id_scheme_v13u1_drivers() {
-        assert_eq!(detect_field_id_scheme("580.82.07"), FieldIdScheme::V13Update1);
-        assert_eq!(detect_field_id_scheme("580.95.05"), FieldIdScheme::V13Update1);
-        assert_eq!(detect_field_id_scheme("580.126.09"), FieldIdScheme::V13Update1);
+        assert_eq!(
+            detect_field_id_scheme("580.82.07"),
+            FieldIdScheme::V13Update1
+        );
+        assert_eq!(
+            detect_field_id_scheme("580.95.05"),
+            FieldIdScheme::V13Update1
+        );
+        assert_eq!(
+            detect_field_id_scheme("580.126.09"),
+            FieldIdScheme::V13Update1
+        );
         assert_eq!(detect_field_id_scheme("581.0.0"), FieldIdScheme::V13Update1);
         assert_eq!(detect_field_id_scheme("600.0.0"), FieldIdScheme::V13Update1);
     }
