@@ -7,6 +7,7 @@ use crate::Unit;
 use crate::bitmasks::{device::*, event::*};
 
 use crate::enum_wrappers::device::*;
+use crate::enum_wrappers::vgpu::VmId;
 use crate::enums::device::BusType;
 use crate::enums::device::DeviceArchitecture;
 use crate::enums::device::PcieLinkMaxSpeed;
@@ -15,6 +16,13 @@ use crate::enums::unit::*;
 use crate::error::NvmlError;
 use crate::event::EventSet;
 use crate::struct_wrappers::gpm::GpmMetricResult;
+use crate::struct_wrappers::vgpu::Bar1Info;
+use crate::struct_wrappers::vgpu::VgpuLicenseInfo;
+use crate::struct_wrappers::vgpu::VgpuMetadata;
+use crate::struct_wrappers::vgpu::VgpuPlacementId;
+use crate::struct_wrappers::vgpu::VgpuRuntimeState;
+use crate::vgpu::VgpuInstance;
+use crate::vgpu::VgpuType;
 use std::fmt::Debug;
 
 use crate::struct_wrappers::nv_link::*;
@@ -68,6 +76,7 @@ impl ShouldPrint for bool {}
 impl ShouldPrint for u32 {}
 impl ShouldPrint for i32 {}
 impl ShouldPrint for (u32, u32) {}
+impl ShouldPrint for (u64, u64) {}
 impl ShouldPrint for u64 {}
 impl ShouldPrint for String {}
 impl ShouldPrint for Brand {}
@@ -124,6 +133,17 @@ impl ShouldPrint for Vec<GpuInstancePlacement> {}
 impl ShouldPrint for (VgpuVersion, VgpuVersion) {}
 impl ShouldPrint for ProfileInfo {}
 impl ShouldPrint for GspFirmwareMode {}
+impl<'dev> ShouldPrint for VgpuInstance<'dev> {}
+impl<'dev> ShouldPrint for Vec<VgpuInstance<'dev>> {}
+impl ShouldPrint for VmId {}
+impl ShouldPrint for VgpuLicenseInfo {}
+impl ShouldPrint for VgpuMetadata {}
+impl ShouldPrint for Vec<VgpuMetadata> {}
+impl<'dev> ShouldPrint for VgpuType<'dev> {}
+impl<'dev> ShouldPrint for Vec<VgpuType<'dev>> {}
+impl ShouldPrint for Bar1Info {}
+impl ShouldPrint for VgpuPlacementId {}
+impl ShouldPrint for VgpuRuntimeState {}
 
 #[cfg(target_os = "windows")]
 impl ShouldPrint for DriverModelState {}
@@ -151,9 +171,9 @@ where
     multi(reps, test);
 }
 
-pub fn test_with_device<T, R>(reps: usize, nvml: &Nvml, test: T)
+pub fn test_with_device<'a, T, R>(reps: usize, nvml: &'a Nvml, test: T)
 where
-    T: Fn(&Device) -> Result<R, NvmlError>,
+    T: Fn(&Device<'a>) -> Result<R, NvmlError>,
     R: ShouldPrint,
 {
     let device = device(nvml);

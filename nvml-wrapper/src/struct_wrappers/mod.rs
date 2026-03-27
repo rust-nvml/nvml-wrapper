@@ -3,6 +3,7 @@ pub mod event;
 pub mod gpm;
 pub mod nv_link;
 pub mod unit;
+pub mod vgpu;
 
 use self::device::PciInfo;
 use crate::error::NvmlError;
