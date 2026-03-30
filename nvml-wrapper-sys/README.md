@@ -35,7 +35,7 @@ there's a convincing reason to do so; please file an issue.
 
 ## NVML Support
 
-These bindings were generated for NVML version 11. Each new version of NVML is
+These bindings were generated for NVML version 12. Each new version of NVML is
 guaranteed to be backwards-compatible according to NVIDIA, so these bindings
 should be useful regardless of NVML version bumps.
 

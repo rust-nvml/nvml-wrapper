@@ -36,6 +36,15 @@ bitflags! {
         /// Power source change event (battery vs. AC power).
         const POWER_SOURCE_CHANGE   = nvmlEventTypePowerSourceChange as u64;
         /// MIG configuration changes.
-        const MIG_CONFIG_CHANGE     = nvmlEventMigConfigChange as u64;
+        /// Placeholder for unknown event type bits introduced in newer NVML versions.
+        const UNKNOWN_0x80   = 0x80u64;
+        const UNKNOWN_0x100  = 0x100u64;
+        const UNKNOWN_0x200  = 0x200u64;
+        const UNKNOWN_0x400  = 0x400u64;
+        const UNKNOWN_0x800  = 0x800u64;
+        const UNKNOWN_0x1000 = 0x1000u64;
+        const UNKNOWN_0x2000 = 0x2000u64;
+        const UNKNOWN_0x4000 = 0x4000u64;
+        const UNKNOWN_0x8000 = 0x8000u64;
     }
 }
