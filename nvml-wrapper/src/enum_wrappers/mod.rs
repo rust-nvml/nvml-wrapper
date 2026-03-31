@@ -4,6 +4,7 @@ use crate::ffi::bindings::*;
 pub mod device;
 pub mod nv_link;
 pub mod unit;
+pub mod vgpu;
 
 pub fn bool_from_state(state: nvmlEnableState_t) -> Result<bool, NvmlError> {
     match state {
