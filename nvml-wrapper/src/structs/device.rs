@@ -134,9 +134,7 @@ pub struct PowerManagementConstraints {
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct PowerMizerModeInfo {
-    /// Current PowerMizer mode for the `Device`.
     pub current: PowerMizerMode,
-    /// Supported PowerMizer modes for the `Device`.
     pub supported: PowerMizerModes,
 }
 
