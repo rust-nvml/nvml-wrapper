@@ -4,6 +4,10 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 ## [Unreleased]
 
+### Added
+
+* `Device::power_mizer_mode()` and `Device::set_power_mizer_mode()` for NVML v580 PowerMizer mode support
+
 ## [0.12.1] (released 2026-03-27)
 
 ### Fixed

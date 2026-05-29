@@ -4,7 +4,7 @@ use crate::GpmSample;
 use crate::NvLink;
 use crate::Nvml;
 
-use crate::bitmasks::device::ThrottleReasons;
+use crate::bitmasks::device::{PowerMizerModes, ThrottleReasons};
 #[cfg(target_os = "linux")]
 use crate::bitmasks::event::EventTypes;
 #[cfg(target_os = "windows")]
@@ -14,7 +14,7 @@ use crate::enum_wrappers::{bool_from_state, device::*, state_from_bool};
 
 use crate::enums::device::{
     BusType, DeviceArchitecture, FanControlPolicy, GpuLockedClocksSetting, PcieLinkMaxSpeed,
-    PowerSource,
+    PowerMizerMode, PowerSource,
 };
 use crate::error::nvml_try_count;
 #[cfg(target_os = "linux")]
@@ -3296,6 +3296,41 @@ impl<'nvml> Device<'nvml> {
         }
     }
 
+    /**
+    Gets the current and supported PowerMizer modes for this `Device`.
+
+    PowerMizer mode provides a hint to the driver for managing GPU performance.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support PowerMizer mode readings
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `UnexpectedVariant`, if NVML returns an unknown current PowerMizer mode
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Maxwell or newer fully supported devices.
+    */
+    #[doc(alias = "nvmlDeviceGetPowerMizerMode_v1")]
+    pub fn power_mizer_mode(&self) -> Result<PowerMizerModeInfo, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetPowerMizerMode_v1.as_ref())?;
+
+        unsafe {
+            let mut power_mizer_mode: nvmlDevicePowerMizerModes_v1_t = mem::zeroed();
+            nvml_try(sym(self.device, &mut power_mizer_mode))?;
+
+            Ok(PowerMizerModeInfo {
+                current: PowerMizerMode::try_from(power_mizer_mode.currentMode)?,
+                supported: PowerMizerModes::from_bits_truncate(
+                    power_mizer_mode.supportedPowerMizerModes,
+                ),
+            })
+        }
+    }
+
     /// Not documenting this because it's deprecated. Read NVIDIA's docs if you
     /// must use it.
     // Tested
@@ -5601,6 +5636,39 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Sets the PowerMizer mode for this `Device`.
+
+    PowerMizer mode provides a hint to the driver for managing GPU performance.
+    See `.power_mizer_mode()` to check supported modes.
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid or `mode` is invalid
+    * `NotSupported`, if this `Device` does not support PowerMizer mode changes
+    * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
+    * `Unknown`, on any unexpected error
+
+    # Device Support
+
+    Supports Maxwell or newer fully supported devices.
+    */
+    #[doc(alias = "nvmlDeviceSetPowerMizerMode_v1")]
+    pub fn set_power_mizer_mode(&mut self, mode: PowerMizerMode) -> Result<(), NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceSetPowerMizerMode_v1.as_ref())?;
+
+        unsafe {
+            let mut power_mizer_mode = nvmlDevicePowerMizerModes_v1_t {
+                currentMode: mem::zeroed(),
+                mode: mode.as_c(),
+                supportedPowerMizerModes: mem::zeroed(),
+            };
+
+            nvml_try(sym(self.device, &mut power_mizer_mode))
+        }
+    }
+
+    /**
     Retrieve min, max and current clock offset of some clock domain for a given PState
 
     # Errors
@@ -6786,7 +6854,7 @@ mod test {
     #[cfg(target_os = "windows")]
     use crate::bitmasks::Behavior;
     use crate::enum_wrappers::device::*;
-    use crate::enums::device::GpuLockedClocksSetting;
+    use crate::enums::device::{GpuLockedClocksSetting, PowerMizerMode};
     use crate::error::*;
     use crate::structs::device::FieldId;
     use crate::sys_exports::field_id::*;
@@ -7333,6 +7401,13 @@ mod test {
         test_with_device(3, &nvml, |device| {
             device.power_management_limit_constraints()
         })
+    }
+
+    #[test]
+    #[ignore = "requires a v580+ driver and supported device"]
+    fn power_mizer_mode() {
+        let nvml = nvml();
+        test_with_device(3, &nvml, |device| device.power_mizer_mode())
     }
 
     #[test]
@@ -8024,6 +8099,17 @@ mod test {
         device
             .set_power_management_limit(250000)
             .expect("set to true")
+    }
+
+    // This modifies device state, so we don't want to actually run the test
+    #[allow(dead_code)]
+    fn set_power_mizer_mode() {
+        let nvml = nvml();
+        let mut device = device(&nvml);
+
+        device
+            .set_power_mizer_mode(PowerMizerMode::Auto)
+            .expect("set to auto")
     }
 
     // This modifies device state, so we don't want to actually run the test

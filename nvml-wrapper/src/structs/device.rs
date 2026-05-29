@@ -1,6 +1,8 @@
+use crate::bitmasks::device::PowerMizerModes;
 #[cfg(target_os = "windows")]
 use crate::enum_wrappers::device::DriverModel;
 use crate::enum_wrappers::device::OperationMode;
+use crate::enums::device::PowerMizerMode;
 #[cfg(feature = "serde")]
 use serde_derive::{Deserialize, Serialize};
 
@@ -126,6 +128,16 @@ pub struct OperationModeState {
 pub struct PowerManagementConstraints {
     pub min_limit: u32,
     pub max_limit: u32,
+}
+
+/// Returned from `Device.power_mizer_mode()`.
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct PowerMizerModeInfo {
+    /// Current PowerMizer mode for the `Device`.
+    pub current: PowerMizerMode,
+    /// Supported PowerMizer modes for the `Device`.
+    pub supported: PowerMizerModes,
 }
 
 /// Returned from `Device.encoder_stats()`
