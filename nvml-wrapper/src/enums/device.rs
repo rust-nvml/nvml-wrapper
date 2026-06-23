@@ -201,6 +201,52 @@ impl TryFrom<nvmlPowerSource_t> for PowerSource {
     }
 }
 
+/// PowerMizer mode preference for GPU performance management.
+// TODO: technically this is an "enum wrapper" but the type on the C side isn't
+// an enum
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum PowerMizerMode {
+    /// Adjust GPU clocks based on GPU utilization.
+    Adaptive,
+    /// Raise GPU clocks to favor maximum performance, within thermal and other constraints.
+    PreferMaximumPerformance,
+    /// Let the driver choose the performance policy.
+    Auto,
+    /// Lock to GPU base clocks.
+    PreferConsistentPerformance,
+}
+
+impl PowerMizerMode {
+    /// Returns the C constant equivalent for the given Rust enum variant.
+    pub fn as_c(&self) -> c_uint {
+        match *self {
+            Self::Adaptive => NVML_POWER_MIZER_MODE_ADAPTIVE,
+            Self::PreferMaximumPerformance => NVML_POWER_MIZER_MODE_PREFER_MAXIMUM_PERFORMANCE,
+            Self::Auto => NVML_POWER_MIZER_MODE_AUTO,
+            Self::PreferConsistentPerformance => {
+                NVML_POWER_MIZER_MODE_PREFER_CONSISTENT_PERFORMANCE
+            }
+        }
+    }
+}
+
+impl TryFrom<c_uint> for PowerMizerMode {
+    type Error = NvmlError;
+
+    fn try_from(data: c_uint) -> Result<Self, Self::Error> {
+        match data {
+            NVML_POWER_MIZER_MODE_ADAPTIVE => Ok(Self::Adaptive),
+            NVML_POWER_MIZER_MODE_PREFER_MAXIMUM_PERFORMANCE => Ok(Self::PreferMaximumPerformance),
+            NVML_POWER_MIZER_MODE_AUTO => Ok(Self::Auto),
+            NVML_POWER_MIZER_MODE_PREFER_CONSISTENT_PERFORMANCE => {
+                Ok(Self::PreferConsistentPerformance)
+            }
+            _ => Err(NvmlError::UnexpectedVariant(data)),
+        }
+    }
+}
+
 /// Returned by [`crate::Device::architecture()`].
 ///
 /// This is the simplified chip architecture of the device.

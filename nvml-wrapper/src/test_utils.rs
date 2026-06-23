@@ -10,6 +10,7 @@ use crate::enum_wrappers::device::*;
 use crate::enums::device::BusType;
 use crate::enums::device::DeviceArchitecture;
 use crate::enums::device::PcieLinkMaxSpeed;
+use crate::enums::device::PowerMizerMode;
 use crate::enums::device::PowerSource;
 use crate::enums::unit::*;
 use crate::error::NvmlError;
@@ -94,6 +95,9 @@ impl ShouldPrint for UtilizationInfo {}
 impl ShouldPrint for EccModeState {}
 impl ShouldPrint for OperationModeState {}
 impl ShouldPrint for InfoRom {}
+impl ShouldPrint for PowerMizerMode {}
+impl ShouldPrint for PowerMizerModeInfo {}
+impl ShouldPrint for PowerMizerModes {}
 impl ShouldPrint for Vec<RetiredPage> {}
 impl ShouldPrint for ExcludedDeviceInfo {}
 impl ShouldPrint for MemoryInfo {}

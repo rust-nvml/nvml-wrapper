@@ -74,6 +74,22 @@ bitflags! {
 }
 
 bitflags! {
+    /// Flags specifying the PowerMizer modes supported by a GPU.
+    #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+    #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+    pub struct PowerMizerModes: u32 {
+        /// Adjust GPU clocks based on GPU utilization.
+        const ADAPTIVE = 1 << NVML_POWER_MIZER_MODE_ADAPTIVE;
+        /// Raise GPU clocks to favor maximum performance, within thermal and other constraints.
+        const PREFER_MAXIMUM_PERFORMANCE = 1 << NVML_POWER_MIZER_MODE_PREFER_MAXIMUM_PERFORMANCE;
+        /// Let the driver choose the performance policy.
+        const AUTO = 1 << NVML_POWER_MIZER_MODE_AUTO;
+        /// Lock to GPU base clocks.
+        const PREFER_CONSISTENT_PERFORMANCE = 1 << NVML_POWER_MIZER_MODE_PREFER_CONSISTENT_PERFORMANCE;
+    }
+}
+
+bitflags! {
     /// Flags that specify info about a frame capture session
     #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
     #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
