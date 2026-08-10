@@ -50,6 +50,15 @@ impl<'nvml> GpmSample<'nvml> {
         }
     }
 
+    /// Wrap a raw sample handle.
+    ///
+    /// # Safety
+    ///
+    /// You need to ensure that the sample is valid.
+    pub unsafe fn from_handle(nvml: &'nvml Nvml, sample: nvmlGpmSample_t) -> Self {
+        Self { sample, nvml }
+    }
+
     /**
     Use this to free the sample if you care about handling potential errors
     (*the `Drop` implementation ignores errors!*).
