@@ -52,9 +52,19 @@ impl<'nvml> GpmSample<'nvml> {
 
     /// Wrap a raw sample handle.
     ///
+    /// The returned `GpmSample` takes ownership of the handle and will free
+    /// it on drop.
+    ///
     /// # Safety
     ///
-    /// You need to ensure that the sample is valid.
+    /// * The handle must have been allocated by `nvmlGpmSampleAlloc` via the
+    ///   same loaded NVML library as `nvml` and must not already have been
+    ///   freed.
+    /// * Nothing else may free the handle afterward — neither another
+    ///   `GpmSample` wrapping the same handle nor a manual
+    ///   `nvmlGpmSampleFree` call — as that would result in a double-free.
+    ///   Use [`Self::into_handle`] to release ownership from an existing
+    ///   `GpmSample` before reconstructing it with this function.
     pub unsafe fn from_handle(nvml: &'nvml Nvml, sample: nvmlGpmSample_t) -> Self {
         Self { sample, nvml }
     }
@@ -82,14 +92,32 @@ impl<'nvml> GpmSample<'nvml> {
 
     /// Get the raw sample handle.
     ///
+    /// The handle is *borrowed*: this `GpmSample` still owns the sample and
+    /// will free it on drop.
+    ///
     /// # Safety
     ///
     /// This is unsafe to prevent it from being used without care. In
     /// particular, you must avoid creating a new `GpmSample` from this handle
-    /// and allowing both this `GpmSample` and the newly created one to drop
-    /// (which would result in a double-free).
+    /// (e.g. via [`Self::from_handle`]) and allowing both this `GpmSample`
+    /// and the newly created one to drop (which would result in a
+    /// double-free). To transfer ownership of the sample out of the wrapper,
+    /// use [`Self::into_handle`] instead.
     pub unsafe fn handle(&self) -> nvmlGpmSample_t {
         self.sample
+    }
+
+    /// Consume this `GpmSample` and return the raw sample handle without
+    /// freeing it.
+    ///
+    /// The caller takes ownership of the handle and is responsible for
+    /// freeing it, either by calling `nvmlGpmSampleFree` manually or by
+    /// reconstructing a `GpmSample` with [`Self::from_handle`] and letting
+    /// that free it.
+    pub fn into_handle(self) -> nvmlGpmSample_t {
+        let sample = self.sample;
+        mem::forget(self);
+        sample
     }
 
     /// Get a reference to the `Nvml` instance this sample was created from.
