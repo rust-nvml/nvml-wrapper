@@ -6244,10 +6244,7 @@ impl<'nvml> Device<'nvml> {
     // Tested
     #[cfg(target_os = "linux")]
     #[doc(alias = "nvmlDeviceGetActiveVgpus")]
-    pub fn active_vgpus<'a>(&'a self) -> Result<Vec<VgpuInstance<'nvml>>, NvmlError>
-    where
-        'a: 'nvml,
-    {
+    pub fn active_vgpus(&self) -> Result<Vec<VgpuInstance<'_>>, NvmlError> {
         let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetActiveVgpus.as_ref())?;
 
         let raw_vgpus = unsafe {

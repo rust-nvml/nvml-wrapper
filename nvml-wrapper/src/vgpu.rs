@@ -435,7 +435,11 @@ pub struct VgpuInstance<'dev> {
 assert_impl_all!(VgpuInstance: Send, Sync);
 
 impl<'dev> VgpuInstance<'dev> {
-    pub(crate) fn new(instance: nvmlVgpuInstance_t, device: &'dev Device<'dev>) -> Self {
+    /// Create a new vGPU instance wrapper from a raw vGPU instance ID.
+    ///
+    /// You probably don't need to use this yourself, but rather through
+    /// `Device::active_vgpus` (Linux only).
+    pub fn new(instance: nvmlVgpuInstance_t, device: &'dev Device<'dev>) -> Self {
         Self { instance, device }
     }
 
@@ -518,7 +522,7 @@ impl<'dev> VgpuInstance<'dev> {
     ///
     /// For Maxwell or newer fully supported devices
     #[doc(alias = "nvmlVgpuInstanceGetType")]
-    pub fn instance_type(&'dev self) -> Result<VgpuType<'dev>, NvmlError> {
+    pub fn instance_type(&self) -> Result<VgpuType<'dev>, NvmlError> {
         let sym = nvml_sym(self.device.nvml().lib.nvmlVgpuInstanceGetType.as_ref())?;
         let mut raw_type = 0;
         unsafe {
