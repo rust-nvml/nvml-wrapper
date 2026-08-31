@@ -4,9 +4,23 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 ## [Unreleased]
 
+## [0.13.0] (released 2026-08-31)
+
+### Changed
+
+* **Breaking**: `Device::active_vgpus()` now returns `Vec<VgpuInstance<'_>>` instead of raw vGPU instance ids, and drops its explicit lifetime clause (#130, #144)
+* Bindings updated to the NVML API version 13 (CUDA 13) header via `nvml-wrapper-sys` 0.10.0 (#139)
+
 ### Added
 
-* `Device::power_mizer_mode()` and `Device::set_power_mizer_mode()` for NVML v580 PowerMizer mode support
+* Greatly expanded vGPU API coverage (#130): a `VgpuInstance` wrapper with methods for UUID, VM id, framebuffer usage, encoder/FBC sessions and stats, license info, metadata, placement id, runtime state size, mdev UUID, guest driver version, ECC and accounting modes, and more; new `VgpuType` methods (`bar1_info()`, `fb_reservation()`, `gsp_heap_size()`); new vGPU enum and struct wrappers
+* `VgpuInstance::new()` is public, allowing construction from a raw vGPU instance id (#144)
+* `Device::power_mizer_mode()` and `Device::set_power_mizer_mode()` for NVML v580 PowerMizer mode support (#140)
+* `GpmSample::from_handle()` (unsafe) to reconstruct a `GpmSample` from its raw handle, with a documented ownership contract (#141, #143)
+
+### Fixed
+
+* `VgpuInstance::instance_type()` takes `&self` instead of `&'dev self`, so the returned `VgpuType` no longer keeps the instance borrowed for the device's lifetime (#144)
 
 ## [0.12.1] (released 2026-03-27)
 
