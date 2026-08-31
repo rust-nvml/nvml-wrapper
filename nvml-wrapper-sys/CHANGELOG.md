@@ -4,6 +4,12 @@ This file describes the changes / additions / fixes between bindings releases.
 
 ## Unreleased
 
+## 0.10.0 (released 2026-08-31)
+
+Bindings have been regenerated using the NVML 13.0.39 header (CUDA 13, sourced from NVIDIA/go-nvml v0.13.0-1) and bindgen 0.72.1 (#139).
+
+Existing function signatures are preserved; new CUDA 13 structs, enums, and function pointers are added. Some public constants changed value with the new header (e.g. `NVML_API_VERSION` is now 13, `NVML_BRAND_COUNT` and `NVML_GPM_METRIC_MAX` grew), hence the minor version bump. Field IDs 251-273 retain v12 numbering so the wrapper's runtime remapping logic is unaffected.
+
 ## 0.9.1 (released 2026-03-27)
 
 ### Fixed
