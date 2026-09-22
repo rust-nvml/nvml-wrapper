@@ -427,3 +427,127 @@ impl TryFrom<nvmlFanControlPolicy_t> for FanControlPolicy {
         }
     }
 }
+
+/// The state of a GPU's registration with an NVLink fabric.
+///
+/// This mirrors `nvmlGpuFabricState_t` in a Rust enum.
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum GpuFabricState {
+    /// The GPU is not part of an NVLink fabric.
+    NotSupported,
+    /// Fabric registration has not started.
+    NotStarted,
+    /// Fabric registration is in progress.
+    InProgress,
+    /// Fabric registration has completed. [GpuFabricState::Completed] does not imply NVLink health.
+    Completed,
+    /// An unrecognized state value reported by the driver.
+    Unknown(u8),
+}
+
+impl From<nvmlGpuFabricState_t> for GpuFabricState {
+    fn from(value: nvmlGpuFabricState_t) -> Self {
+        match u32::from(value) {
+            NVML_GPU_FABRIC_STATE_NOT_SUPPORTED => GpuFabricState::NotSupported,
+            NVML_GPU_FABRIC_STATE_NOT_STARTED => GpuFabricState::NotStarted,
+            NVML_GPU_FABRIC_STATE_IN_PROGRESS => GpuFabricState::InProgress,
+            NVML_GPU_FABRIC_STATE_COMPLETED => GpuFabricState::Completed,
+            _ => GpuFabricState::Unknown(value),
+        }
+    }
+}
+
+/// Overall NVLink fabric health.
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum GpuFabricHealthSummary {
+    /// Health reporting is not supported.
+    NotSupported,
+    /// The fabric is healthy.
+    Healthy,
+    /// The fabric is unhealthy.
+    Unhealthy,
+    /// The fabric is healthy but running at limited capacity.
+    LimitedCapacity,
+    /// An unrecognized value reported by the driver.
+    Unknown(u8),
+}
+
+impl From<u8> for GpuFabricHealthSummary {
+    fn from(value: u8) -> Self {
+        match u32::from(value) {
+            NVML_GPU_FABRIC_HEALTH_SUMMARY_NOT_SUPPORTED => Self::NotSupported,
+            NVML_GPU_FABRIC_HEALTH_SUMMARY_HEALTHY => Self::Healthy,
+            NVML_GPU_FABRIC_HEALTH_SUMMARY_UNHEALTHY => Self::Unhealthy,
+            NVML_GPU_FABRIC_HEALTH_SUMMARY_LIMITED_CAPACITY => Self::LimitedCapacity,
+            _ => Self::Unknown(value),
+        }
+    }
+}
+
+/// Represents the value of an NVLink fabric health flag.
+/// See `nvml.h` for more details.
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum GpuFabricHealthFlag {
+    /// The flag is not supported.
+    NotSupported,
+    /// The condition is present.
+    True,
+    /// The condition is absent.
+    False,
+    /// An unrecognized value reported by the driver.
+    Unknown(u32),
+}
+
+impl From<u32> for GpuFabricHealthFlag {
+    fn from(value: u32) -> Self {
+        match value {
+            0 => Self::NotSupported,
+            1 => Self::True,
+            2 => Self::False,
+            _ => Self::Unknown(value),
+        }
+    }
+}
+
+/// NVLink fabric misconfiguration reported in the health mask.
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub enum GpuFabricIncorrectConfig {
+    /// The flag is not supported.
+    NotSupported,
+    /// No misconfiguration.
+    None,
+    /// Incorrect system GUID.
+    IncorrectSystemGuid,
+    /// Incorrect chassis serial number.
+    IncorrectChassisSerial,
+    /// No partition assigned.
+    NoPartition,
+    /// Insufficient NVLink resources.
+    InsufficientNvlinks,
+    /// An unrecognized value reported by the driver.
+    Unknown(u32),
+}
+
+impl From<u32> for GpuFabricIncorrectConfig {
+    fn from(value: u32) -> Self {
+        match value {
+            NVML_GPU_FABRIC_HEALTH_MASK_INCORRECT_CONFIGURATION_NOT_SUPPORTED => Self::NotSupported,
+            NVML_GPU_FABRIC_HEALTH_MASK_INCORRECT_CONFIGURATION_NONE => Self::None,
+            NVML_GPU_FABRIC_HEALTH_MASK_INCORRECT_CONFIGURATION_INCORRECT_SYSGUID => {
+                Self::IncorrectSystemGuid
+            }
+            NVML_GPU_FABRIC_HEALTH_MASK_INCORRECT_CONFIGURATION_INCORRECT_CHASSIS_SN => {
+                Self::IncorrectChassisSerial
+            }
+            NVML_GPU_FABRIC_HEALTH_MASK_INCORRECT_CONFIGURATION_NO_PARTITION => Self::NoPartition,
+            NVML_GPU_FABRIC_HEALTH_MASK_INCORRECT_CONFIGURATION_INSUFFICIENT_NVLINKS => {
+                Self::InsufficientNvlinks
+            }
+            _ => Self::Unknown(value),
+        }
+    }
+}

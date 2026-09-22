@@ -2,7 +2,10 @@ use crate::bitmasks::device::FbcFlags;
 use crate::enum_wrappers::device::{
     BridgeChip, Clock, EncoderType, FbcSessionType, PerformanceState, SampleValueType,
 };
-use crate::enums::device::{FirmwareVersion, SampleValue, UsedGpuMemory};
+use crate::enums::device::{
+    FirmwareVersion, GpuFabricHealthFlag, GpuFabricHealthSummary, GpuFabricIncorrectConfig,
+    GpuFabricState, SampleValue, UsedGpuMemory,
+};
 use crate::error::{nvml_try, Bits, NvmlError};
 use crate::ffi::bindings::*;
 use crate::structs::device::FieldId;
@@ -1029,6 +1032,105 @@ impl VgpuSchedulerSetState {
             enableARRMode: self.enable_arr_mode,
             schedulerPolicy: self.scheduler_policy,
             schedulerParams: self.scheduler_params.as_c(),
+        }
+    }
+}
+
+/// Information about a GPU's registration with an NVLink fabric.
+///
+/// Returned from `Device.gpu_fabric_info()`.
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct GpuFabricInfo {
+    /// UUID of the NVLink fabric the GPU is registered with.
+    /// All zeroes when the GPU is not part of a multi-node NVLink fabric.
+    pub cluster_uuid: [u8; 16],
+    /// Status of the fabric registration process as a `nvmlReturn_t`.
+    /// This is only meaningful once `state` is [`GpuFabricState::Completed`].
+    /// Use [`GpuFabricInfo::registration_result`] to interpret it as an
+    /// [`NvmlError`].
+    pub status: u32,
+    /// Clique ID of the GPU within the cluster.
+    /// Only valid on NVLink multi-node systems.
+    pub clique_id: u32,
+    /// State of the GPU's fabric registration.
+    pub state: GpuFabricState,
+    /// NVLink fabric health.
+    pub health: GpuFabricHealth,
+}
+
+impl GpuFabricInfo {
+    /// The fabric registration [`status`](Self::status) interpreted as an
+    /// [`NvmlError`]: `Ok(())` on success, otherwise the corresponding error.
+    ///
+    /// Only meaningful once [`state`](Self::state) is
+    /// [`GpuFabricState::Completed`].
+    pub fn registration_result(&self) -> Result<(), NvmlError> {
+        nvml_try(self.status)
+    }
+}
+
+impl From<nvmlGpuFabricInfoV_t> for GpuFabricInfo {
+    fn from(value: nvmlGpuFabricInfoV_t) -> Self {
+        GpuFabricInfo {
+            cluster_uuid: value.clusterUuid,
+            status: value.status,
+            clique_id: value.cliqueId,
+            state: GpuFabricState::from(value.state),
+            health: GpuFabricHealth::from_raw(value.healthMask, value.healthSummary),
+        }
+    }
+}
+
+/// NVLink fabric health, decoded from the driver's health mask and summary.
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct GpuFabricHealth {
+    /// Overall health summary.
+    pub summary: GpuFabricHealthSummary,
+    /// Whether NVLink bandwidth is degraded.
+    pub degraded_bandwidth: GpuFabricHealthFlag,
+    /// Whether NVLink route recovery is in progress.
+    pub route_recovery: GpuFabricHealthFlag,
+    /// Whether NVLink route recovery has failed or been aborted.
+    pub route_unhealthy: GpuFabricHealthFlag,
+    /// Whether NVLink access timeout recovery is in progress.
+    pub access_timeout_recovery: GpuFabricHealthFlag,
+    /// Reported misconfiguration, if any.
+    pub incorrect_config: GpuFabricIncorrectConfig,
+}
+
+impl GpuFabricHealth {
+    fn from_raw(mask: u32, summary: u8) -> Self {
+        // Each field is a sub-range of `healthMask`. See `NVML_GPU_FABRIC_HEALTH_MASK` in nvml.h.
+        let field = |shift: u32, width: u32| (mask >> shift) & ((1u32 << width) - 1);
+        GpuFabricHealth {
+            summary: summary.into(),
+            degraded_bandwidth: field(
+                NVML_GPU_FABRIC_HEALTH_MASK_SHIFT_DEGRADED_BW,
+                NVML_GPU_FABRIC_HEALTH_MASK_WIDTH_DEGRADED_BW,
+            )
+            .into(),
+            route_recovery: field(
+                NVML_GPU_FABRIC_HEALTH_MASK_SHIFT_ROUTE_RECOVERY,
+                NVML_GPU_FABRIC_HEALTH_MASK_WIDTH_ROUTE_RECOVERY,
+            )
+            .into(),
+            route_unhealthy: field(
+                NVML_GPU_FABRIC_HEALTH_MASK_SHIFT_ROUTE_UNHEALTHY,
+                NVML_GPU_FABRIC_HEALTH_MASK_WIDTH_ROUTE_UNHEALTHY,
+            )
+            .into(),
+            access_timeout_recovery: field(
+                NVML_GPU_FABRIC_HEALTH_MASK_SHIFT_ACCESS_TIMEOUT_RECOVERY,
+                NVML_GPU_FABRIC_HEALTH_MASK_WIDTH_ACCESS_TIMEOUT_RECOVERY,
+            )
+            .into(),
+            incorrect_config: field(
+                NVML_GPU_FABRIC_HEALTH_MASK_SHIFT_INCORRECT_CONFIGURATION,
+                NVML_GPU_FABRIC_HEALTH_MASK_WIDTH_INCORRECT_CONFIGURATION,
+            )
+            .into(),
         }
     }
 }

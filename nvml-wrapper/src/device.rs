@@ -4511,6 +4511,38 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
+    Gets the NVLink fabric registration info for this [`Device`].
+
+    On multi-node NVLink systems, this reports the NVLink fabric UUID, the clique
+    id, fabric health, and the state of the device's registration with the fabric.
+    Devices that are not part of an NVLink fabric report
+    [`GpuFabricState::NotSupported`](crate::enums::device::GpuFabricState::NotSupported).
+
+    # Errors
+
+    * `Uninitialized`, if the library has not been successfully initialized
+    * `InvalidArg`, if this `Device` is invalid
+    * `NotSupported`, if this `Device` does not support this driver call
+    * `Unknown`, on any unexpected error
+    */
+    #[doc(alias = "nvmlDeviceGetGpuFabricInfoV")]
+    pub fn gpu_fabric_info(&self) -> Result<GpuFabricInfo, NvmlError> {
+        let sym = nvml_sym(self.nvml.lib.nvmlDeviceGetGpuFabricInfoV.as_ref())?;
+
+        let info = unsafe {
+            let mut info: nvmlGpuFabricInfoV_t = mem::zeroed();
+            // Implements NVML_STRUCT_VERSION(GpuFabricInfo, 3), as detailed in nvml.h
+            info.version =
+                (mem::size_of::<nvmlGpuFabricInfo_v3_t>() | (3_usize << 24_usize)) as u32;
+            nvml_try(sym(self.device, &mut info))?;
+
+            info
+        };
+
+        Ok(GpuFabricInfo::from(info))
+    }
+
+    /**
     Gets the power source of this [`Device`].
 
     # Errors
