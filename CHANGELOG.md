@@ -13,6 +13,14 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 * `ScopeId` and `FieldValueRequest` in `structs::device`, for querying scoped fields such as per-link NVLink counters and module-scope power (#55)
 
+### Fixed
+
+* The minimum dependency versions in `Cargo.toml` now build. `serde = "1.0"` allowed versions that `bitflags`' serde support fails to compile against, and `thiserror = "1.0"` allowed versions that fail to derive `NvmlError`. Each dependency's minimum is now the version CI tests: `bitflags` 2.13.2, `libloading` 0.8.9, `serde` and `serde_derive` 1.0.229, `static_assertions` 1.1.0, `thiserror` 1.0.69 (#131)
+
+### Rust Version Support
+
+The MSRV of this release is 1.71.0, raised from 1.60.0. The current releases of `libloading` 0.8 and `serde_derive` 1 require Rust 1.71, so a fresh dependency resolve already needed 1.71 (#131).
+
 ## [0.13.0] (released 2026-08-31)
 
 ### Changed

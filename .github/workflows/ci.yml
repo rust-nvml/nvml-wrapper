@@ -15,7 +15,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         rust:
           - stable
-          - 1.60.0
+          - 1.71.0
         # Avoid trying to build on macos-latest with Rust 1.51
         #
         # Rust < 1.54 doesn't work with xcode 14
@@ -69,3 +69,25 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: clippy
+          args: --all-targets --all-features -- -D warnings
+
+  minimal-versions:
+    name: Minimal dependency versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+      # Resolve each direct dependency to the lowest version its requirement
+      # allows, so a version floor in Cargo.toml that is too low fails here.
+      - uses: actions-rs/cargo@v1
+        with:
+          command: update
+          args: -Z direct-minimal-versions
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --all-features --all-targets

@@ -4,6 +4,10 @@ This file describes the changes / additions / fixes between bindings releases.
 
 ## Unreleased
 
+### Rust Version Support
+
+The MSRV is now 1.71.0, raised from 1.60.0, and the minimum `libloading` version is 0.8.9. The current releases of `libloading` 0.8 require Rust 1.71 (#131).
+
 ## 0.10.0 (released 2026-08-31)
 
 Bindings have been regenerated using the NVML 13.0.39 header (CUDA 13, sourced from NVIDIA/go-nvml v0.13.0-1) and bindgen 0.72.1 (#139).
