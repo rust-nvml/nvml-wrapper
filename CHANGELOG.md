@@ -4,6 +4,15 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 ## [Unreleased]
 
+### Changed
+
+* **Breaking**: `Device::field_values_for()` takes an iterator of `FieldValueRequest` (a field ID plus a scope ID) instead of `&[FieldId]`; wrap existing IDs with `FieldValueRequest::id()` (#55)
+* **Breaking**: `FieldValueSample` has a new public field, `scope: ScopeId` (#55)
+
+### Added
+
+* `ScopeId` and `FieldValueRequest` in `structs::device`, for querying scoped fields such as per-link NVLink counters and module-scope power (#55)
+
 ## [0.13.0] (released 2026-08-31)
 
 ### Changed

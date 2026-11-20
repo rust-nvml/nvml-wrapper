@@ -174,9 +174,53 @@ pub struct RetiredPage {
 /// Populate this newtype with the constants `nvml_wrapper::sys_exports::field_id::*`.
 ///
 /// Used in `FieldValue` and `Device.field_values_for()`.
-#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct FieldId(pub u32);
+
+/// Can be used to specify a scope for certain `FieldId`s.
+///
+/// See NVIDIA's documentation for fields to see which ones take a scope, e.g. for NVLINK counters,
+/// the field scope can be used to signify link index.
+///
+/// Default value is 0 which is appropriate
+///
+/// Used in `FieldValue` and `Device.field_values_for()`.
+#[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct ScopeId(pub u32);
+
+/// Specify a field ID and an optional scope ID for requesting data samples
+/// from a device.
+///
+/// Used in [`crate::struct_wrappers::device::FieldValueSample`] and
+/// [`crate::device::Device::field_values_for()`].
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+pub struct FieldValueRequest {
+    /// Populate this newtype with the constants `nvml_wrapper::sys_exports::field_id::*`.
+    pub id: FieldId,
+    /// Populate this with a [`ScopeId`] if applicable for the [`FieldId`]. Otherwise use the
+    /// default scope ID of 0.
+    ///
+    /// See NVIDIA's field ID constant docs (`NVML_FI_*`) to understand what scope
+    /// IDs may be valid for which field IDs.
+    pub scope_id: ScopeId,
+}
+
+impl FieldValueRequest {
+    /// Convenience constructor for requesting fields that do not use a scope
+    ///
+    /// Uses the default scope of 0.
+    pub fn id(id: FieldId) -> Self {
+        Self::id_with_scope(id, Default::default())
+    }
+
+    /// Construct a `FieldValueRequest` from its parts
+    pub fn id_with_scope(id: FieldId, scope_id: ScopeId) -> Self {
+        Self { id, scope_id }
+    }
+}
 
 /// Returned from `Device.mig_mode()`
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
