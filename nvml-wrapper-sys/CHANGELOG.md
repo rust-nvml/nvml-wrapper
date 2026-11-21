@@ -6,7 +6,11 @@ This file describes the changes / additions / fixes between bindings releases.
 
 ### Rust Version Support
 
-The MSRV is now 1.71.0, raised from 1.60.0, and the minimum `libloading` version is 0.8.9. The current releases of `libloading` 0.8 require Rust 1.71 (#131).
+The MSRV of this release is 1.71.0. This is needed for `libloading` 0.8.9, the minimum version this release depends on (#146).
+
+### Dependencies
+
+* `libloading`: `0.8.1` -> `0.8.9`
 
 ## 0.10.0 (released 2026-08-31)
 
