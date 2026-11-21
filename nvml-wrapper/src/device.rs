@@ -7654,10 +7654,7 @@ mod test {
             .field_values_for(&field_reqs)
             .expect("field_values_for call succeeded");
 
-        println!(
-            "{:<52} {:>6} {:>10}  {}",
-            "NAME", "V12_ID", "DRIVER_ID", "RESULT"
-        );
+        println!("{:<52} {:>6} {:>10}  RESULT", "NAME", "V12_ID", "DRIVER_ID");
         println!("{}", "-".repeat(90));
 
         for ((name, v12_id), sample) in fields.iter().zip(results.iter()) {

@@ -1,0 +1,4 @@
+# Prefer dependency versions whose `rust-version` is compatible with ours when
+# updating Cargo.lock. Cargo before 1.84 ignores this setting.
+[resolver]
+incompatible-rust-versions = "fallback"
