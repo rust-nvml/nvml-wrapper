@@ -189,7 +189,7 @@ mod test {
             .expect("registration");
 
         let data = match set.wait(10_000) {
-            Err(NvmlError::Timeout) => return (),
+            Err(NvmlError::Timeout) => return,
             Ok(d) => d,
             _ => panic!("An error other than `Timeout` occurred"),
         };
