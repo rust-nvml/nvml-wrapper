@@ -8,6 +8,7 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 * **Breaking**: `Device::field_values_for()` takes an iterator of `FieldValueRequest` (a field ID plus a scope ID) instead of `&[FieldId]`; wrap existing IDs with `FieldValueRequest::id()` (#55)
 * **Breaking**: `FieldValueSample` has a new public field, `scope: ScopeId` (#55)
+* `Device::samples()` returns an empty `Vec` instead of `Err(NvmlError::NotFound)` when NVML has no samples for the requested period. A caller that matched `NotFound` should check for an empty `Vec` instead (#150)
 
 ### Added
 
