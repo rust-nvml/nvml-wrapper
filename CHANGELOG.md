@@ -17,6 +17,10 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 * The minimum dependency versions in `Cargo.toml` now build: `serde = "1.0"` allowed versions that `bitflags`' serde support fails to compile against, and `thiserror = "1.0"` allowed versions that fail to derive `NvmlError` (#146)
 
+### Internal
+
+* The `basic_usage` example formats byte counts and PCIe transfer rates itself instead of using the `pretty-bytes` dev-dependency, which pulled in `atty` (RUSTSEC-2024-0375: unmaintained; RUSTSEC-2021-0145: potential unaligned read) (#65, #147)
+
 ### Rust Version Support
 
 The MSRV of this release is 1.71.0. This is needed for `libloading` 0.8.9 and `serde_derive` 1.0.229, the minimum versions this release depends on (#146).

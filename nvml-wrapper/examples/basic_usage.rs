@@ -1,7 +1,25 @@
 use nvml_wrapper::enum_wrappers::device::{Clock, TemperatureSensor};
 use nvml_wrapper::error::NvmlError;
 use nvml_wrapper::{cuda_driver_version_major, cuda_driver_version_minor, Nvml};
-use pretty_bytes::converter::convert;
+
+/// Formats `value` with an SI prefix (powers of 1000), rounded to at most two
+/// decimal places, e.g. `si(12_884_901_888, "B")` returns `"12.88 GB"`.
+fn si(value: u64, unit: &str) -> String {
+    const PREFIXES: [&str; 7] = ["", "k", "M", "G", "T", "P", "E"];
+    let mut scaled = value as f64;
+    let mut i = 0;
+    while scaled >= 1000.0 && i < PREFIXES.len() - 1 {
+        scaled /= 1000.0;
+        i += 1;
+    }
+    format!(
+        "{} {}{}",
+        // Round with `{:.2}`, then parse back to drop trailing zeros (8.00 prints as 8).
+        format!("{:.2}", scaled).parse::<f64>().unwrap(),
+        PREFIXES[i],
+        unit
+    )
+}
 
 fn main() -> Result<(), NvmlError> {
     let nvml = Nvml::init()?;
@@ -23,7 +41,7 @@ fn main() -> Result<(), NvmlError> {
     let link_speed = device
         .pcie_link_speed()
         .map(u64::from)
-        // Convert megabytes to bytes
+        // MT/s to T/s
         .map(|x| x * 1000000)?;
     let link_width = device.current_pcie_link_width()?;
     let max_link_gen = device.max_pcie_link_gen()?;
@@ -32,7 +50,7 @@ fn main() -> Result<(), NvmlError> {
         .max_pcie_link_speed()?
         .as_integer()
         .map(u64::from)
-        // Convert megabytes to bytes
+        // MT/s to T/s
         .map(|x| x * 1000000);
     let cuda_cores = device.num_cores()?;
     let architecture = device.architecture()?;
@@ -52,19 +70,17 @@ fn main() -> Result<(), NvmlError> {
         temperature = temperature,
         graphics_clock = graphics_clock,
         mem_clock = mem_clock,
-        used_mem = convert(mem_info.used as _),
-        total_mem = convert(mem_info.total as _),
+        used_mem = si(mem_info.used, "B"),
+        total_mem = si(mem_info.total, "B"),
         link_gen = link_gen,
-        // Convert byte output to transfers/sec
-        link_speed = convert(link_speed as _).replace("B", "T") + "/s",
+        link_speed = si(link_speed, "T/s"),
         link_width = link_width,
         max_link_gen = max_link_gen,
         max_link_width = max_link_width,
         cuda_cores = cuda_cores,
         architecture = architecture,
         max_link_speed = max_link_speed
-            // Convert byte output to transfers/sec
-            .map(|x| convert(x as _).replace("B", "T") + "/s")
+            .map(|x| si(x, "T/s"))
             .unwrap_or_else(|| "<unknown>".into()),
     );
 
