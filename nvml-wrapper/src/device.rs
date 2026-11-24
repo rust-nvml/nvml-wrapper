@@ -2010,12 +2010,16 @@ impl<'nvml> Device<'nvml> {
     /**
     Sets fan control policy.
 
+    Requires root/admin permissions.
+
     You can determine valid fan indices using [`Self::num_fans()`].
 
     # Errors
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if this `Device` is invalid or `fan_idx` is invalid
+    * `NoPermission`, if the user doesn't have permission to perform this
+      operation. The NVML header does not list this error for this function.
     * `NotSupported`, if this `Device` does not have a fan
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `UnexpectedVariant`, for which you can read the docs for
@@ -2039,6 +2043,8 @@ impl<'nvml> Device<'nvml> {
     /**
     Sets the speed of a specified fan.
 
+    Requires root/admin permissions.
+
     WARNING: This function changes the fan control policy to manual. It means that YOU have to monitor the temperature and adjust the fan speed accordingly.
     If you set the fan speed too low you can burn your GPU! Use [`Device::set_default_fan_speed`] to restore default control policy.
 
@@ -2048,6 +2054,8 @@ impl<'nvml> Device<'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if this `Device` is invalid or `fan_idx` is invalid
+    * `NoPermission`, if the user doesn't have permission to perform this
+      operation. The NVML header does not list this error for this function.
     * `NotSupported`, if this `Device` does not have a fan
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `UnexpectedVariant`, for which you can read the docs for
@@ -2065,7 +2073,9 @@ impl<'nvml> Device<'nvml> {
     }
 
     /**
-    Sets the the fan control policy to default.
+    Sets the fan control policy to default.
+
+    Requires root/admin permissions.
 
     You can determine valid fan indices using [`Self::num_fans()`].
 
@@ -2073,6 +2083,8 @@ impl<'nvml> Device<'nvml> {
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if this `Device` is invalid or `fan_idx` is invalid
+    * `NoPermission`, if the user doesn't have permission to perform this
+      operation. The NVML header does not list this error for this function.
     * `NotSupported`, if this `Device` does not have a fan
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
     * `UnexpectedVariant`, for which you can read the docs for
