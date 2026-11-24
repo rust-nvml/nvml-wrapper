@@ -37,7 +37,7 @@ impl TryFrom<nvmlNvLinkUtilizationControl_t> for UtilizationControl {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlNvLinkUtilizationControl_t) -> Result<Self, Self::Error> {
         let bits = value.pktfilter;

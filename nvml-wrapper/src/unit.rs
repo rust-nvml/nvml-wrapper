@@ -166,7 +166,7 @@ impl<'nvml> Unit<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if the unit is invalid
     * `NotSupported`, if this is not an S-class product
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support

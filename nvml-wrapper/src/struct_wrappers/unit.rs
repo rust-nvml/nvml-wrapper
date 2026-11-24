@@ -24,7 +24,7 @@ impl TryFrom<nvmlUnitFanSpeeds_t> for FansInfo {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlUnitFanSpeeds_t) -> Result<Self, Self::Error> {
         let fans = value
@@ -59,7 +59,7 @@ impl TryFrom<nvmlUnitFanInfo_t> for FanInfo {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlUnitFanInfo_t) -> Result<Self, Self::Error> {
         Ok(FanInfo {
@@ -108,7 +108,7 @@ impl TryFrom<nvmlPSUInfo_t> for PsuInfo {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlPSUInfo_t) -> Result<Self, Self::Error> {
         unsafe {
@@ -144,7 +144,7 @@ impl TryFrom<nvmlUnitInfo_t> for UnitInfo {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlUnitInfo_t) -> Result<Self, Self::Error> {
         unsafe {
@@ -180,7 +180,7 @@ impl TryFrom<nvmlHwbcEntry_t> for HwbcEntry {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlHwbcEntry_t) -> Result<Self, Self::Error> {
         unsafe {

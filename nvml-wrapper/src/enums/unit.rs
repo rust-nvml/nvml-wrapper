@@ -22,7 +22,7 @@ impl TryFrom<nvmlLedState_t> for LedState {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlLedState_t) -> Result<Self, Self::Error> {
         let color = value.color;

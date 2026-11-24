@@ -28,7 +28,7 @@ impl TryFrom<nvmlExcludedDeviceInfo_t> for ExcludedDeviceInfo {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlExcludedDeviceInfo_t) -> Result<Self, Self::Error> {
         unsafe {

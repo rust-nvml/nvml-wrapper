@@ -21,9 +21,13 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 ### Documentation
 
 * `Device::set_fan_speed()`, `Device::set_default_fan_speed()` and `Device::set_fan_control_policy()` state that they require root/admin permissions and list `NoPermission` among their errors; the NVML header lists `NoPermission` for none of the three (#64)
+* The `UnexpectedVariant` entry in 41 error lists, which ended mid-sentence, now reads "check that error's docs for more info"
+* `FanControlPolicy` links to `Device::fan_control_policy()`; the link pointed at a method that does not exist
+* `DetachGpuState` and `PcieLinkState` no longer have a broken link to `Device::remove()` in docs built for a platform other than Linux
 
 ### Internal
 
+* CI builds the docs with `RUSTDOCFLAGS="-D warnings"`
 * The `basic_usage` example formats byte counts and PCIe transfer rates itself instead of using the `pretty-bytes` dev-dependency, which pulled in `atty` (RUSTSEC-2024-0375: unmaintained; RUSTSEC-2021-0145: potential unaligned read) (#65, #147)
 
 ### Rust Version Support

@@ -607,7 +607,14 @@ pub enum FbcSessionType {
     HwEnc,
 }
 
-/// Options to pass to [`crate::Device::remove()`].
+#[cfg_attr(
+    target_os = "linux",
+    doc = "Options to pass to [`crate::Device::remove()`]."
+)]
+#[cfg_attr(
+    not(target_os = "linux"),
+    doc = "Options to pass to `Device::remove()`, which is only available on Linux."
+)]
 #[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlDetachGpuState_enum")]
@@ -618,7 +625,14 @@ pub enum DetachGpuState {
     Remove,
 }
 
-/// Options to pass to [`crate::Device::remove()`].
+#[cfg_attr(
+    target_os = "linux",
+    doc = "Options to pass to [`crate::Device::remove()`]."
+)]
+#[cfg_attr(
+    not(target_os = "linux"),
+    doc = "Options to pass to `Device::remove()`, which is only available on Linux."
+)]
 #[derive(EnumWrapper, Debug, Clone, Copy, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[wrap(c_enum = "nvmlPcieLinkState_enum")]
