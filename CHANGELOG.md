@@ -15,6 +15,7 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 ### Fixed
 
+* `Device::process_utilization_stats()` returns an empty `Vec` instead of `Err(NvmlError::NotFound)` when NVML has no samples for the requested period, such as after the only process using the GPU has exited (#56)
 * The minimum dependency versions in `Cargo.toml` now build: `serde = "1.0"` allowed versions that `bitflags`' serde support fails to compile against, and `thiserror = "1.0"` allowed versions that fail to derive `NvmlError` (#146)
 
 ### Documentation
