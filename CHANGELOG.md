@@ -17,6 +17,10 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 * The minimum dependency versions in `Cargo.toml` now build: `serde = "1.0"` allowed versions that `bitflags`' serde support fails to compile against, and `thiserror = "1.0"` allowed versions that fail to derive `NvmlError` (#146)
 
+### Documentation
+
+* `Device::set_fan_speed()`, `Device::set_default_fan_speed()` and `Device::set_fan_control_policy()` list `NoPermission` among their errors, although the NVML header does not. `set_fan_control_policy()` states that it requires root/admin permissions, as the header does (#64)
+
 ### Internal
 
 * The `basic_usage` example formats byte counts and PCIe transfer rates itself instead of using the `pretty-bytes` dev-dependency, which pulled in `atty` (RUSTSEC-2024-0375: unmaintained; RUSTSEC-2021-0145: potential unaligned read) (#65, #147)
