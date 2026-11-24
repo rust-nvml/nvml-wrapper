@@ -27,7 +27,3 @@ nvml-wrapper-sys = { version = "0.10.0", path = "../nvml-wrapper-sys" }
 wrapcenum-derive = "0.4.1"
 libloading = "0.8.9"
 static_assertions = "1.1"
-
-[dev-dependencies]
-# Used in the `basic_usage` example
-pretty-bytes = "0.2.2"
