@@ -3563,13 +3563,16 @@ impl<'nvml> Device<'nvml> {
     The advantage of using this method for samples in contrast to polling via
     existing methods is to get higher frequency data at a lower polling cost.
 
+    Returns an empty `Vec` if NVML has no samples newer than `last_seen_timestamp`
+    (or none at all when it is `None`), which NVML reports as
+    `NVML_ERROR_NOT_FOUND`.
+
     # Errors
 
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this query is not supported by this `Device`
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `NotFound`, if sample entries are not found
     * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
@@ -3583,12 +3586,6 @@ impl<'nvml> Device<'nvml> {
     # use nvml_wrapper::Nvml;
     # use nvml_wrapper::error::*;
     # fn main() -> Result<(), NvmlError> {
-    # match test() {
-    # Err(NvmlError::NotFound) => Ok(()),
-    # other => other,
-    # }
-    # }
-    # fn test() -> Result<(), NvmlError> {
     # let nvml = Nvml::init()?;
     # let device = nvml.device_by_index(0)?;
     use nvml_wrapper::enum_wrappers::device::Sampling;
@@ -3622,21 +3619,25 @@ impl<'nvml> Device<'nvml> {
 
         unsafe {
             let mut val_type: nvmlValueType_t = mem::zeroed();
-            let count = match self.samples_count(&sample_type, timestamp)? {
-                0 => return Ok(vec![]),
-                value => value,
+            let count = match self.samples_count(&sample_type, timestamp) {
+                Ok(0) | Err(NvmlError::NotFound) => return Ok(vec![]),
+                Ok(value) => value,
+                Err(e) => return Err(e),
             };
             let mut samples: Vec<nvmlSample_t> = vec![mem::zeroed(); count as usize];
             let mut new_count = count;
 
-            nvml_try(sym(
+            match nvml_try(sym(
                 self.device,
                 sample_type.as_c(),
                 timestamp,
                 &mut val_type,
                 &mut new_count,
                 samples.as_mut_ptr(),
-            ))?;
+            )) {
+                Err(NvmlError::NotFound) => return Ok(vec![]),
+                r => r?,
+            }
 
             let val_type_rust = SampleValueType::try_from(val_type)?;
             Ok(samples
