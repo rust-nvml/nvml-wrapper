@@ -19,7 +19,7 @@ This file describes the changes / additions / fixes between wrapper releases, tr
 
 ### Documentation
 
-* `Device::set_fan_speed()`, `Device::set_default_fan_speed()` and `Device::set_fan_control_policy()` list `NoPermission` among their errors, although the NVML header does not. `set_fan_control_policy()` states that it requires root/admin permissions, as the header does (#64)
+* `Device::set_fan_speed()`, `Device::set_default_fan_speed()` and `Device::set_fan_control_policy()` state that they require root/admin permissions and list `NoPermission` among their errors; the NVML header lists `NoPermission` for none of the three (#64)
 
 ### Internal
 
