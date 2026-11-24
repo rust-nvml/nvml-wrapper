@@ -2320,6 +2320,9 @@ impl<'nvml> Device<'nvml> {
     a timestamp retrieved from a previous query will target samples taken since that
     timestamp.
 
+    Returns an empty `Vec` if NVML has no samples in the target period, which NVML
+    reports as `NVML_ERROR_NOT_FOUND`.
+
     # Errors
 
     * `Uninitialized`, if the library has not been successfully initialized
@@ -2344,19 +2347,23 @@ impl<'nvml> Device<'nvml> {
 
         unsafe {
             let last_seen_timestamp = last_seen_timestamp.into().unwrap_or(0);
-            let mut count = match self.process_utilization_stats_count(last_seen_timestamp)? {
-                0 => return Ok(vec![]),
-                v => v,
+            let mut count = match self.process_utilization_stats_count(last_seen_timestamp) {
+                Ok(0) | Err(NvmlError::NotFound) => return Ok(vec![]),
+                Ok(v) => v,
+                Err(e) => return Err(e),
             };
             let mut utilization_samples: Vec<nvmlProcessUtilizationSample_t> =
                 vec![mem::zeroed(); count as usize];
 
-            nvml_try(sym(
+            match nvml_try(sym(
                 self.device,
                 utilization_samples.as_mut_ptr(),
                 &mut count,
                 last_seen_timestamp,
-            ))?;
+            )) {
+                Err(NvmlError::NotFound) => return Ok(vec![]),
+                r => r?,
+            }
             utilization_samples.truncate(count as usize);
 
             Ok(utilization_samples
