@@ -271,7 +271,7 @@ pub enum DeviceArchitecture {
     Ada,
     /// <https://en.wikipedia.org/wiki/Hopper_(microarchitecture)>
     Hopper,
-    /// https://en.wikipedia.org/wiki/Blackwell_(microarchitecture)
+    /// <https://en.wikipedia.org/wiki/Blackwell_(microarchitecture)>
     Blackwell,
     /// Unknown device architecture (most likely something newer).
     Unknown,
@@ -405,7 +405,7 @@ pub enum FanControlPolicy {
     Manual = NVML_FAN_POLICY_MANUAL,
 }
 
-/// Returned by [`crate::Device::get_fan_control_policy()`].
+/// Returned by [`crate::Device::fan_control_policy()`].
 ///
 /// Policy used for fan control.
 // TODO: technically this is an "enum wrapper" but the type on the C side isn't

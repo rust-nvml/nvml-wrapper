@@ -693,7 +693,7 @@ impl Nvml {
 
     * `InvalidArg`, if the device is invalid
     * `NotSupported`, if this `Device` or the OS does not support this feature
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Platform Support

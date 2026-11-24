@@ -173,7 +173,7 @@ impl TryFrom<nvmlBridgeChipInfo_t> for BridgeChipInfo {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlBridgeChipInfo_t) -> Result<Self, Self::Error> {
         let fw_version = FirmwareVersion::from(value.fwVersion);
@@ -210,7 +210,7 @@ impl TryFrom<nvmlBridgeChipHierarchy_t> for BridgeChipHierarchy {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlBridgeChipHierarchy_t) -> Result<Self, Self::Error> {
         let chips_hierarchy = value
@@ -464,7 +464,7 @@ impl TryFrom<nvmlEncoderSessionInfo_t> for EncoderSessionInfo {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlEncoderSessionInfo_t) -> Result<Self, Self::Error> {
         Ok(Self {
@@ -564,7 +564,7 @@ impl TryFrom<nvmlFieldValue_t> for FieldValueSample {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     */
     fn try_from(value: nvmlFieldValue_t) -> Result<Self, Self::Error> {
         Ok(Self {
@@ -644,7 +644,7 @@ impl TryFrom<nvmlFBCSessionInfo_t> for FbcSessionInfo {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `IncorrectBits`, if the `sessionFlags` from the given struct do match the
       wrapper definition
     */

@@ -166,7 +166,7 @@ impl<'nvml> Device<'nvml> {
     * does not support the feature that is being queried (e.g. enabling/disabling auto
     * boosted clocks is not supported by this `Device`).
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -238,7 +238,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support auto boosted clocks
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -443,7 +443,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -1285,7 +1285,7 @@ impl<'nvml> Device<'nvml> {
 
     # Errors
 
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `IncorrectBits`, if bits are found in a session's info flags that don't
       match the flags in this wrapper
     * `Uninitialized`, if the library has not been successfully initialized
@@ -1435,7 +1435,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
     */
     // Checked against local
@@ -1464,7 +1464,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
     */
     // Checked against local
@@ -1494,7 +1494,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if the platform is not Windows
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -1537,7 +1537,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -1769,7 +1769,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -1799,7 +1799,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -1824,7 +1824,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -1854,7 +1854,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -1988,7 +1988,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid or `fan_idx` is invalid
     * `NotSupported`, if this `Device` does not have a fan
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -2022,7 +2022,7 @@ impl<'nvml> Device<'nvml> {
       operation. The NVML header does not list this error for this function.
     * `NotSupported`, if this `Device` does not have a fan
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -2058,7 +2058,7 @@ impl<'nvml> Device<'nvml> {
       operation. The NVML header does not list this error for this function.
     * `NotSupported`, if this `Device` does not have a fan
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -2087,7 +2087,7 @@ impl<'nvml> Device<'nvml> {
       operation. The NVML header does not list this error for this function.
     * `NotSupported`, if this `Device` does not have a fan
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -2137,7 +2137,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -2215,7 +2215,7 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if this `Device` is invalid
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
     */
     // Tested as part of `.running_graphics_processes()`
@@ -2288,7 +2288,7 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if this `Device` is invalid
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
     */
     #[doc(alias = "nvmlDeviceGetGraphicsRunningProcesses_v2")]
@@ -3150,7 +3150,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -3183,7 +3183,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Platform Support
@@ -3525,7 +3525,7 @@ impl<'nvml> Device<'nvml> {
     * `InvalidArg`, if this `Device` is invalid
     * `NotSupported`, if this `Device` doesn't support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -4162,7 +4162,7 @@ impl<'nvml> Device<'nvml> {
 
     * `InvalidArg`, if either `Device` is invalid
     * `NotSupported`, if this `Device` or the OS does not support this feature
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, an error has occurred in the underlying topology discovery
 
     # Platform Support
@@ -5029,7 +5029,7 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `InvalidArg`, if the `Device` is invalid
     * `NotSupported`, if this `Device` does not support this feature
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
@@ -6150,7 +6150,7 @@ impl<'nvml> Device<'nvml> {
     * `Uninitialized`, if the library has not been successfully initialized
     * `NotSupported`, if this `Device` doesn't support this feature
     * `GpuLost`, if this `Device` has fallen off the bus or is otherwise inaccessible
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     In addition, all of the errors returned by:

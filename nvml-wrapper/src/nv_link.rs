@@ -76,7 +76,7 @@ impl<'device, 'nvml: 'device> NvLink<'device, 'nvml> {
     * `InvalidArg`, if the `link` or `Device` within this `NvLink` struct instance
       is invalid
     * `NotSupported`, if this `Device` doesn't support this feature
-    * `UnexpectedVariant`, for which you can read the docs for
+    * `UnexpectedVariant`, check that error's docs for more info
     * `Unknown`, on any unexpected error
 
     # Device Support
